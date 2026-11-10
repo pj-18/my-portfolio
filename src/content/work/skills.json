@@ -1,0 +1,5 @@
+[
+  { "group": "Test automation", "items": ["Playwright", "Cypress"] },
+  { "group": "Front end", "items": ["React"] },
+  { "group": "Data", "items": ["SQL"] }
+]

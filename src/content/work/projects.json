@@ -1,0 +1,20 @@
+[
+  {
+    "title": "Project one",
+    "summary": "Placeholder. What the problem was, what you built, and the outcome in one or two sentences.",
+    "stack": ["Playwright", "TypeScript"],
+    "url": ""
+  },
+  {
+    "title": "Project two",
+    "summary": "Placeholder. A test framework, a migration, a tool your team still uses. Say what it replaced.",
+    "stack": ["Cypress", "React"],
+    "url": ""
+  },
+  {
+    "title": "Project three",
+    "summary": "Placeholder. Something with data in it: a reporting query, a pipeline check, a dashboard.",
+    "stack": ["SQL"],
+    "url": ""
+  }
+]

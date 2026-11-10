@@ -1,0 +1,52 @@
+{
+  "chesscom": {
+    "fetchedAt": "2026-11-10T18:29:13.539Z",
+    "formats": {
+      "rapid": {
+        "rating": 1687,
+        "best": 1730,
+        "games": 2083
+      },
+      "blitz": {
+        "rating": 1444,
+        "best": 1486,
+        "games": 4150
+      },
+      "bullet": {
+        "rating": 1278,
+        "best": 1379,
+        "games": 2415
+      },
+      "daily": {
+        "rating": 1398,
+        "best": 1398,
+        "games": 48
+      }
+    }
+  },
+  "lichess": {
+    "fetchedAt": "2026-11-10T18:29:14.161Z",
+    "formats": {
+      "rapid": {
+        "rating": 1723,
+        "games": 46,
+        "provisional": true
+      },
+      "blitz": {
+        "rating": 1879,
+        "games": 3,
+        "provisional": true
+      },
+      "bullet": {
+        "rating": 1291,
+        "games": 26,
+        "provisional": true
+      },
+      "classical": {
+        "rating": 1534,
+        "games": 2,
+        "provisional": true
+      }
+    }
+  }
+}

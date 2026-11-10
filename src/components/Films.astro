@@ -1,0 +1,283 @@
+---
+import site from '../content/site.json';
+import { films, filmsFetchedAt } from '../lib/films';
+import { excerpt, longDate, shortDate, withoutEmoji } from '../lib/format';
+import Icon from './Icon.astro';
+import Poster from './Poster.astro';
+import Stars from './Stars.astro';
+
+const profile = `https://letterboxd.com/${site.handles.letterboxd}/`;
+
+// Lead with the most recent entry that has a spoiler-free review; list the rest.
+const feature = films.find((film) => film.review && !film.spoilers) ?? null;
+const diary = films.filter((film) => film !== feature).slice(0, 12);
+
+// Short reviews keep their line breaks; longer ones are cut to an excerpt.
+const featureReview = withoutEmoji(feature?.review ?? '');
+const featureText = featureReview.length <= 220 ? featureReview : excerpt(featureReview, 220);
+---
+
+<section id="films" class="section films" aria-labelledby="films-title">
+  <div class="wrap">
+    <header class="section-head">
+      <h2 id="films-title">Films</h2>
+      <p>
+        The latest entries from my <a href={profile}>Letterboxd diary</a>, ratings and all.{' '}
+        {filmsFetchedAt && <Fragment>Synced {longDate(filmsFetchedAt)}.</Fragment>}
+      </p>
+    </header>
+
+    {
+      films.length === 0 ? (
+        <p class="films__empty">
+          The diary could not be loaded for this build. Everything I have watched, rated and reviewed is on{' '}
+          <a href={profile}>Letterboxd</a>.
+        </p>
+      ) : (
+        <Fragment>
+          {feature && (
+            <article class="feature">
+              <div class="feature__poster">
+                <Poster film={feature} widths={[240, 360, 480, 600]} sizes="(min-width: 48rem) 20rem, 58vw" />
+              </div>
+              <div class="feature__body">
+                <h3 class="feature__title">
+                  <span class="sr-only">Latest review: </span>
+                  <a href={feature.url}>{feature.title}</a>
+                </h3>
+                <p class="feature__meta data">
+                  {feature.rating !== null && <Stars rating={feature.rating} />}
+                  <span>
+                    {feature.year}
+                    <span aria-hidden="true"> · </span>
+                    <span class="sr-only">, </span>
+                    Watched <time datetime={feature.watchedDate}>{longDate(feature.watchedDate)}</time>
+                    {feature.rewatch && (
+                      <Fragment>
+                        <span aria-hidden="true"> · </span>
+                        <span class="sr-only">, </span>
+                        Rewatch
+                      </Fragment>
+                    )}
+                  </span>
+                </p>
+                <blockquote class="feature__review" cite={feature.url}>
+                  <p>{featureText}</p>
+                </blockquote>
+                <p class="feature__more">
+                  <a href={feature.url}>
+                    Read the review on Letterboxd
+                    <Icon name="arrow-out" />
+                  </a>
+                </p>
+              </div>
+            </article>
+          )}
+
+          <div class="block">
+            <h3 class="block__title">Recent diary</h3>
+            <div>
+            <ol class="diary" style={`--rows:${Math.ceil(diary.length / 2)}`}>
+              {diary.map((film) => (
+                <li class="entry">
+                  <div class="entry__poster">
+                    <Poster film={film} widths={[80, 160, 240]} sizes="5rem" />
+                  </div>
+                  <div class="entry__body">
+                    <h4 class="entry__title">
+                      <a href={film.url}>
+                        {film.title}
+                        <span class="sr-only">, {film.review ? 'review' : 'diary entry'} on Letterboxd</span>
+                      </a>
+                    </h4>
+                    <p class="entry__meta data">
+                      {film.rating !== null && <Stars rating={film.rating} />}
+                      <span>
+                        {film.year}
+                        <span aria-hidden="true"> · </span>
+                        <span class="sr-only">, watched </span>
+                        <time datetime={film.watchedDate}>{shortDate(film.watchedDate)}</time>
+                        {film.rewatch && (
+                          <Fragment>
+                            <span aria-hidden="true"> · </span>
+                            <span class="sr-only">, </span>
+                            Rewatch
+                          </Fragment>
+                        )}
+                      </span>
+                    </p>
+                    {film.review && (
+                      <p class="entry__review">
+                        {film.spoilers ? 'This review contains spoilers.' : excerpt(withoutEmoji(film.review), 110)}
+                      </p>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <p class="films__all">
+              <a href={`${profile}films/diary/`}>
+                The full diary on Letterboxd
+                <Icon name="arrow-out" />
+              </a>
+            </p>
+            </div>
+          </div>
+        </Fragment>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  /* House lights down: this section is dark in both themes. */
+  .films {
+    color-scheme: dark;
+  }
+
+  .films__empty {
+    max-width: 34ch;
+    font-size: var(--text-lead);
+    line-height: 1.2;
+  }
+
+  .feature {
+    display: grid;
+    gap: 1.75rem clamp(2rem, 5vw, 4.5rem);
+    margin-bottom: clamp(3rem, 6vw, 5rem);
+  }
+
+  .feature__poster {
+    width: min(58vw, 20rem);
+  }
+
+  .feature__body {
+    display: grid;
+    align-content: end;
+    justify-items: start;
+    gap: 1rem;
+  }
+
+  .feature__title {
+    font-size: clamp(2.5rem, 1.4rem + 4.6vw, 5rem);
+    font-stretch: 62%;
+    font-weight: 900;
+    line-height: 0.9;
+    text-transform: uppercase;
+    color: var(--yellow);
+    text-wrap: balance;
+  }
+
+  .feature__title a {
+    text-decoration: none;
+  }
+
+  .feature__meta,
+  .entry__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.75rem;
+    color: var(--ink-soft);
+  }
+
+  .feature__review {
+    max-width: 26ch;
+    margin-top: 0.5rem;
+    font-size: clamp(1.5rem, 1rem + 2.2vw, 2.5rem);
+    line-height: 1.16;
+    letter-spacing: -0.014em;
+    white-space: pre-line;
+    text-wrap: balance;
+  }
+
+  .feature__more a,
+  .films__all a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-weight: 700;
+  }
+
+  @media (min-width: 48rem) {
+    .feature {
+      grid-template-columns: 20rem minmax(0, 1fr);
+    }
+
+    .feature__poster {
+      width: auto;
+    }
+  }
+
+  /* Rows are ruled underneath; the negative margin lines the first row up with the block label. */
+  .diary {
+    display: grid;
+    column-gap: clamp(2rem, 4vw, 4rem);
+    margin-top: -1rem;
+  }
+
+  /* Two columns read top to bottom, like a diary page, not left to right. */
+  @media (min-width: 56rem) {
+    .diary {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: repeat(var(--rows), auto);
+      grid-auto-flow: column;
+    }
+  }
+
+  .entry {
+    position: relative;
+    display: grid;
+    grid-template-columns: 5rem minmax(0, 1fr);
+    align-items: start;
+    gap: 1.125rem;
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .entry__body {
+    display: grid;
+    gap: 0.375rem;
+    padding-top: 0.125rem;
+  }
+
+  .entry__title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.008em;
+    text-wrap: balance;
+  }
+
+  .entry__title a {
+    text-decoration: none;
+  }
+
+  /* One link per entry, stretched over the whole row so the poster is clickable too. */
+  .entry__title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .entry__title a:focus-visible {
+    outline: none;
+  }
+
+  .entry:has(a:focus-visible) {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+  }
+
+  .entry__review {
+    max-width: 44ch;
+    font-size: var(--text-small);
+    line-height: 1.45;
+    color: var(--ink-soft);
+    text-wrap: pretty;
+  }
+
+  .films__all {
+    margin-top: 1.5rem;
+  }
+</style>

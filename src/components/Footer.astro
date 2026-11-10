@@ -1,0 +1,82 @@
+---
+import site from '../content/site.json';
+import { sections } from '../lib/sections';
+import { longDate } from '../lib/format';
+import Icon from './Icon.astro';
+
+const built = new Date();
+---
+
+<footer class="footer">
+  <div class="wrap footer__inner">
+    <nav aria-label="Footer">
+      <ul class="footer__nav">
+        {
+          sections.map((section) => (
+            <li>
+              <a href={`#${section.id}`}>{section.label}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <a class="footer__top" href="#top">
+      Back to top
+      <Icon name="arrow-up" />
+    </a>
+
+    <p class="footer__colophon">
+      © {built.getFullYear()}
+      {site.name}. Set in Archivo and built with Astro. Film diary from Letterboxd, ratings from Chess.com and Lichess, both read
+      when the site is built. Last built <time datetime={built.toISOString()}>{longDate(built.toISOString())}</time>. No cookies, no
+      tracking.
+    </p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    color-scheme: dark;
+    padding-block: clamp(2rem, 4vw, 3rem);
+    background: var(--ground);
+    color: var(--ink);
+    font-size: var(--text-small);
+  }
+
+  .footer__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1.5rem 2rem;
+  }
+
+  .footer__nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.5rem;
+    font-weight: 700;
+  }
+
+  /* Comfortable tap targets without changing the visual rhythm. */
+  .footer__nav a,
+  .footer__top {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 2.75rem;
+  }
+
+  .footer__top {
+    font-weight: 700;
+  }
+
+  .footer__colophon {
+    grid-column: 1 / -1;
+    max-width: 78ch;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--hairline);
+    color: var(--ink-soft);
+    text-wrap: pretty;
+  }
+</style>

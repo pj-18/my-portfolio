@@ -1,0 +1,70 @@
+---
+import Icon from './Icon.astro';
+/**
+ * Switches between the light and dark themes and remembers the choice.
+ * With no saved choice the site follows the operating system. The button is
+ * hidden until its script runs, so it never appears where it cannot work.
+ */
+---
+
+<button type="button" class="theme-toggle" data-theme-toggle hidden>
+  <Icon name="theme" />
+  <span class="sr-only" data-theme-label>Switch to dark theme</span>
+</button>
+
+<script>
+  const root = document.documentElement;
+  const system = matchMedia('(prefers-color-scheme: dark)');
+  const current = () => root.dataset.theme ?? (system.matches ? 'dark' : 'light');
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]')) {
+    const label = button.querySelector('[data-theme-label]')!;
+    const describe = () => {
+      label.textContent = `Switch to ${current() === 'dark' ? 'light' : 'dark'} theme`;
+    };
+
+    button.addEventListener('click', () => {
+      const next = current() === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = next;
+      try {
+        localStorage.setItem('theme', next);
+      } catch {
+        // Private browsing can refuse storage; the choice still applies to this page.
+      }
+      describe();
+    });
+
+    system.addEventListener('change', describe);
+    describe();
+    button.hidden = false;
+  }
+</script>
+
+<style>
+  .theme-toggle {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-right: -0.625rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    cursor: pointer;
+  }
+
+  .theme-toggle[hidden] {
+    display: none;
+  }
+
+  .theme-toggle :global(.icon) {
+    width: 1.5rem;
+    height: 1.5rem;
+    transition: rotate 0.5s var(--ease-out);
+  }
+
+  .theme-toggle:hover :global(.icon) {
+    rotate: 180deg;
+  }
+</style>

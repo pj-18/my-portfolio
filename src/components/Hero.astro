@@ -1,0 +1,223 @@
+---
+import site from '../content/site.json';
+import { sections } from '../lib/sections';
+import { CAP_HEIGHT, displayWidth } from '../lib/fit';
+import Icon from './Icon.astro';
+import ThemeToggle from './ThemeToggle.astro';
+
+/*
+ * The name is set as SVG text so it spans the full width at any viewport size,
+ * with no script and no layout shift. The view box is the name's own measured
+ * width; `textLength` pins it there even while the web font is still loading.
+ * Landscape screens get one line, portrait screens get two justified lines.
+ */
+const given = site.givenName.toUpperCase();
+const family = site.familyName.toUpperCase();
+const wideWidth = displayWidth(`${given} ${family}`);
+const stackWidth = Math.max(displayWidth(given), displayWidth(family));
+const LINE_GAP = 140;
+const stackHeight = CAP_HEIGHT * 2 + LINE_GAP;
+---
+
+<header class="hero">
+  <div class="hero__bar wrap">
+    <p class="hero__mark">{site.nickname}</p>
+    <ThemeToggle />
+  </div>
+
+  <div class="hero__body wrap">
+    <h1 class="name">
+      <span class="sr-only">{site.name}</span>
+      <svg class="name__wide" viewBox={`0 0 ${wideWidth} ${CAP_HEIGHT}`} aria-hidden="true" focusable="false">
+        <text y={CAP_HEIGHT} textLength={wideWidth}>{given} {family}</text>
+      </svg>
+      <svg class="name__stack" viewBox={`0 0 ${stackWidth} ${stackHeight}`} aria-hidden="true" focusable="false">
+        <text y={CAP_HEIGHT} textLength={stackWidth}>{given}</text>
+        <text y={stackHeight} textLength={stackWidth}>{family}</text>
+      </svg>
+    </h1>
+    <p class="hero__line">{site.tagline}</p>
+  </div>
+
+  <nav class="wedge" aria-label="Sections">
+    <ul>
+      {
+        sections.map((section, index) => (
+          <li style={`--i:${index}`}>
+            <a href={`#${section.id}`}>
+              <span>{section.label}</span>
+              <Icon name="arrow-down" />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .hero {
+    --hero-ground: light-dark(var(--yellow), var(--zone-1));
+    --hero-ink: light-dark(var(--black), var(--zone-10));
+    --hero-display: light-dark(var(--black), var(--yellow));
+    /* On the yellow field the highlighter inverts: black stroke, yellow text. */
+    --hl-ground: light-dark(var(--black), var(--yellow));
+    --hl-ink: light-dark(var(--yellow), var(--black));
+
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100svh;
+    background: var(--hero-ground);
+    color: var(--hero-ink);
+    overflow: clip;
+  }
+
+  .hero__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 4.5rem;
+  }
+
+  .hero__mark {
+    font-size: 1.5rem;
+    font-stretch: 62%;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--hero-display);
+  }
+
+  .hero__body {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: clamp(1.25rem, 2.6vw, 2.25rem);
+    padding-block: 3rem clamp(1.75rem, 4vw, 3rem);
+  }
+
+  .name {
+    color: var(--hero-display);
+  }
+
+  .name svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .name text {
+    font-family: var(--font);
+    font-size: 1000px;
+    font-stretch: 62%;
+    font-weight: 900;
+    fill: currentColor;
+  }
+
+  .name__wide {
+    display: none;
+  }
+
+  @media (min-width: 48rem) and (orientation: landscape) {
+    .name__wide {
+      display: block;
+    }
+
+    .name__stack {
+      display: none;
+    }
+  }
+
+  .hero__line {
+    max-width: 31ch;
+    font-size: var(--text-lead);
+    line-height: 1.18;
+    letter-spacing: -0.012em;
+    text-wrap: balance;
+  }
+
+  /* The step wedge: five tones from black to paper, each one a section link. */
+  .wedge ul {
+    display: grid;
+  }
+
+  .wedge li:nth-child(1) { --step: light-dark(var(--black), var(--zone-2)); --step-ink: var(--paper); }
+  .wedge li:nth-child(2) { --step: var(--zone-3); --step-ink: var(--paper); }
+  .wedge li:nth-child(3) { --step: var(--zone-5); --step-ink: var(--black); }
+  .wedge li:nth-child(4) { --step: var(--zone-8); --step-ink: var(--black); }
+  .wedge li:nth-child(5) { --step: var(--paper); --step-ink: var(--black); }
+
+  .wedge a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-height: 3rem;
+    padding: 0.5rem var(--gutter);
+    background: var(--step);
+    color: var(--step-ink);
+    font-size: 1.25rem;
+    font-stretch: 62%;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .wedge a:hover span {
+    text-decoration: underline;
+    text-decoration-thickness: 0.11em;
+    text-underline-offset: 0.2em;
+  }
+
+  .wedge :global(.icon) {
+    transition: translate 0.35s var(--ease-out);
+  }
+
+  .wedge a:hover :global(.icon) {
+    translate: 0 0.25rem;
+  }
+
+  .wedge a:focus-visible {
+    outline-color: var(--step-ink);
+    outline-offset: -0.5rem;
+  }
+
+  @media (min-width: 60rem) {
+    .wedge ul {
+      grid-template-columns: repeat(5, 1fr);
+    }
+
+    .wedge a {
+      align-items: flex-end;
+      min-height: clamp(4.5rem, 11svh, 7rem);
+      padding: 0.875rem 1.125rem;
+    }
+
+    .wedge li:first-child a {
+      padding-left: var(--gutter);
+    }
+
+    .wedge li:last-child a {
+      padding-right: var(--gutter);
+    }
+  }
+
+  /* The page's one authored entrance: the wedge develops step by step, like a test strip. */
+  @media (prefers-reduced-motion: no-preference) {
+    .wedge li {
+      animation: develop 0.9s var(--ease-out) backwards;
+      animation-delay: calc(var(--i) * 80ms + 120ms);
+    }
+
+    @keyframes develop {
+      from {
+        clip-path: inset(100% 0 0 0);
+      }
+
+      to {
+        clip-path: inset(0);
+      }
+    }
+  }
+</style>

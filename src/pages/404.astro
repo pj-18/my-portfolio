@@ -1,0 +1,46 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Page not found" description="There is nothing at this address." noindex>
+  <main id="main" class="missing">
+    <div class="wrap">
+      <h1>Not found</h1>
+      <p>There is nothing at this address. It may have moved, or the link may be wrong.</p>
+      <p><a href="/">Go to the home page</a></p>
+    </div>
+  </main>
+</Base>
+
+<style>
+  .missing {
+    --hl-ground: light-dark(var(--black), var(--yellow));
+    --hl-ink: light-dark(var(--yellow), var(--black));
+
+    display: grid;
+    align-items: end;
+    min-height: 100svh;
+    padding-block: var(--section);
+    background: light-dark(var(--yellow), var(--zone-1));
+  }
+
+  .missing .wrap {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  h1 {
+    font-size: clamp(4rem, 2rem + 14vw, 13rem);
+    font-stretch: 62%;
+    font-weight: 900;
+    line-height: 0.86;
+    text-transform: uppercase;
+    color: var(--display);
+  }
+
+  p {
+    max-width: 34ch;
+    font-size: var(--text-lead);
+    line-height: 1.2;
+  }
+</style>

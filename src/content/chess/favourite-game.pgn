@@ -1,0 +1,21 @@
+[Event "Live Chess"]
+[Site "Chess.com"]
+[Date "2026.09.14"]
+[White "II-Natsu-II"]
+[Black "PJ_18"]
+[Result "0-1"]
+[ECO "D02"]
+[Opening "Queen's Pawn Opening: Zukertort Variation"]
+[WhiteElo "1694"]
+[BlackElo "1730"]
+[TimeControl "600"]
+[Termination "PJ_18 won by checkmate"]
+[Link "https://www.chess.com/game/live/174452752946"]
+
+1. d4 d5 2. Nf3 Bf5 3. c4 e6 4. Qb3 dxc4 5. Qxb7 Nd7 6. Nc3 Nb6 7. Qc6+ Nd7
+8. e4 Ne7 9. Qa4 Bg4 10. Ne5 Bh5 11. Bxc4 Nc8 12. O-O Nb6 13. Qc6 Be7 14. Bb5 a6
+15. Nxd7 Nxd7 16. Ba4 Rb8 17. Qxa6 O-O 18. b3 Nb6 19. Qd3 c5 20. d5 exd5
+21. exd5 Bg6 22. Qe3 Nxa4 23. Nxa4 Qc7 24. Bb2 Bd6 25. g3 Rfe8 26. Qc3 Be5
+27. Qd2 Bd6 28. Rac1 Qa7 29. Rfe1 Rec8 30. Qc3 f6 31. Qc4 Bf7 32. Rcd1 Rb4
+33. Qe2 Rcb8 34. Qg4 Rxg4 35. Re2 Rxa4 36. bxa4 Bh5 37. Re6 Bxd1 38. Bxf6 Bf3
+39. Rxd6 Rb1# 0-1

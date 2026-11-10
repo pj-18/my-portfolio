@@ -1,0 +1,499 @@
+---
+import content from '../content/chess/chess.json';
+import site from '../content/site.json';
+import { game, hasProvisional, plyLabel, ratings, ratingsFetchedAt } from '../lib/chess';
+import { longDate } from '../lib/format';
+import Icon from './Icon.astro';
+
+/*
+ * The board is drawn at build time from the PGN in src/content/chess, showing
+ * the final position. A small script then lets visitors step through the game;
+ * without it the diagram and the move list still read as a printed game score.
+ */
+
+// Piece artwork: the "cburnett" set by Colin M.L. Burnett (see src/assets/chess/LICENSE.md).
+const pieceFiles = import.meta.glob<string>('../assets/chess/*.svg', { eager: true, query: '?raw', import: 'default' });
+const pieces = Object.entries(pieceFiles).map(([file, svg]) => ({
+  id: file.split('/').pop()!.replace('.svg', ''),
+  body: svg.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, ''),
+}));
+
+const flipped = content.game.orientation === 'black';
+const at = (file: number, row: number) => (flipped ? { x: 7 - file, y: 7 - row } : { x: file, y: row });
+const square = (name: string) => at(name.charCodeAt(0) - 97, 8 - Number(name[1]));
+
+const last = game.plies.at(-1);
+const placed = (last?.placement ?? game.start).split('/').flatMap((rowText, row) => {
+  let file = 0;
+  return [...rowText].flatMap((char) => {
+    if (/\d/.test(char)) {
+      file += Number(char);
+      return [];
+    }
+    const upper = char.toUpperCase();
+    return [{ id: `${char === upper ? 'w' : 'b'}${upper}`, ...at(file++, row) }];
+  });
+});
+
+const darkSquares = Array.from({ length: 64 }, (_, i) => ({ x: i % 8, y: Math.floor(i / 8) }))
+  .filter(({ x, y }) => (x + y) % 2 === 1)
+  .map(({ x, y }) => `M${x} ${y}h1v1h-1z`)
+  .join('');
+
+const files = [...'abcdefgh'].map((letter, i) => ({ letter, x: at(i, 0).x }));
+const ranks = Array.from({ length: 8 }, (_, row) => ({ number: 8 - row, y: at(0, row).y }));
+
+const turns = [];
+for (let i = 0; i < game.plies.length; i += 2) {
+  turns.push({ number: i / 2 + 1, white: game.plies[i]!, black: game.plies[i + 1] });
+}
+
+const lastLabel = last ? plyLabel(last) : 'the starting position';
+const player = (side: { name: string; elo: string | null }) => `${side.name}${side.elo ? ` (${side.elo})` : ''}`;
+const client = {
+  start: game.start,
+  flipped,
+  plies: game.plies.map((ply) => [ply.placement, ply.from, ply.to, plyLabel(ply)]),
+};
+const profiles = site.links.filter((link) => ['Chess.com', 'Lichess'].includes(link.label));
+---
+
+<section id="chess" class="section" aria-labelledby="chess-title">
+  <div class="wrap">
+    <header class="section-head">
+      <h2 id="chess-title">Chess</h2>
+      <p>{content.blurb}</p>
+    </header>
+
+    {
+      ratings.length > 0 && (
+        <div class="block">
+          <h3 class="block__title">Ratings</h3>
+          <div>
+            <table class="ratings data">
+              <caption class="sr-only">Chess ratings by time control</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Time control</th>
+                  <th scope="col">Chess.com</th>
+                  <th scope="col">Peak</th>
+                  <th scope="col">Lichess</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ratings.map((row) => (
+                  <tr>
+                    <th scope="row">{row.format}</th>
+                    {[row.chesscom, row.best, row.lichess].map((value) => (
+                      <td>
+                        {value ?? (
+                          <Fragment>
+                            <span aria-hidden="true">–</span>
+                            <span class="sr-only">No rating</span>
+                          </Fragment>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p class="ratings__note">
+              {ratingsFetchedAt && <Fragment>Read from the public APIs on {longDate(ratingsFetchedAt)}. </Fragment>}
+              {hasProvisional && <Fragment>A question mark means the rating is still provisional. </Fragment>}
+              Find me on{' '}
+              {profiles.map((link, i) => (
+                <Fragment>
+                  {i > 0 && ' and '}
+                  <a href={link.url}>{link.label}</a>
+                </Fragment>
+              ))}
+              .
+            </p>
+          </div>
+        </div>
+      )
+    }
+
+    <div class="block">
+      <h3 class="block__title">A favourite game</h3>
+      <figure class="game" data-game={JSON.stringify(client)}>
+        <div class="game__board">
+          <svg viewBox="-0.5 0 8.5 8.5" role="img" aria-label={`Chess board. Position after ${lastLabel}.`} data-board>
+            <defs>
+              {pieces.map((piece) => <symbol id={`p-${piece.id}`} viewBox="0 0 45 45" set:html={piece.body} />)}
+            </defs>
+            <rect class="board__light" width="8" height="8"></rect>
+            <path class="board__dark" d={darkSquares}></path>
+            <g class="board__moved" data-moved>
+              {
+                [last?.from, last?.to].map((name) => {
+                  const pos = name ? square(name) : null;
+                  return <rect x={pos?.x ?? 0} y={pos?.y ?? 0} width="1" height="1" visibility={pos ? 'visible' : 'hidden'} />;
+                })
+              }
+            </g>
+            <g data-pieces>
+              {placed.map((piece) => <use href={`#p-${piece.id}`} x={piece.x} y={piece.y} width="1" height="1" />)}
+            </g>
+            <rect class="board__edge" width="8" height="8"></rect>
+            <g class="board__coords" aria-hidden="true">
+              {ranks.map((rank) => <text x="-0.25" y={rank.y + 0.6} text-anchor="middle">{rank.number}</text>)}
+              {files.map((file) => <text x={file.x + 0.5} y="8.36" text-anchor="middle">{file.letter}</text>)}
+            </g>
+          </svg>
+        </div>
+
+        <figcaption class="game__info">
+          <h4 class="game__title">{content.game.title}</h4>
+          <p class="game__players data">
+            {player(game.white)} vs {player(game.black)}
+            <span aria-hidden="true"> · </span>
+            <span class="sr-only">, result </span>
+            {game.result}
+            {game.date && (
+              <Fragment>
+                <span aria-hidden="true"> · </span>
+                <span class="sr-only">, </span>
+                <time datetime={game.date}>{longDate(game.date)}</time>
+              </Fragment>
+            )}
+          </p>
+          <p class="game__caption">{content.game.caption}</p>
+
+          <div class="game__controls" data-controls hidden>
+            <button type="button" data-go="first"><Icon name="first" /><span class="sr-only">First position</span></button>
+            <button type="button" data-go="prev"><Icon name="prev" /><span class="sr-only">Previous move</span></button>
+            <button type="button" data-go="next"><Icon name="next" /><span class="sr-only">Next move</span></button>
+            <button type="button" data-go="last"><Icon name="last" /><span class="sr-only">Final position</span></button>
+            <p class="game__status data" data-status aria-live="polite">{lastLabel}</p>
+          </div>
+
+          <ol class="moves data" aria-label="Moves">
+            {
+              turns.map((turn) => (
+                <li>
+                  <span class="moves__number">{turn.number}.</span>
+                  <button type="button" data-ply={turn.white.ply} tabindex="-1">{turn.white.san}</button>
+                  {turn.black && (
+                    <button type="button" data-ply={turn.black.ply} tabindex="-1" aria-current={turn.black === last ? 'true' : undefined}>
+                      {turn.black.san}
+                    </button>
+                  )}
+                </li>
+              ))
+            }
+          </ol>
+
+          {
+            game.url && (
+              <p class="game__link">
+                <a href={game.url}>
+                  Replay it on Chess.com
+                  <Icon name="arrow-out" />
+                </a>
+              </p>
+            )
+          }
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<script>
+  interface GameData {
+    start: string;
+    flipped: boolean;
+    /** [placement, from, to, label] */
+    plies: [string, string, string, string][];
+  }
+
+  const root = document.querySelector<HTMLElement>('[data-game]');
+
+  if (root) {
+    const data: GameData = JSON.parse(root.dataset.game!);
+    const board = root.querySelector('[data-board]')!;
+    const piecesGroup = root.querySelector('[data-pieces]')!;
+    const moved = [...root.querySelectorAll('[data-moved] rect')];
+    const status = root.querySelector('[data-status]')!;
+    const controls = root.querySelector<HTMLElement>('[data-controls]')!;
+    const moveButtons = [...root.querySelectorAll<HTMLButtonElement>('[data-ply]')];
+    const SVG = 'http://www.w3.org/2000/svg';
+    const total = data.plies.length;
+    let ply = total;
+
+    const at = (file: number, row: number): [number, number] => (data.flipped ? [7 - file, 7 - row] : [file, row]);
+    const square = (name: string) => at(name.charCodeAt(0) - 97, 8 - Number(name[1]));
+
+    const go = (target: number) => {
+      ply = Math.max(0, Math.min(total, target));
+      const current = data.plies[ply - 1];
+
+      const nodes: SVGUseElement[] = [];
+      (current?.[0] ?? data.start).split('/').forEach((rowText, row) => {
+        let file = 0;
+        for (const char of rowText) {
+          if (char >= '1' && char <= '8') {
+            file += Number(char);
+            continue;
+          }
+          const upper = char.toUpperCase();
+          const [x, y] = at(file++, row);
+          const use = document.createElementNS(SVG, 'use');
+          use.setAttribute('href', `#p-${char === upper ? 'w' : 'b'}${upper}`);
+          use.setAttribute('x', String(x));
+          use.setAttribute('y', String(y));
+          use.setAttribute('width', '1');
+          use.setAttribute('height', '1');
+          nodes.push(use);
+        }
+      });
+      piecesGroup.replaceChildren(...nodes);
+
+      moved.forEach((rect, i) => {
+        const name = current?.[i + 1];
+        rect.setAttribute('visibility', name ? 'visible' : 'hidden');
+        if (name) {
+          const [x, y] = square(name);
+          rect.setAttribute('x', String(x));
+          rect.setAttribute('y', String(y));
+        }
+      });
+
+      const label = current?.[3] ?? 'Starting position';
+      status.textContent = label;
+      board.setAttribute('aria-label', `Chess board. ${current ? `Position after ${label}` : label}.`);
+
+      for (const button of moveButtons) {
+        if (Number(button.dataset.ply) === ply) button.setAttribute('aria-current', 'true');
+        else button.removeAttribute('aria-current');
+      }
+      for (const button of controls.querySelectorAll<HTMLButtonElement>('[data-go]')) {
+        const back = button.dataset.go === 'first' || button.dataset.go === 'prev';
+        // aria-disabled, not disabled: a disabled button would drop keyboard focus mid-game.
+        button.setAttribute('aria-disabled', String(back ? ply === 0 : ply === total));
+      }
+    };
+
+    const targets: Record<string, () => number> = {
+      first: () => 0,
+      prev: () => ply - 1,
+      next: () => ply + 1,
+      last: () => total,
+    };
+
+    controls.addEventListener('click', (event) => {
+      const button = (event.target as Element).closest<HTMLButtonElement>('[data-go]');
+      if (button) go(targets[button.dataset.go!]!());
+    });
+
+    for (const button of moveButtons) {
+      button.addEventListener('click', () => go(Number(button.dataset.ply)));
+    }
+
+    root.addEventListener('keydown', (event) => {
+      const key: Record<string, string> = { ArrowLeft: 'prev', ArrowRight: 'next', Home: 'first', End: 'last' };
+      const action = key[event.key];
+      if (action) {
+        event.preventDefault();
+        go(targets[action]!());
+      }
+    });
+
+    controls.hidden = false;
+    root.classList.add('is-live');
+    go(total);
+  }
+</script>
+
+<style>
+  .ratings {
+    width: 100%;
+    max-width: 40rem;
+    border-collapse: collapse;
+    font-size: 1.125rem;
+    text-align: left;
+  }
+
+  .ratings th,
+  .ratings td {
+    padding: 0.625rem 1rem 0.625rem 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .ratings thead th {
+    padding-top: 0;
+    font-size: var(--text-small);
+    font-weight: 500;
+    color: var(--ink-soft);
+    border-bottom-color: var(--ink);
+  }
+
+  .ratings tbody th {
+    font-weight: 500;
+  }
+
+  /* The current rating reads in full ink; the reference columns step back. */
+  .ratings td:not(:first-of-type) {
+    color: var(--ink-soft);
+  }
+
+  .ratings__note {
+    max-width: 60ch;
+    margin-top: 1rem;
+    font-size: var(--text-small);
+    color: var(--ink-soft);
+  }
+
+  .game {
+    display: grid;
+    gap: 1.75rem clamp(2rem, 4vw, 3.5rem);
+    align-items: start;
+  }
+
+  @media (min-width: 50rem) {
+    .game {
+      grid-template-columns: minmax(0, 26rem) minmax(0, 1fr);
+    }
+  }
+
+  .game__board svg {
+    width: 100%;
+    height: auto;
+  }
+
+  /* The board is a printed diagram: the same paper and yellow in both themes. */
+  .board__light {
+    fill: var(--zone-10);
+  }
+
+  .board__dark {
+    fill: var(--yellow);
+  }
+
+  .board__moved {
+    fill: var(--black);
+    opacity: 0.2;
+  }
+
+  .board__edge {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 1px;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .board__coords {
+    font-size: 0.26px;
+    font-stretch: 80%;
+    font-weight: 500;
+    fill: var(--ink-soft);
+  }
+
+  .game__info {
+    display: grid;
+    gap: 0.875rem;
+    justify-items: start;
+  }
+
+  .game__title {
+    font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.014em;
+  }
+
+  .game__players {
+    color: var(--ink-soft);
+  }
+
+  .game__caption {
+    max-width: 52ch;
+    text-wrap: pretty;
+  }
+
+  .game__controls {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+  }
+
+  .game__controls[hidden] {
+    display: none;
+  }
+
+  .game__controls button {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 1px solid var(--ink);
+    background: none;
+    cursor: pointer;
+    transition:
+      background-color 0.18s var(--ease-out),
+      color 0.18s var(--ease-out);
+  }
+
+  .game__controls button:hover:not([aria-disabled='true']) {
+    background: var(--yellow);
+    color: var(--black);
+    border-color: var(--yellow);
+  }
+
+  .game__controls button[aria-disabled='true'] {
+    border-color: var(--hairline);
+    color: var(--ink-soft);
+    cursor: default;
+  }
+
+  .game__status {
+    margin-left: 0.75rem;
+    font-size: 1.125rem;
+  }
+
+  .moves {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.125rem 0.75rem;
+    max-width: 52ch;
+    line-height: 1.5;
+  }
+
+  .moves li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+  }
+
+  .moves__number {
+    color: var(--ink-soft);
+  }
+
+  .moves button {
+    padding: 0.0625rem 0.1875rem;
+    border: 0;
+    background: none;
+    font-weight: inherit;
+  }
+
+  .game.is-live .moves button {
+    cursor: pointer;
+  }
+
+  .game.is-live .moves button:hover,
+  .moves button[aria-current='true'] {
+    background: var(--yellow);
+    color: var(--black);
+  }
+
+  .game__link a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-weight: 700;
+  }
+</style>

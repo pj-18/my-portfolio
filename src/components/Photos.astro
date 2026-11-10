@@ -1,0 +1,398 @@
+---
+import { getImage, Picture } from 'astro:assets';
+import { photos } from '../lib/photos';
+import Icon from './Icon.astro';
+
+/*
+ * The gallery is a justified layout in plain CSS: every photo keeps its own
+ * aspect ratio, rows share a height, and space is reserved before images load.
+ * Each thumbnail links to a large version, so the gallery works without script;
+ * with script, the link opens the lightbox instead.
+ */
+const LIGHTBOX_WIDTHS = [1280, 2048];
+
+const items = await Promise.all(
+  photos.map(async (photo) => {
+    const { width, height } = photo.image;
+    const ratio = width / height;
+    const widths = LIGHTBOX_WIDTHS.filter((w) => w < width);
+    if (widths.length < LIGHTBOX_WIDTHS.length) widths.push(width);
+
+    const [avif, webp] = await Promise.all(
+      (['avif', 'webp'] as const).map((format) => getImage({ src: photo.image, format, widths, width: widths.at(-1) })),
+    );
+
+    return {
+      ...photo,
+      ratio,
+      avif: avif!.srcSet.attribute,
+      webp: webp!.srcSet.attribute,
+      href: webp!.src,
+      meta: [photo.location, ...photo.exif].filter(Boolean).join(' · '),
+      // How wide the thumbnail is drawn, so the browser picks the right file.
+      sizes: `(min-width: 91rem) ${Math.round(ratio * 27)}rem, (min-width: 40rem) ${Math.round(ratio * 30)}vw, min(100vw, ${Math.round(ratio * 16)}rem)`,
+    };
+  }),
+);
+---
+
+<section id="photography" class="section photos" aria-labelledby="photography-title">
+  <div class="wrap">
+    <header class="section-head">
+      <h2 id="photography-title">Photography</h2>
+      <p>A few frames I keep coming back to. Select one to see it large, with the camera settings.</p>
+    </header>
+
+    <ul class="gallery">
+      {
+        items.map((item, index) => (
+          <li style={`--ratio:${item.ratio.toFixed(4)}`}>
+            <a
+              href={item.href}
+              data-photo
+              data-avif={item.avif}
+              data-webp={item.webp}
+              data-ratio={item.ratio.toFixed(4)}
+              data-title={item.title}
+              data-meta={item.meta}
+            >
+              <Picture
+                src={item.image}
+                formats={['avif', 'webp']}
+                widths={[320, 480, 720, 1080]}
+                sizes={item.sizes}
+                alt={item.alt}
+                loading={index < 2 ? 'eager' : 'lazy'}
+                decoding="async"
+              />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <dialog class="lightbox" data-lightbox aria-label="Photo viewer">
+    <div class="lightbox__stage" data-lb-stage>
+      <picture>
+        <source type="image/avif" sizes="100vw" />
+        <source type="image/webp" sizes="100vw" />
+        <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="" decoding="async" />
+      </picture>
+    </div>
+    <div class="lightbox__bar">
+      <div class="lightbox__caption" aria-live="polite">
+        <p class="lightbox__title" data-lb-title></p>
+        <p class="lightbox__meta data" data-lb-meta></p>
+      </div>
+      <p class="lightbox__count data" data-lb-count></p>
+      <div class="lightbox__controls">
+        <button type="button" data-lb-prev>
+          <Icon name="prev" />
+          <span class="sr-only">Previous photo</span>
+        </button>
+        <button type="button" data-lb-next>
+          <Icon name="next" />
+          <span class="sr-only">Next photo</span>
+        </button>
+        <button type="button" data-lb-close>
+          <Icon name="close" />
+          <span class="sr-only">Close</span>
+        </button>
+      </div>
+    </div>
+  </dialog>
+</section>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('[data-lightbox]');
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-photo]')];
+
+  if (dialog && links.length > 0) {
+    const stage = dialog.querySelector<HTMLElement>('[data-lb-stage]')!;
+    const image = dialog.querySelector('img')!;
+    const sources = [...dialog.querySelectorAll('source')];
+    const title = dialog.querySelector('[data-lb-title]')!;
+    const meta = dialog.querySelector('[data-lb-meta]')!;
+    const count = dialog.querySelector('[data-lb-count]')!;
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    let index = 0;
+
+    const thumbOf = (i: number) => links[i]!.querySelector('img')!;
+
+    /** Show photo `i`: the already-loaded thumbnail first, then the large file over it. */
+    const render = (i: number) => {
+      index = (i + links.length) % links.length;
+      const link = links[index]!;
+      const thumb = thumbOf(index);
+      const data = link.dataset;
+
+      for (const source of sources) source.removeAttribute('srcset');
+      image.src = thumb.currentSrc || link.href;
+      image.alt = thumb.alt;
+      stage.style.setProperty('--ratio', data.ratio!);
+      title.textContent = data.title ?? '';
+      meta.textContent = data.meta ?? '';
+      count.textContent = `${index + 1} / ${links.length}`;
+
+      requestAnimationFrame(() => {
+        sources[0]!.srcset = data.avif!;
+        sources[1]!.srcset = data.webp!;
+      });
+    };
+
+    /** Run `update` as a view transition that morphs `from` into `to`, where supported. */
+    const morph = (from: HTMLElement, to: HTMLElement, update: () => void) => {
+      if (!document.startViewTransition || reducedMotion.matches) return update();
+      from.style.viewTransitionName = 'photo';
+      const transition = document.startViewTransition(() => {
+        from.style.viewTransitionName = '';
+        update();
+        to.style.viewTransitionName = 'photo';
+      });
+      transition.finished.finally(() => {
+        to.style.viewTransitionName = '';
+      });
+    };
+
+    const open = (i: number) =>
+      morph(thumbOf(i), image, () => {
+        render(i);
+        dialog.showModal();
+      });
+
+    const close = () => {
+      const link = links[index]!;
+      morph(image, thumbOf(index), () => {
+        dialog.close();
+        // Hand focus back to the photo that was on screen, which also scrolls it into view.
+        link.focus();
+      });
+    };
+
+    links.forEach((link, i) => {
+      link.addEventListener('click', (event) => {
+        // Leave modified clicks alone so "open in new tab" still works.
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        open(i);
+      });
+    });
+
+    dialog.querySelector('[data-lb-prev]')!.addEventListener('click', () => render(index - 1));
+    dialog.querySelector('[data-lb-next]')!.addEventListener('click', () => render(index + 1));
+    dialog.querySelector('[data-lb-close]')!.addEventListener('click', close);
+
+    dialog.addEventListener('keydown', (event) => {
+      const actions: Record<string, () => void> = {
+        ArrowLeft: () => render(index - 1),
+        ArrowRight: () => render(index + 1),
+        Home: () => render(0),
+        End: () => render(links.length - 1),
+      };
+      const action = actions[event.key];
+      if (action) {
+        event.preventDefault();
+        action();
+      }
+    });
+
+    // Escape closes a dialog natively; route it through close() for the same exit.
+    dialog.addEventListener('cancel', (event) => {
+      event.preventDefault();
+      close();
+    });
+
+    // A click on the empty stage around the photo closes the viewer.
+    stage.addEventListener('click', (event) => {
+      if (event.target === stage) close();
+    });
+
+    // Swipe left or right to move between photos on touch screens.
+    let startX = 0;
+    let startY = 0;
+    stage.addEventListener('pointerdown', (event) => {
+      startX = event.clientX;
+      startY = event.clientY;
+    });
+    stage.addEventListener('pointerup', (event) => {
+      const dx = event.clientX - startX;
+      const dy = event.clientY - startY;
+      if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.5) render(index + (dx < 0 ? 1 : -1));
+    });
+  }
+</script>
+
+<style>
+  .photos {
+    background: var(--ground-alt);
+  }
+
+  /*
+   * Justified rows. Each item's basis is its width at the target row height and it
+   * grows in proportion to its aspect ratio, so every photo in a row lands on the
+   * same height. The trailing pseudo-element soaks up the last row's spare space.
+   */
+  .gallery {
+    --row: clamp(10rem, 24vw, 20rem);
+    --gap: clamp(0.5rem, 1vw, 0.875rem);
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap);
+  }
+
+  .gallery::after {
+    content: '';
+    flex: 1000 1 0;
+  }
+
+  .gallery li {
+    flex: calc(var(--ratio) * 100) 1 calc(var(--ratio) * var(--row));
+    aspect-ratio: var(--ratio);
+    background: var(--hairline);
+  }
+
+  .gallery a {
+    display: block;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .gallery a:hover {
+    background: none;
+  }
+
+  .gallery :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: scale 0.6s var(--ease-out);
+  }
+
+  .gallery a:hover :global(img) {
+    scale: 1.03;
+  }
+
+  /* The viewer fills the screen and is always dark, like the Films section. */
+  .lightbox {
+    color-scheme: dark;
+    /* 100%, not 100vw: the viewport unit includes the scrollbar gutter and would hide the right edge under it. */
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--ground);
+    color: var(--ink);
+  }
+
+  .lightbox[open] {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .lightbox::backdrop {
+    background: var(--zone-1);
+  }
+
+  /* Lock the page behind the viewer, and darken the root so the scrollbar gutter matches it. */
+  :global(:root:has(.lightbox[open])) {
+    overflow: hidden;
+    background: var(--zone-1);
+  }
+
+  .lightbox__stage {
+    display: grid;
+    place-items: center;
+    container-type: size;
+    margin: clamp(0.75rem, 2vw, 2rem);
+    margin-bottom: 0;
+    touch-action: pan-y;
+  }
+
+  /* Exactly the largest box of this aspect ratio that fits the stage. */
+  .lightbox__stage img {
+    width: min(100cqw, 100cqh * var(--ratio, 1.5));
+    height: auto;
+    aspect-ratio: var(--ratio, 1.5);
+    object-fit: cover;
+    background: var(--zone-2);
+  }
+
+  .lightbox__bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.25rem 1.5rem;
+    padding: 0.75rem clamp(0.75rem, 2vw, 2rem);
+  }
+
+  .lightbox__title {
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .lightbox__meta,
+  .lightbox__count {
+    font-size: var(--text-small);
+    color: var(--ink-soft);
+  }
+
+  .lightbox__meta {
+    min-height: 1.45em;
+  }
+
+  .lightbox__controls {
+    display: flex;
+    grid-row: 1 / span 2;
+    grid-column: 2;
+    gap: 0.25rem;
+  }
+
+  .lightbox__count {
+    grid-row: 2;
+  }
+
+  .lightbox__caption {
+    grid-row: 1;
+  }
+
+  .lightbox__controls button {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    transition:
+      background-color 0.18s var(--ease-out),
+      color 0.18s var(--ease-out);
+  }
+
+  .lightbox__controls button:hover {
+    background: var(--yellow);
+    color: var(--black);
+  }
+
+  .lightbox__controls :global(.icon) {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  @media (min-width: 48rem) {
+    .lightbox__bar {
+      grid-template-columns: minmax(0, 1fr) auto auto;
+    }
+
+    .lightbox__count,
+    .lightbox__controls {
+      grid-row: auto;
+      grid-column: auto;
+    }
+  }
+</style>

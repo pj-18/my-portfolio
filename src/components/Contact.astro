@@ -1,0 +1,101 @@
+---
+import site from '../content/site.json';
+import Icon from './Icon.astro';
+---
+
+<section id="contact" class="section contact" aria-labelledby="contact-title">
+  <div class="wrap">
+    <header class="section-head">
+      <h2 id="contact-title">Contact</h2>
+      <p>Email is the quickest way to reach me, about work, a film worth arguing over, or a game.</p>
+    </header>
+
+    {/* --chars lets the address size itself to fill one line, whatever its length. */}
+    <p class="contact__email" style={`--chars:${site.email.length}`}>
+      <a href={`mailto:${site.email}`}>{site.email}</a>
+    </p>
+
+    <div class="block">
+      <h3 class="block__title">Elsewhere</h3>
+      <ul class="contact__links">
+        {
+          site.links.map((link) => (
+            <li>
+              <a href={link.url} rel="me">
+                <span class="contact__label">{link.label}</span>
+                <span class="contact__handle data">{link.handle}</span>
+                <Icon name="arrow-out" />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* The closing card: the yellow field in both themes, with the highlighter inverted. */
+  .contact {
+    color-scheme: light;
+    --ink-soft: oklch(0.34 0.05 80);
+    --hairline: oklch(0.17 0.012 85 / 0.32);
+    --hl-ground: var(--black);
+    --hl-ink: var(--yellow);
+
+    background: var(--yellow);
+  }
+
+  .contact__email {
+    container-type: inline-size;
+    margin-bottom: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  /* Condensed lowercase averages about 0.43em per character in this face. */
+  .contact__email a {
+    font-size: min(6rem, 100cqi / (var(--chars) * 0.43));
+    font-stretch: 62%;
+    font-weight: 900;
+    line-height: 1.05;
+    text-decoration-thickness: 0.06em;
+    text-underline-offset: 0.14em;
+    overflow-wrap: anywhere;
+  }
+
+  .contact__links li {
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .contact__links a {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.875rem 0.5rem;
+    margin-inline: -0.5rem;
+    text-decoration: none;
+  }
+
+  .contact__links li:first-child a {
+    padding-top: 0;
+  }
+
+  .contact__label {
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .contact__handle {
+    color: var(--ink-soft);
+    transition: color 0.18s var(--ease-out);
+  }
+
+  .contact__links a:hover .contact__handle {
+    color: inherit;
+  }
+
+  .contact__links :global(.icon) {
+    align-self: center;
+  }
+</style>

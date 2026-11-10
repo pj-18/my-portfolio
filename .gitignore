@@ -1,0 +1,21 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+.astro/
+
+# data fetched at build time (the committed copy lives in src/data/fallback)
+src/data/cache/
+
+# test output
+test-results/
+playwright-report/
+
+# local
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+.wrangler/

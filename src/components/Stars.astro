@@ -1,0 +1,31 @@
+---
+import { ratingLabel } from '../lib/format';
+
+/**
+ * A Letterboxd-style rating: five stars, filled to the nearest half.
+ * One element: a two-colour bar split at the rating, cut into star shapes by a mask.
+ */
+interface Props {
+  rating: number;
+}
+const { rating } = Astro.props;
+---
+
+<span class="stars" role="img" aria-label={ratingLabel(rating)} style={`--fill:${rating * 20}%`}></span>
+
+<style>
+  .stars {
+    --star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='m10 1.6 2.55 5.5 6.05.7-4.5 4.1 1.25 5.95L10 14.8l-5.35 3.05L5.9 11.9 1.4 7.8l6.05-.7z'/%3E%3C/svg%3E");
+
+    display: inline-block;
+    flex: none;
+    width: 5em;
+    height: 1em;
+    vertical-align: middle;
+    background: linear-gradient(90deg, var(--yellow) var(--fill), var(--hairline) var(--fill));
+    -webkit-mask: var(--star) 0 0 / 1em 1em repeat-x;
+    mask: var(--star) 0 0 / 1em 1em repeat-x;
+    /* Keep the rating visible in Windows high-contrast mode, which removes backgrounds. */
+    forced-color-adjust: none;
+  }
+</style>

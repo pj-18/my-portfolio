@@ -1,0 +1,107 @@
+---
+import '@fontsource-variable/archivo/wdth.css';
+import '../styles/global.css';
+import fontUrl from '@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2?url';
+import Icons from '../components/Icons.astro';
+import site from '../content/site.json';
+import skills from '../content/work/skills.json';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Set on pages that should stay out of search results, such as the 404. */
+  noindex?: boolean;
+}
+
+const { title = `${site.name} | ${site.role}`, description = site.description, noindex = false } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL('/og.png', Astro.site);
+
+// https://schema.org/Person, read by search engines.
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: site.name,
+  givenName: site.givenName,
+  familyName: site.familyName,
+  alternateName: site.nickname,
+  jobTitle: site.role,
+  description: site.description,
+  url: new URL('/', Astro.site).href,
+  image: ogImage.href,
+  email: `mailto:${site.email}`,
+  sameAs: site.links.map((link) => link.url),
+  knowsAbout: skills.flatMap((group) => group.items),
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffc410" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0e0c08" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preload" href={fontUrl} as="font" type="font/woff2" crossorigin />
+
+    <meta property="og:type" content="profile" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${site.name}, ${site.role}`} />
+    <meta property="profile:first_name" content={site.givenName} />
+    <meta property="profile:last_name" content={site.familyName} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={`${site.name}, ${site.role}`} />
+
+    {/* Apply a saved theme before first paint, so there is no flash of the other one. */}
+    <script is:inline>
+      try {
+        const saved = localStorage.getItem('theme');
+        if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
+      } catch {}
+    </script>
+
+    <script type="application/ld+json" set:html={JSON.stringify(person)} />
+
+    {/*
+      Optional, privacy-friendly analytics. Nothing is tracked unless you enable one of these.
+      Both are cookieless and need no consent banner. Move the tag you want out of this comment.
+
+      Cloudflare Web Analytics (free; token from the Cloudflare dashboard > Analytics & Logs > Web Analytics):
+      <script is:inline defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "YOUR_TOKEN"}'></script>
+
+      Plausible (paid, or self-hosted):
+      <script is:inline defer data-domain="YOURDOMAIN.COM" src="https://plausible.io/js/script.js"></script>
+    */}
+  </head>
+  <body>
+    <!--
+      THESIS: A technical data sheet for a person. One stock-yellow field, black ink, measured facts in ruled tables. Refuses the dark gradient hero and the grid of project cards with tech badges.
+      OWN-WORLD: Three inks (chrome yellow, D-max black, paper) and zone greys. One grotesque across its width axis: extra-condensed black titles, normal prose, condensed tabular data. Heavy top rules, hairline rows, a five-step grey wedge.
+      STORY: The visitor learns what PJ does, sees what he watches, shoots and plays from live data, then gets in touch.
+      FIRST VIEWPORT: Full-bleed yellow (dark theme: black, yellow name). Name on one line edge to edge at the foot, positioning line beneath, five section links as a step wedge bleeding along the bottom edge.
+      FORM: Photographic technical documentation and control targets; candidate 4 of 7; seed b8f3ef24.
+      FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+    -->
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Icons />
+    <slot />
+  </body>
+</html>

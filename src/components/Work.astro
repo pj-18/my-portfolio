@@ -1,0 +1,178 @@
+---
+import { Content as Bio } from '../content/work/bio.md';
+import experience from '../content/work/experience.json';
+import projects from '../content/work/projects.json';
+import skills from '../content/work/skills.json';
+import Icon from './Icon.astro';
+---
+
+<section id="work" class="section" aria-labelledby="work-title">
+  <div class="wrap">
+    <header class="section-head">
+      <h2 id="work-title">Work</h2>
+    </header>
+
+    <div class="bio">
+      <Bio />
+    </div>
+
+    <div class="block">
+      <h3 class="block__title">Experience</h3>
+      <ol class="roles">
+        {
+          experience.map((job) => (
+            <li class="role">
+              <p class="role__when data">
+                {job.start} to {job.end}
+              </p>
+              <div>
+                <h4 class="role__title">{job.role}</h4>
+                <p class="role__company">{job.company}</p>
+              </div>
+              <p class="role__summary">{job.summary}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+
+    <div class="block">
+      <h3 class="block__title">Selected projects</h3>
+      <ul class="projects">
+        {
+          projects.map((project) => (
+            <li class="project">
+              <h4 class="project__title">
+                {project.url ? (
+                  <a href={project.url}>
+                    {project.title}
+                    <Icon name="arrow-out" />
+                  </a>
+                ) : (
+                  project.title
+                )}
+              </h4>
+              <p class="project__summary">{project.summary}</p>
+              <p class="project__stack data">{project.stack.join(' / ')}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="block">
+      <h3 class="block__title">Skills</h3>
+      <dl class="skills">
+        {
+          skills.map((group) => (
+            <div class="skills__row">
+              <dt class="data">{group.group}</dt>
+              <dd>{group.items.join(', ')}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* The bio leads with one large paragraph; anything after it is set as body text. */
+  .bio {
+    display: grid;
+    gap: 1.25rem;
+    max-width: 62rem;
+    margin-bottom: clamp(3rem, 6vw, 5rem);
+  }
+
+  .bio :global(p) {
+    max-width: 68ch;
+    color: var(--ink-soft);
+    text-wrap: pretty;
+  }
+
+  .bio :global(p:first-child) {
+    max-width: 30ch;
+    font-size: clamp(1.625rem, 1.1rem + 2.3vw, 2.75rem);
+    line-height: 1.12;
+    letter-spacing: -0.018em;
+    color: var(--ink);
+    text-wrap: balance;
+  }
+
+  .roles,
+  .projects,
+  .skills {
+    display: grid;
+  }
+
+  .role,
+  .project,
+  .skills__row {
+    display: grid;
+    gap: 0.375rem 2rem;
+    padding-block: 1.125rem;
+    border-top: 1px solid var(--hairline);
+  }
+
+  .role:first-child,
+  .project:first-child,
+  .skills__row:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .role:last-child,
+  .project:last-child,
+  .skills__row:last-child {
+    padding-bottom: 0;
+  }
+
+  .role__when,
+  .project__stack,
+  .skills dt {
+    color: var(--ink-soft);
+  }
+
+  .role__title,
+  .project__title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.008em;
+  }
+
+  .project__title a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .role__summary,
+  .project__summary {
+    max-width: 58ch;
+    color: var(--ink-soft);
+    text-wrap: pretty;
+  }
+
+  @media (min-width: 44rem) {
+    .role {
+      grid-template-columns: 9rem minmax(0, 4fr) minmax(0, 6fr);
+      align-items: baseline;
+    }
+
+    .project {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 6fr);
+      align-items: baseline;
+    }
+
+    .project__stack {
+      grid-column: 2;
+    }
+
+    .skills__row {
+      grid-template-columns: 12rem minmax(0, 1fr);
+      align-items: baseline;
+    }
+  }
+</style>

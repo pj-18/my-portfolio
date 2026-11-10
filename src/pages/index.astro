@@ -1,0 +1,30 @@
+---
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import Work from '../components/Work.astro';
+import Films from '../components/Films.astro';
+import Photos from '../components/Photos.astro';
+import Chess from '../components/Chess.astro';
+import Contact from '../components/Contact.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Base>
+  <div id="top">
+    <Hero />
+    <main id="main" tabindex="-1">
+      <Work />
+      <Films />
+      <Photos />
+      <Chess />
+      <Contact />
+    </main>
+    <Footer />
+  </div>
+</Base>
+
+<style>
+  main:focus {
+    outline: none;
+  }
+</style>

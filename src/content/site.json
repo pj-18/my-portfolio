@@ -1,0 +1,23 @@
+{
+  "url": "https://YOURDOMAIN.COM",
+  "name": "Praveen Ponduru",
+  "givenName": "Praveen",
+  "familyName": "Ponduru",
+  "nickname": "PJ",
+  "role": "Senior Software Engineer",
+  "tagline": "Senior software engineer. Seven years of building web apps and the test suites that keep them honest.",
+  "description": "Praveen Ponduru (PJ) is a senior software engineer working with React, Playwright, Cypress and SQL. Also here: a film diary, photographs and chess.",
+  "email": "praveenkumar.ponduru@gmail.com",
+  "handles": {
+    "letterboxd": "pj_18",
+    "chesscom": "pj_18",
+    "lichess": "PJ_18"
+  },
+  "links": [
+    { "label": "GitHub", "handle": "pj-18", "url": "https://github.com/pj-18" },
+    { "label": "LinkedIn", "handle": "praveenponduru", "url": "https://www.linkedin.com/in/praveenponduru/" },
+    { "label": "Letterboxd", "handle": "pj_18", "url": "https://letterboxd.com/pj_18/" },
+    { "label": "Chess.com", "handle": "pj_18", "url": "https://www.chess.com/member/pj_18" },
+    { "label": "Lichess", "handle": "PJ_18", "url": "https://lichess.org/@/PJ_18" }
+  ]
+}

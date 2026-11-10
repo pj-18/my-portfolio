@@ -1,0 +1,23 @@
+[
+  {
+    "role": "Senior Software Engineer",
+    "company": "Company name",
+    "start": "20XX",
+    "end": "Present",
+    "summary": "Placeholder. One or two lines on what you own, the scale of it, and the result you are proudest of."
+  },
+  {
+    "role": "Software Engineer",
+    "company": "Company name",
+    "start": "20XX",
+    "end": "20XX",
+    "summary": "Placeholder. What you built or tested, with which tools, and what changed because of it."
+  },
+  {
+    "role": "Associate Software Engineer",
+    "company": "Company name",
+    "start": "20XX",
+    "end": "20XX",
+    "summary": "Placeholder. Where you started and what you learned to do well."
+  }
+]

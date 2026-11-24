@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Seven Samurai",
+    "year": 1954,
+    "rating": 5,
+    "liked": true,
+    "rewatch": true,
+    "watchedDate": "2026-11-08",
+    "url": "https://letterboxd.com/film/seven-samurai/",
+    "review": "Three and a half hours and not a wasted frame. Kurosawa spends the first hour just assembling the team, so that by the time the rain comes down in the final battle every loss lands. The rain still feels like weather rather than effect."
+  },
+  {
+    "title": "In the Mood for Love",
+    "year": 2000,
+    "rating": 4.5,
+    "liked": true,
+    "rewatch": false,
+    "watchedDate": "2026-11-05",
+    "url": "https://letterboxd.com/film/in-the-mood-for-love/",
+    "review": "Two people decide not to become what was done to them, and Wong Kar-wai shoots the decision through doorways, mirrors and cigarette smoke. Nothing happens and it is unbearable."
+  },
+  {
+    "title": "The Third Man",
+    "year": 1949,
+    "rating": 4.5,
+    "liked": false,
+    "rewatch": false,
+    "watchedDate": "2026-11-01",
+    "url": "https://letterboxd.com/film/the-third-man/",
+    "review": "Every angle is tilted because nothing in Vienna is level any more. Welles is on screen for minutes and owns the film; the zither does the rest."
+  },
+  {
+    "title": "Playtime",
+    "year": 1967,
+    "rating": 4,
+    "liked": false,
+    "rewatch": false,
+    "watchedDate": "2026-10-27",
+    "url": "https://letterboxd.com/film/playtime/",
+    "review": "A comedy built like a city: you cannot watch all of it at once, so you pick a corner of the frame and wait. Best seen as large as possible."
+  },
+  {
+    "title": "Paris, Texas",
+    "year": 1984,
+    "rating": 5,
+    "liked": true,
+    "rewatch": false,
+    "watchedDate": "2026-10-24",
+    "url": "https://letterboxd.com/film/paris-texas/",
+    "review": "The peep-show monologue is the scene everyone remembers, but it was the Super 8 footage that undid me. Robby Müller makes neon look like grief."
+  },
+  {
+    "title": "Le Samouraï",
+    "year": 1967,
+    "rating": 4,
+    "liked": false,
+    "rewatch": false,
+    "watchedDate": "2026-10-19",
+    "url": "https://letterboxd.com/film/le-samourai/",
+    "review": "Melville strips the crime film down to a hat, a coat and a routine. Ten minutes pass before anyone speaks and you do not miss the dialogue."
+  },
+  {
+    "title": "Rear Window",
+    "year": 1954,
+    "rating": 5,
+    "liked": true,
+    "rewatch": true,
+    "watchedDate": "2026-10-12",
+    "url": "https://letterboxd.com/film/rear-window/",
+    "review": ""
+  }
+]

@@ -1,0 +1,49 @@
+---
+/** Served by the host for any address that does not exist. */
+import Icon from '../components/Icon.astro';
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Page not found" description="This page does not exist." path="/404" noindex>
+  <main id="main" class="missing wrap">
+    <p class="label accent">404</p>
+    <h1 class="display missing__title">Reel missing</h1>
+    <p class="missing__text">There is nothing at this address. The programme starts on the front page.</p>
+    <p class="label">
+      <a href="/">
+        <Icon name="left" />
+        Back to the start
+      </a>
+    </p>
+  </main>
+</Base>
+
+<style is:global>
+  .missing {
+    display: grid;
+    align-content: center;
+    gap: 1.25rem;
+    min-height: 100svh;
+    padding-block: 3rem;
+  }
+
+  .missing__title {
+    font-size: clamp(4.5rem, 2rem + 14vw, 12rem);
+  }
+
+  .missing__text {
+    max-width: 26em;
+    font-size: var(--step-1);
+  }
+
+  .missing a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    padding-block: 0.4rem;
+  }
+
+  .missing a .icon {
+    margin: 0;
+  }
+</style>

@@ -1,0 +1,31 @@
+---
+/** The whole site is this one page. Each section is its own component in src/components. */
+import Chess from '../components/Chess.astro';
+import Colophon from '../components/Colophon.astro';
+import Contact from '../components/Contact.astro';
+import Films from '../components/Films.astro';
+import Hero from '../components/Hero.astro';
+import Masthead from '../components/Masthead.astro';
+import Photography from '../components/Photography.astro';
+import Work from '../components/Work.astro';
+import Base from '../layouts/Base.astro';
+---
+
+<Base>
+  <Masthead />
+  <main id="main" tabindex="-1">
+    <Hero />
+    <Work />
+    <Films />
+    <Photography />
+    <Chess />
+    <Contact />
+  </main>
+  <Colophon />
+</Base>
+
+<style is:global>
+  main:focus {
+    outline: none;
+  }
+</style>

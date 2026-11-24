@@ -1,0 +1,18 @@
+# Response headers for Cloudflare Pages.
+# https://developers.cloudflare.com/pages/configuration/headers/
+#
+# The main Content Security Policy is written into each page as a <meta> tag at build time
+# (see `security.csp` in astro.config.ts). `frame-ancestors` only works as a real header,
+# so it lives here: the site may not be embedded in a frame on another site.
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Content-Security-Policy: frame-ancestors 'none'
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), browsing-topics=()
+  Cross-Origin-Opener-Policy: same-origin
+
+# Everything under /_astro/ has a content hash in its file name, so it can be cached for good.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable

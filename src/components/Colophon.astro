@@ -1,0 +1,51 @@
+---
+/** The footer: copyright line, a note on how the site is made, and the way back up. */
+import { site } from '../lib/site.ts';
+import Icon from './Icon.astro';
+
+// The site is rebuilt daily, so this never goes stale.
+const year = new Date().getFullYear();
+---
+
+<footer class="colophon">
+  <div class="wrap colophon__row label muted">
+    <p>© {year} {site.name}</p>
+    <p class="colophon__note">Set in League Gothic, Newsreader and IBM Plex Mono. No cookies, no tracking.</p>
+    <p>
+      <a href="#top">
+        Back to top
+        <Icon name="up" />
+      </a>
+    </p>
+  </div>
+</footer>
+
+<style is:global>
+  .colophon {
+    border-top: 1px solid var(--line);
+  }
+
+  .colophon__row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 2rem;
+    padding-block: 1.5rem 2rem;
+  }
+
+  .colophon__note {
+    flex: 1 1 22rem;
+  }
+
+  .colophon a {
+    display: inline-flex;
+    align-items: center;
+    padding-block: 0.3rem;
+  }
+
+  @media (min-width: 60em) {
+    .colophon__note {
+      text-align: center;
+    }
+  }
+</style>

@@ -1,0 +1,283 @@
+---
+/**
+ * The fixed bar across the top: name, section links, and the "Lights" theme switch.
+ * On narrow screens the links move into a full-screen index, opened as a <dialog>.
+ */
+import { pad2 } from '../lib/format.ts';
+import { sectionIds, site } from '../lib/site.ts';
+---
+
+<header class="masthead">
+  <div class="wrap masthead__row">
+    <a class="masthead__name label" href="#top">{site.name}</a>
+
+    <nav class="masthead__nav" aria-label="Sections">
+      <ul class="masthead__links">
+        {
+          sectionIds.map((id, i) => (
+            <li>
+              <a class="label" href={`#${id}`} data-nav={id}>
+                <span class="masthead__num" aria-hidden="true">
+                  {pad2(i + 1)}
+                </span>
+                {site.sections[id].title}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <button class="lights label" type="button" data-theme-toggle aria-pressed="false" title="Switch between the light and dark theme">
+      <span class="lights__lamp" aria-hidden="true"></span>Lights
+    </button>
+
+    <button class="masthead__menu label" type="button" data-menu-open aria-haspopup="dialog">Index</button>
+  </div>
+</header>
+
+<dialog class="menu" data-menu aria-label="Index">
+  <div class="wrap menu__inner">
+    <div class="menu__bar">
+      <span class="label muted">Index</span>
+      <button class="menu__close label" type="button" data-menu-close>Close</button>
+    </div>
+    <nav aria-label="Sections">
+      <ol class="menu__list">
+        {
+          sectionIds.map((id, i) => (
+            <li>
+              <a href={`#${id}`} data-nav={id}>
+                <span class="label accent" aria-hidden="true">
+                  {pad2(i + 1)}
+                </span>
+                <span class="display menu__title">{site.sections[id].title}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+  </div>
+</dialog>
+
+<script>
+  import '../scripts/site.ts';
+</script>
+
+<style is:global>
+  .masthead {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .masthead__row {
+    display: flex;
+    align-items: stretch;
+    gap: clamp(0.75rem, 2vw, 1.75rem);
+    min-height: var(--masthead);
+  }
+
+  /* One line always; a very long name is cut short with an ellipsis rather than wrapping. */
+  .masthead__name {
+    min-width: 0;
+    margin-inline-end: auto;
+    overflow: hidden;
+    line-height: var(--masthead);
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .masthead__nav {
+    display: none;
+  }
+
+  .masthead__links {
+    display: flex;
+    height: 100%;
+    margin: 0;
+    gap: clamp(1rem, 2vw, 1.75rem);
+  }
+
+  .masthead__links a {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    height: 100%;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .masthead__links a:hover,
+  .masthead__links a[aria-current] {
+    color: var(--text);
+  }
+
+  .masthead__num {
+    color: var(--muted);
+  }
+
+  .masthead__links a[aria-current] .masthead__num {
+    color: var(--accent);
+  }
+
+  /* The marker under the section being read. */
+  .masthead__links a::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    bottom: -1px;
+    height: 2px;
+    background: var(--accent);
+    scale: 0 1;
+    transform-origin: left;
+    transition: scale 0.3s var(--ease);
+  }
+
+  .masthead__links a[aria-current]::after {
+    scale: 1 1;
+  }
+
+  .lights,
+  .masthead__menu,
+  .menu__close {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55em;
+    min-width: 2.75rem;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .lights:hover,
+  .masthead__menu:hover,
+  .menu__close:hover {
+    color: var(--accent);
+  }
+
+  .lights,
+  .masthead__menu {
+    flex: none;
+  }
+
+  .lights__lamp {
+    flex: none;
+    width: 0.625rem;
+    height: 0.625rem;
+    border: 1.5px solid currentColor;
+    border-radius: 50%;
+  }
+
+  /* Pressed means the lights are on: the light theme. */
+  .lights[aria-pressed='true'] .lights__lamp {
+    background: currentColor;
+  }
+
+  .lights::after {
+    content: 'off';
+    min-width: 1.9em;
+    color: var(--muted);
+  }
+
+  .lights[aria-pressed='true']::after {
+    content: 'on';
+  }
+
+  /* On the narrowest phones the lamp alone shows the state, leaving room for the name. */
+  @media (max-width: 22.5em) {
+    .lights::after {
+      content: none;
+    }
+    .lights[aria-pressed='true']::after {
+      content: none;
+    }
+  }
+
+  /* Both switches need JavaScript; without it they are left out rather than left broken. */
+  html:not(.js) .lights,
+  html:not(.js) .masthead__menu {
+    display: none;
+  }
+
+  @media (min-width: 62em) {
+    .masthead__nav {
+      display: block;
+    }
+    .masthead__menu {
+      display: none;
+    }
+  }
+
+  /* ── Full-screen index (narrow screens) ── */
+
+  .menu {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    background: var(--bg);
+    color: var(--text);
+    border: 0;
+  }
+
+  .menu::backdrop {
+    background: var(--bg);
+  }
+
+  .menu__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--masthead);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .menu__close {
+    min-height: 2.75rem;
+  }
+
+  .menu__list {
+    margin: 0;
+    padding-block: clamp(1rem, 4vh, 2.5rem);
+  }
+
+  .menu__list a {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    padding-block: 0.7rem;
+    text-decoration: none;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .menu__title {
+    font-size: clamp(3rem, 15vw, 5.5rem);
+  }
+
+  .menu__list a[aria-current] .menu__title {
+    color: var(--accent);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .menu[open] {
+      animation: menu-in 0.28s var(--ease);
+    }
+  }
+
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      translate: 0 -0.75rem;
+    }
+  }
+</style>

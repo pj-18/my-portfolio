@@ -1,0 +1,302 @@
+---
+/**
+ * Films: the latest Letterboxd diary entries. The first is set large with a longer excerpt;
+ * the rest run as a diary underneath. Data comes from src/lib/films.ts, which decides between
+ * the fetched diary, the sample entries, and a short "nothing to show" state.
+ */
+import { estimates } from '../lib/estimate.ts';
+import { getFilms, type Film } from '../lib/films.ts';
+import { formatDay, formatInstant, truncate } from '../lib/format.ts';
+import { site } from '../lib/site.ts';
+import Chapter from './Chapter.astro';
+import Icon from './Icon.astro';
+import Poster from './Poster.astro';
+import Stars from './Stars.astro';
+
+const films = getFilms();
+const [feature, ...rest] = films.mode === 'unavailable' ? [] : films.entries;
+
+const day = (film: Film) => (film.watchedDate ? formatDay(film.watchedDate, site.locale) : '');
+---
+
+<section class="section" id="films" aria-labelledby="films-title" style={estimates.films(films.mode === 'unavailable' ? 0 : films.entries.length)}>
+  <div class="wrap">
+    <Chapter id="films" />
+
+    {
+      feature && (
+        <article class="feature" data-reveal>
+          <div class="feature__poster">
+            <Poster film={feature} sizes="(min-width: 60em) 22rem, (min-width: 36em) 16rem, 62vw" widths={[240, 360, 480, 600]} />
+          </div>
+
+          <div class="feature__body">
+            <p class="label muted">
+              Latest entry
+              {feature.watchedDate && (
+                <>
+                  <span aria-hidden="true"> · </span>
+                  <span class="visually-hidden">, watched </span>
+                  <time datetime={feature.watchedDate}>{day(feature)}</time>
+                </>
+              )}
+            </p>
+
+            <h3 class="feature__title">
+              {feature.title}
+              {feature.year && <span class="feature__year">{feature.year}</span>}
+            </h3>
+
+            <p class="marks label">
+              {feature.rating !== null && <Stars rating={feature.rating} />}
+              {feature.liked && <span>Liked</span>}
+              {feature.rewatch && <span>Rewatch</span>}
+            </p>
+
+            {feature.review && (
+              <blockquote class="feature__review" cite={feature.url}>
+                <p>{truncate(feature.review, 520)}</p>
+              </blockquote>
+            )}
+            {feature.spoilers && <p class="feature__note">This review contains spoilers, so it stays on Letterboxd.</p>}
+            {!feature.review && !feature.spoilers && <p class="feature__note">Logged without a review.</p>}
+
+            <p class="label feature__more">
+              <a href={feature.url}>
+                {feature.review || feature.spoilers ? 'Read the full review on Letterboxd' : 'See the entry on Letterboxd'}
+                <span class="visually-hidden">: {feature.title}</span>
+                <Icon />
+              </a>
+            </p>
+          </div>
+        </article>
+      )
+    }
+
+    {
+      rest.length > 0 && (
+        <>
+          <h3 class="subhead label">Earlier in the diary</h3>
+          <ol class="diary">
+            {rest.map((film) => (
+              <li class="entry" data-reveal>
+                <div class="entry__poster">
+                  <Poster film={film} sizes="(min-width: 36em) 7rem, 5.5rem" widths={[120, 240, 360]} />
+                </div>
+                <div class="entry__body">
+                  {film.watchedDate && (
+                    <p class="label muted">
+                      <time datetime={film.watchedDate}>{day(film)}</time>
+                    </p>
+                  )}
+                  <h4 class="entry__title">
+                    <a href={film.url}>{film.title}</a>
+                    {film.year && <span class="entry__year label muted">{film.year}</span>}
+                  </h4>
+                  <p class="marks label">
+                    {film.rating !== null && <Stars rating={film.rating} />}
+                    {film.liked && <span>Liked</span>}
+                    {film.rewatch && <span>Rewatch</span>}
+                  </p>
+                  {film.review && <p class="entry__review">{truncate(film.review, 190)}</p>}
+                  {film.spoilers && <p class="entry__review muted">Review contains spoilers.</p>}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </>
+      )
+    }
+
+    {
+      films.mode === 'unavailable' && (
+        <p class="films__empty">
+          The diary could not be loaded for this edition of the site. It carries on at
+          <a href={films.profileUrl}>
+            Letterboxd
+            <Icon />
+          </a>
+        </p>
+      )
+    }
+
+    <p class="films__foot label muted">
+      {
+        films.mode === 'live' && (
+          <>
+            <span>
+              Updated <time datetime={films.fetchedAt}>{formatInstant(films.fetchedAt, site.locale)}</time>
+            </span>
+            <a href={films.profileUrl}>
+              The whole diary on Letterboxd
+              <Icon />
+            </a>
+          </>
+        )
+      }
+      {films.mode === 'sample' && <span>Sample entries. Add your Letterboxd username in content/site.json to show your own diary.</span>}
+    </p>
+  </div>
+</section>
+
+<style is:global>
+  /* ── Latest entry ── */
+
+  .feature {
+    display: grid;
+    gap: clamp(1.5rem, 4vw, 2.5rem) var(--gap);
+    margin-bottom: clamp(3rem, 7vw, 5.5rem);
+  }
+
+  .feature__poster {
+    width: min(62vw, 16rem);
+  }
+
+  .feature__body {
+    display: grid;
+    gap: 0.9rem;
+    align-content: start;
+    max-width: 40em;
+  }
+
+  .feature__title {
+    font-size: var(--step-3);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+  }
+
+  .feature__year {
+    margin-inline-start: 0.5em;
+    font-size: 0.62em;
+    font-style: italic;
+    letter-spacing: 0;
+    color: var(--muted);
+  }
+
+  .marks {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.9rem;
+    color: var(--muted);
+  }
+
+  .feature__review {
+    margin-top: 0.4rem;
+    padding-inline-start: clamp(1rem, 2vw, 1.5rem);
+    border-inline-start: 2px solid var(--accent);
+    font-size: var(--step-1);
+    line-height: 1.45;
+  }
+
+  .feature__note {
+    font-style: italic;
+    color: var(--muted);
+  }
+
+  .feature__more a,
+  .films__foot a {
+    display: inline-flex;
+    align-items: center;
+    padding-block: 0.3rem;
+  }
+
+  .feature__more a:hover .icon,
+  .films__foot a:hover .icon {
+    translate: 0.12em -0.12em;
+  }
+
+  /* ── The rest of the diary ── */
+
+  .diary {
+    display: grid;
+    gap: 0 var(--gap);
+    margin: 0;
+  }
+
+  .entry {
+    position: relative;
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    gap: clamp(1rem, 2.5vw, 1.5rem);
+    padding-block: clamp(1rem, 2.5vw, 1.5rem);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .entry__body {
+    display: grid;
+    gap: 0.35rem;
+    align-content: start;
+  }
+
+  .entry__title {
+    font-size: var(--step-1);
+    line-height: 1.18;
+  }
+
+  .entry__title a {
+    text-decoration: none;
+  }
+
+  /* The whole row is the link target, with a single link for assistive technology. */
+  .entry__title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .entry:hover .entry__title a {
+    color: var(--accent);
+  }
+
+  .entry__year {
+    margin-inline-start: 0.5em;
+  }
+
+  .entry__review {
+    margin-top: 0.25rem;
+    font-size: 0.95em;
+    line-height: 1.45;
+  }
+
+  .films__empty {
+    max-width: 30em;
+    font-size: var(--step-1);
+  }
+
+  .films__foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 2rem;
+    margin-top: clamp(1.5rem, 3vw, 2.25rem);
+  }
+
+  @media (min-width: 36em) {
+    .feature {
+      grid-template-columns: 16rem minmax(0, 1fr);
+      align-items: start;
+    }
+    .entry {
+      grid-template-columns: 7rem minmax(0, 1fr);
+    }
+  }
+
+  @media (min-width: 60em) {
+    .feature {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+    .feature__poster {
+      grid-column: 1 / span 4;
+      width: min(100%, 22rem);
+    }
+    .feature__body {
+      grid-column: 6 / -1;
+      padding-top: 0.5rem;
+    }
+    .diary {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

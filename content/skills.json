@@ -1,0 +1,17 @@
+{
+  "placeholder": true,
+  "groups": [
+    {
+      "name": "Languages",
+      "items": ["TypeScript", "Go", "Python", "SQL"]
+    },
+    {
+      "name": "Platforms",
+      "items": ["AWS", "Kubernetes", "PostgreSQL", "Kafka"]
+    },
+    {
+      "name": "Practice",
+      "items": ["System design", "Observability", "Incident response", "Mentoring"]
+    }
+  ]
+}

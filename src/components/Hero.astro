@@ -1,0 +1,263 @@
+---
+/**
+ * The title card: role, the name set to fill the column exactly, the one-line statement,
+ * and a contents list. The name's width is measured at build time (src/lib/typefit.ts), so
+ * any name fits without JavaScript: one line on wide screens, one word per line on narrow.
+ */
+import { pad2 } from '../lib/format.ts';
+import { sectionIds, site } from '../lib/site.ts';
+import { displayEm } from '../lib/typefit.ts';
+import Icon from './Icon.astro';
+
+const words = site.name.trim().split(/\s+/);
+const lineEm = displayEm(site.name.trim());
+const stackEm = Math.max(...words.map(displayEm));
+---
+
+<section class="hero" id="top" aria-labelledby="hero-name">
+  <div class="wrap hero__wrap">
+    <div class="hero__frame">
+      <span class="crop crop--tl" aria-hidden="true"></span>
+      <span class="crop crop--tr" aria-hidden="true"></span>
+      <span class="crop crop--bl" aria-hidden="true"></span>
+      <span class="crop crop--br" aria-hidden="true"></span>
+
+      <p class="hero__role label" data-in>
+        <span>{site.role}</span>
+        {site.location && <span class="muted">{site.location}</span>}
+      </p>
+
+      <div class="hero__title">
+        <h1 class="hero__name display" id="hero-name" style={`--line-em:${lineEm};--stack-em:${stackEm}`}>
+          {
+            words.map((word, i) => (
+              <>
+                {i > 0 && ' '}
+                <span>{word}</span>
+              </>
+            ))
+          }
+        </h1>
+      </div>
+
+      <div class="hero__foot">
+        <p class="hero__tagline" data-in>{site.tagline}</p>
+
+        <nav class="hero__index" aria-label="Contents" data-in>
+          <ol class="hero__list">
+            {
+              sectionIds.map((id, i) => (
+                <li>
+                  <a href={`#${id}`}>
+                    <span class="label hero__num" aria-hidden="true">
+                      {pad2(i + 1)}
+                    </span>
+                    <span class="hero__entry">{site.sections[id].title}</span>
+                    <span class="label muted hero__summary">{site.sections[id].summary}</span>
+                    <Icon name="down" />
+                  </a>
+                </li>
+              ))
+            }
+          </ol>
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  .hero {
+    display: grid;
+    min-height: calc(100svh - var(--masthead));
+    padding-block: clamp(1rem, 2.5vw, 2rem) clamp(2.5rem, 6vw, 5rem);
+  }
+
+  .hero__wrap {
+    display: grid;
+  }
+
+  .hero__frame {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: clamp(1.25rem, 3.5vw, 2.5rem);
+    padding: clamp(1rem, 2.6vw, 2rem);
+  }
+
+  .hero__role {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.25rem 1.5rem;
+  }
+
+  /* The box is the measure; the name is sized as a fraction of it. */
+  .hero__title {
+    container-type: inline-size;
+    align-self: center;
+  }
+
+  .hero__name {
+    margin: 0;
+    /* A hair under the measured width, so rounding can never push a letter out of the column. */
+    font-size: calc(99.4cqw / var(--stack-em));
+    line-height: 0.86;
+    white-space: nowrap;
+    overflow-x: clip;
+  }
+
+  .hero__name span {
+    display: block;
+  }
+
+  @container (min-width: 44rem) {
+    .hero__name {
+      font-size: calc(99.4cqw / var(--line-em));
+    }
+    .hero__name span {
+      display: inline;
+    }
+  }
+
+  /* A phone held sideways is wide but short: one line there too, or the name fills the screen. */
+  @media (min-width: 30em) and (max-height: 34em) {
+    .hero__name {
+      font-size: calc(99.4cqw / var(--line-em));
+    }
+    .hero__name span {
+      display: inline;
+    }
+  }
+
+  .hero__foot {
+    display: grid;
+    gap: clamp(1.5rem, 4vw, 2.5rem) var(--gap);
+    align-items: end;
+  }
+
+  /* The measure is set in em, not ch: a ch depends on the font in use, so the box would change
+     width (and the text re-wrap, shifting the page) when the web font replaces the fallback. */
+  .hero__tagline {
+    max-width: 13.6em;
+    font-size: var(--step-2);
+    line-height: 1.22;
+    letter-spacing: -0.005em;
+  }
+
+  /* The contents list decides for itself whether there is room for the summaries. */
+  .hero__index {
+    container-type: inline-size;
+  }
+
+  .hero__list {
+    margin: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .hero__list a {
+    display: grid;
+    grid-template-columns: 2rem auto 1fr auto;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding-block: 0.62rem;
+    text-decoration: none;
+    border-bottom: 1px solid var(--line);
+  }
+
+  /* The arrow keeps to the last column even when the summary is hidden on narrow screens. */
+  .hero__list .icon {
+    grid-column: 4;
+  }
+
+  .hero__num {
+    color: var(--accent);
+  }
+
+  .hero__entry {
+    font-size: var(--step-1);
+    line-height: 1.2;
+  }
+
+  .hero__summary {
+    display: none;
+    overflow: hidden;
+    text-align: end;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .hero__list a:hover .icon {
+    translate: 0 0.2em;
+  }
+
+  @container (min-width: 27rem) {
+    .hero__summary {
+      display: block;
+    }
+  }
+
+  @media (min-width: 56em) {
+    .hero__foot {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+    .hero__tagline {
+      grid-column: 1 / span 6;
+    }
+    .hero__index {
+      grid-column: 8 / -1;
+    }
+    .hero__foot {
+      align-items: start;
+    }
+  }
+
+  /* On arrival the supporting lines settle in after the name, which is there from first paint. */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero [data-in] {
+      animation: hero-settle 0.7s var(--ease) both;
+    }
+    .hero .hero__tagline {
+      animation-delay: 0.08s;
+    }
+    .hero .hero__index {
+      animation-delay: 0.16s;
+    }
+    .hero .crop {
+      animation: hero-mark 0.9s var(--ease) both;
+    }
+  }
+
+  @keyframes hero-settle {
+    from {
+      opacity: 0;
+      translate: 0 0.9rem;
+    }
+  }
+
+  /* Scrolling on, the name falls behind and dims, like a title card giving way to the film.
+     Tied to scroll position in CSS; browsers without scroll-driven animations just scroll. */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .hero__name {
+        animation: hero-recede linear both;
+        animation-timeline: view();
+        animation-range: exit 0% exit 100%;
+      }
+    }
+  }
+
+  @keyframes hero-recede {
+    to {
+      opacity: 0.12;
+      translate: 0 30%;
+    }
+  }
+
+  @keyframes hero-mark {
+    from {
+      opacity: 0;
+      scale: 2.2;
+    }
+  }
+</style>

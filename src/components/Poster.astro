@@ -1,0 +1,99 @@
+---
+/**
+ * A film poster. Uses the image downloaded at build time when there is one; otherwise sets
+ * the title as a small typographic poster, so a missing image never leaves a hole.
+ */
+import type { Film } from '../lib/films.ts';
+import { responsive } from '../lib/images.ts';
+
+interface Props {
+  film: Film;
+  /** The `sizes` attribute: how wide the poster is displayed. */
+  sizes: string;
+  widths: readonly number[];
+}
+
+const { film, sizes, widths } = Astro.props;
+const image = film.poster ? await responsive(film.poster, widths) : null;
+
+// One of six print inks, picked by the title so a film always gets the same colour.
+const INKS = ['#9c2f14', '#1e5258', '#7a5a12', '#27325c', '#5c2a4a', '#2f4a36'];
+const ink = INKS[Array.from(film.title).reduce((sum, char) => sum + char.codePointAt(0)!, 0) % INKS.length];
+---
+
+{
+  image ? (
+    <picture class="poster">
+      <source type="image/avif" srcset={image.avif} sizes={sizes} />
+      <source type="image/webp" srcset={image.webp} sizes={sizes} />
+      <img
+        src={image.src}
+        srcset={image.fallback}
+        sizes={sizes}
+        width={image.width}
+        height={image.height}
+        alt={`Poster for ${film.title}`}
+        loading="lazy"
+        decoding="async"
+      />
+    </picture>
+  ) : (
+    <div class="poster poster--type" style={`--ink:${ink}`} aria-hidden="true">
+      <div class="poster__card">
+        <span class="poster__title display">{film.title}</span>
+        {film.year && <span class="poster__year">{film.year}</span>}
+      </div>
+    </div>
+  )
+}
+
+<style is:global>
+  .poster {
+    display: block;
+    aspect-ratio: 2 / 3;
+    background: var(--surface);
+    overflow: hidden;
+  }
+
+  .poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .poster--type {
+    container-type: inline-size;
+    background: var(--ink);
+    color: #f3efe6;
+  }
+
+  .poster__card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 4cqw;
+    height: 100%;
+    padding: 11cqw 10cqw 9cqw;
+  }
+
+  .poster__card::before {
+    content: '';
+    position: absolute;
+    inset: 4.5cqw;
+    border: 1px solid rgb(243 239 230 / 0.4);
+  }
+
+  .poster__title {
+    font-size: max(0.9rem, 21cqw);
+    line-height: 0.9;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+
+  .poster__year {
+    font-family: var(--font-mono);
+    font-size: clamp(0.6875rem, 7cqw, 0.9375rem);
+    letter-spacing: 0.08em;
+  }
+</style>

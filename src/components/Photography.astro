@@ -1,0 +1,171 @@
+---
+/**
+ * Photography: every image in /photos, laid out in justified rows (each row is the same
+ * height, each photo keeps its own shape). Images are lazy-loaded AVIF/WebP with a JPEG
+ * fallback, and each one opens in the viewer below. Without JavaScript the links simply
+ * open the large JPEG.
+ */
+import { estimates } from '../lib/estimate.ts';
+import { jsonForScript, pad2 } from '../lib/format.ts';
+import { getPhotos, photosMissingAlt } from '../lib/photos.ts';
+import Chapter from './Chapter.astro';
+import Viewer from './Viewer.astro';
+
+const photos = await getPhotos();
+
+const missingAlt = photosMissingAlt();
+if (missingAlt.length > 0) {
+  console.warn(`[photos] No alt text in photos/captions.json for: ${missingAlt.join(', ')}`);
+}
+
+/**
+ * How wide a thumbnail is displayed. A photo's width in a justified row is its ratio times
+ * the row height, stretched a little to fill the row; these match the row heights in the CSS.
+ * `auto` lets browsers that support it use the exact rendered size instead.
+ */
+const sizes = (ratio: number) =>
+  [
+    'auto',
+    `(min-width: 64em) ${Math.round(ratio * 256 * 1.35)}px`,
+    `(min-width: 40em) ${Math.round(ratio * 200 * 1.35)}px`,
+    `min(100vw, ${Math.round(ratio * 144 * 1.45)}px)`,
+  ].join(', ');
+
+const viewerData = photos.map((photo) => ({
+  avif: photo.full.avif,
+  webp: photo.full.webp,
+  jpg: photo.full.fallback,
+  src: photo.href,
+  w: photo.full.width,
+  h: photo.full.height,
+  alt: photo.alt,
+  title: photo.title,
+  meta: photo.meta,
+  exif: photo.exif,
+  colour: photo.colour,
+}));
+---
+
+<section class="section" id="photography" aria-labelledby="photography-title" style={estimates.photography(photos.length)}>
+  <div class="wrap">
+    <Chapter id="photography" />
+
+    {
+      photos.length === 0 ? (
+        <p class="gallery__empty">No photographs yet. Add images to the photos folder and they will appear here.</p>
+      ) : (
+        <ul class="gallery">
+          {photos.map((photo, i) => (
+            <li class="frame" style={`--ratio:${photo.ratio}`} data-reveal>
+              <a class="frame__link" href={photo.href} data-photo={i} style={`background-color:${photo.colour}`}>
+                <span class="visually-hidden">Enlarge: </span>
+                <picture>
+                  <source type="image/avif" srcset={photo.thumb.avif} sizes={sizes(photo.ratio)} />
+                  <source type="image/webp" srcset={photo.thumb.webp} sizes={sizes(photo.ratio)} />
+                  <img
+                    src={photo.thumb.src}
+                    srcset={photo.thumb.fallback}
+                    sizes={sizes(photo.ratio)}
+                    width={photo.thumb.width}
+                    height={photo.thumb.height}
+                    alt={photo.alt}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+                <span class="crop crop--tl" aria-hidden="true"></span>
+                <span class="crop crop--tr" aria-hidden="true"></span>
+                <span class="crop crop--bl" aria-hidden="true"></span>
+                <span class="crop crop--br" aria-hidden="true"></span>
+              </a>
+              <p class="frame__no label muted" aria-hidden="true">
+                {pad2(i + 1)}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+
+  {photos.length > 0 && <Viewer data={jsonForScript(viewerData)} />}
+</section>
+
+<style is:global>
+  .gallery {
+    --row: 9rem;
+    --space: clamp(0.5rem, 1.2vw, 1rem);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space);
+    margin: 0;
+  }
+
+  /* Each frame asks for (ratio x row height) and grows in proportion to its ratio, so every
+     photo in a row ends up the same height. */
+  .frame {
+    flex: calc(var(--ratio) * 100) 1 calc(var(--ratio) * var(--row));
+    min-width: 0;
+  }
+
+  /* An invisible last item soaks up spare room so the final row is not stretched out of scale. */
+  .gallery::after {
+    content: '';
+    flex: 250 1 0;
+  }
+
+  .frame__link {
+    position: relative;
+    display: block;
+    aspect-ratio: var(--ratio);
+    overflow: hidden;
+    cursor: zoom-in;
+  }
+
+  .frame__link img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: scale 0.6s var(--ease);
+  }
+
+  .frame__link:hover img {
+    scale: 1.03;
+  }
+
+  /* Frame-line corners appear on hover and keyboard focus. */
+  .frame__link .crop {
+    margin: 0.6rem;
+    border-color: #fff;
+    opacity: 0;
+    transition: opacity 0.2s;
+    filter: drop-shadow(0 0 1px rgb(0 0 0 / 0.6));
+  }
+
+  .frame__link:hover .crop,
+  .frame__link:focus-visible .crop {
+    opacity: 1;
+  }
+
+  .frame__no {
+    margin-top: 0.3rem;
+  }
+
+  .gallery__empty {
+    max-width: 30em;
+    font-size: var(--step-1);
+    color: var(--muted);
+  }
+
+  @media (min-width: 40em) {
+    .gallery {
+      --row: 12.5rem;
+    }
+  }
+
+  @media (min-width: 64em) {
+    .gallery {
+      --row: 16rem;
+    }
+  }
+</style>

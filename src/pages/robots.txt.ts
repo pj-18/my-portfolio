@@ -1,0 +1,8 @@
+/** /robots.txt. Everything may be crawled; the sitemap address follows the URL in content/site.json. */
+import type { APIRoute } from 'astro';
+import { origin } from '../lib/site.ts';
+
+export const GET: APIRoute = () =>
+  new Response(`User-agent: *\nAllow: /\n\nSitemap: ${origin}/sitemap.xml\n`, {
+    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+  });

@@ -1,0 +1,21 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+.astro/
+
+# data fetched by `npm run sync` (Letterboxd diary, posters, chess ratings)
+src/generated/
+
+# local
+.env
+.env.*
+!.env.example
+.wrangler/
+.DS_Store
+Thumbs.db
+
+# leftovers from the previous version of this site; safe to delete
+src/data/cache/
+test-results/

@@ -1,0 +1,108 @@
+---
+/** Contact: the email address and every profile link. All of it comes from content/site.json. */
+import { estimates } from '../lib/estimate.ts';
+import { displayUrl } from '../lib/format.ts';
+import { profileLinks, site } from '../lib/site.ts';
+import Chapter from './Chapter.astro';
+import Icon from './Icon.astro';
+---
+
+<section class="section" id="contact" aria-labelledby="contact-title" style={estimates.contact(profileLinks.length)}>
+  <div class="wrap">
+    <Chapter id="contact" />
+
+    <div class="contact">
+      <p class="contact__email" data-reveal>
+        <span class="label muted">Email</span>
+        <a href={`mailto:${site.email}`}>{site.email}</a>
+      </p>
+
+      {
+        profileLinks.length > 0 && (
+          <div class="contact__elsewhere" data-reveal>
+            <h3 class="label muted">Elsewhere</h3>
+            <ul class="contact__links">
+              {profileLinks.map((link) => (
+                <li>
+                  <a href={link.url} rel="me">
+                    <span class="label contact__label">{link.label}</span>
+                    <span class="contact__handle">{displayUrl(link.url)}</span>
+                    <Icon />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  .contact {
+    display: grid;
+    gap: clamp(2.5rem, 6vw, 4rem) var(--gap);
+  }
+
+  .contact__email {
+    display: grid;
+    gap: 0.6rem;
+    align-content: start;
+  }
+
+  .contact__email a {
+    font-size: var(--step-3);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    overflow-wrap: anywhere;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.18em;
+  }
+
+  .contact__elsewhere {
+    display: grid;
+    gap: 0.6rem;
+    align-content: start;
+  }
+
+  .contact__links {
+    margin: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .contact__links a {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding-block: 0.7rem;
+    text-decoration: none;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .contact__label {
+    color: var(--accent);
+  }
+
+  .contact__handle {
+    overflow-wrap: anywhere;
+  }
+
+  .contact__links a:hover .icon {
+    translate: 0.12em -0.12em;
+  }
+
+  @media (min-width: 60em) {
+    .contact {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+    .contact__email {
+      grid-column: 1 / span 6;
+    }
+    .contact__elsewhere {
+      grid-column: 8 / -1;
+    }
+  }
+</style>

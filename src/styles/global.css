@@ -1,0 +1,395 @@
+/*
+ * Design tokens and base styles. Component styles live next to their markup, in each
+ * component's <style> block.
+ *
+ * The palette is a two-colour print job: ink and paper, plus one spot colour.
+ *   light ("lights up")   newsprint paper, ink text
+ *   dark  ("lights down") warm black, bone text
+ * Every text and background pair meets WCAG AA (4.5:1); README.md lists the measured ratios.
+ *
+ * Everything shared sits in the `base` cascade layer. Styles outside a layer always beat
+ * styles inside one, so a component can adjust a shared class (.label, .display, ...) without
+ * worrying about selector weight or the order the CSS happens to be bundled in.
+ */
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+
+    --bg: light-dark(#f3efe6, #0e0d0b);
+    --surface: light-dark(#e9e3d6, #181613);
+    --line: light-dark(#d5cebf, #2c2924);
+    --line-strong: light-dark(#8a8274, #6f685d);
+    --text: light-dark(#191612, #ede7da);
+    --muted: light-dark(#5e574c, #a49c8e);
+    --accent: light-dark(#b23010, #ff5a36);
+    --on-accent: light-dark(#fff9ee, #0e0d0b);
+
+    --maxw: 78rem;
+    --gutter: clamp(1rem, 4.5vw, 3rem);
+    --gap: clamp(1rem, 2.2vw, 2rem);
+    --section-space: clamp(4.5rem, 11vw, 9.5rem);
+    --masthead: 3.25rem;
+
+    --step--1: 0.8125rem;
+    --step-0: clamp(1.0625rem, 1rem + 0.28vw, 1.1875rem);
+    --step-1: clamp(1.25rem, 1.14rem + 0.5vw, 1.5rem);
+    --step-2: clamp(1.5rem, 1.25rem + 1.1vw, 2.125rem);
+    --step-3: clamp(1.875rem, 1.4rem + 2.2vw, 3.25rem);
+
+    --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  /* A manual choice from the "Lights" switch overrides the system setting. */
+  :root[data-theme='light'] {
+    color-scheme: light;
+  }
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-padding-top: calc(var(--masthead) + 1rem);
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-serif);
+    font-size: var(--step-0);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  ul,
+  ol,
+  dl,
+  dd,
+  figure,
+  blockquote {
+    margin: 0;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: inherit;
+    font-size: inherit;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ul[class],
+  ol[class] {
+    padding: 0;
+    list-style: none;
+  }
+
+  img,
+  picture,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  img {
+    height: auto;
+  }
+
+  a {
+    color: inherit;
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+    text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
+    transition:
+      color 0.15s,
+      text-decoration-color 0.15s;
+  }
+
+  a:hover {
+    color: var(--accent);
+    text-decoration-color: currentColor;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+
+  /* ── Shared pieces ───────────────────────────────────────────────────────────────── */
+
+  .wrap {
+    width: min(100% - 2 * var(--gutter), var(--maxw));
+    margin-inline: auto;
+  }
+
+  /* Monospaced small caps: dates, numbers, metadata. */
+  .label {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    font-weight: 400;
+    line-height: 1.45;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .muted {
+    color: var(--muted);
+  }
+
+  .accent {
+    color: var(--accent);
+  }
+
+  /* The poster face, always in capitals. */
+  .display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: 0.88;
+    text-transform: uppercase;
+  }
+
+  /* Arrow icon; the default points up and to the right, for links that leave the site. */
+  .icon {
+    display: inline-block;
+    flex: none;
+    width: 0.66em;
+    height: 0.66em;
+    margin-inline-start: 0.4em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    vertical-align: 0.02em;
+    transition: translate 0.2s var(--ease);
+  }
+  .icon--right {
+    rotate: 45deg;
+  }
+  .icon--down {
+    rotate: 135deg;
+  }
+  .icon--left {
+    rotate: 225deg;
+  }
+  .icon--up {
+    rotate: -45deg;
+  }
+
+  /* Text set from Markdown. */
+  .prose > * + * {
+    margin-top: 0.9em;
+  }
+  .prose ul,
+  .prose ol {
+    padding-inline-start: 1.15em;
+  }
+  .prose ul {
+    list-style-type: '–  ';
+  }
+  .prose li + li {
+    margin-top: 0.35em;
+  }
+  .prose li::marker {
+    color: var(--muted);
+  }
+  .prose code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+  }
+
+  /* Sections below the first screen are not laid out or painted until they come near the
+     viewport, which keeps the first render short on slow phones. Until a section has been
+     rendered once the browser needs a stand-in height for it: each section passes rough
+     estimates for three widths (src/lib/estimate.ts), and `auto` swaps in the real height
+     once it is known. */
+  .section {
+    padding-block: var(--section-space);
+    content-visibility: auto;
+    /* The estimates are for the whole section; the property wants the height inside the padding. */
+    contain-intrinsic-block-size: auto calc(var(--est-narrow, 2400px) - 2 * var(--section-space));
+  }
+
+  @media (min-width: 40em) {
+    .section {
+      contain-intrinsic-block-size: auto calc(var(--est-medium, 2100px) - 2 * var(--section-space));
+    }
+  }
+
+  @media (min-width: 60em) {
+    .section {
+      contain-intrinsic-block-size: auto calc(var(--est-wide, 1900px) - 2 * var(--section-space));
+    }
+  }
+
+  /* The same deferral for a long block inside a section. Work sits right under the first
+     screen, so the browser lays it out at once; its two long lists opt out until needed.
+     The clip margin keeps focus rings at the block's edges from being cut off. */
+  .defer {
+    content-visibility: auto;
+    contain-intrinsic-block-size: auto var(--est-narrow, 600px);
+    overflow-clip-margin: 0.75rem;
+  }
+
+  @media (min-width: 40em) {
+    .defer {
+      contain-intrinsic-block-size: auto var(--est-medium, 550px);
+    }
+  }
+
+  @media (min-width: 60em) {
+    .defer {
+      contain-intrinsic-block-size: auto var(--est-wide, 500px);
+    }
+  }
+
+  /* A section that receives focus from a jump link is a place to read from, not a control. */
+  main > section:focus {
+    outline: none;
+  }
+
+  /* A small labelled rule that opens each block inside a section. */
+  .subhead {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+    color: var(--muted);
+  }
+  .subhead::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+
+  /* Camera frame-line corners, the site's one recurring ornament. */
+  .crop {
+    position: absolute;
+    width: 0.875rem;
+    height: 0.875rem;
+    border: 0 solid var(--line-strong);
+    pointer-events: none;
+  }
+  .crop--tl {
+    top: 0;
+    left: 0;
+    border-top-width: 1px;
+    border-left-width: 1px;
+  }
+  .crop--tr {
+    top: 0;
+    right: 0;
+    border-top-width: 1px;
+    border-right-width: 1px;
+  }
+  .crop--bl {
+    bottom: 0;
+    left: 0;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+  }
+  .crop--br {
+    right: 0;
+    bottom: 0;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+  }
+
+  /* Blocks ease up into place as they enter the viewport. Pure CSS: where scroll-driven
+     animations are unsupported, the content is simply there.
+     (Jump links glide rather than snap, but that lives in src/scripts/site.ts: CSS smooth
+     scrolling cannot follow a target that moves while sections above it are being laid out.) */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      [data-reveal] {
+        animation: reveal linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 60%;
+      }
+    }
+  }
+
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      translate: 0 1.75rem;
+    }
+  }
+}
+
+/* ── Outside the layer: rules nothing should be able to override by accident ──────────── */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: -5rem;
+  left: var(--gutter);
+  z-index: 100;
+  padding: 0.6rem 1rem;
+  background: var(--text);
+  color: var(--bg);
+}
+
+.skip-link:focus {
+  top: 0.6rem;
+  color: var(--bg);
+}
+
+/* The page behind a modal dialog (photo viewer, index) should not scroll. */
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

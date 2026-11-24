@@ -1,0 +1,12 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist", "node_modules"],
+  "compilerOptions": {
+    // scripts/ and tests/ run directly on Node's type stripping, so keep syntax erasable.
+    "erasableSyntaxOnly": true,
+    // Every file is its own module, including the browser scripts that have no imports.
+    "moduleDetection": "force",
+    "types": ["node"]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "name": "Praveen Ponduru",
+  "role": "Senior Software Engineer",
+  "location": "",
+  "tagline": "I build dependable software for a living. The rest is cinema, photographs and chess.",
+  "description": "Portfolio of Praveen Ponduru, senior software engineer: selected work, a film diary, photographs and chess.",
+  "url": "https://example.com",
+  "lang": "en",
+  "locale": "en-GB",
+  "email": "hello@example.com",
+  "links": [
+    { "label": "GitHub", "url": "https://github.com/pj-18" },
+    { "label": "LinkedIn", "url": "https://www.linkedin.com/in/your-handle/" }
+  ],
+  "letterboxd": {
+    "username": "",
+    "entries": 7
+  },
+  "chess": {
+    "platform": "lichess",
+    "username": ""
+  },
+  "sections": {
+    "work": {
+      "title": "Work",
+      "summary": "Bio, experience, projects",
+      "intro": "What I do for a living, and a few things I am glad I built."
+    },
+    "films": {
+      "title": "Films",
+      "summary": "Latest from the diary",
+      "intro": "The latest entries from my Letterboxd diary, rated out of five."
+    },
+    "photography": {
+      "title": "Photography",
+      "summary": "Selected frames",
+      "intro": "A handful of frames I keep coming back to."
+    },
+    "chess": {
+      "title": "Chess",
+      "summary": "Ratings and a favourite game",
+      "intro": "Mostly online, mostly faster than is good for me."
+    },
+    "contact": {
+      "title": "Contact",
+      "summary": "Email and elsewhere",
+      "intro": "Email is the surest way to reach me."
+    }
+  }
+}

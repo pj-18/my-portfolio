@@ -1,0 +1,14 @@
+---
+/**
+ * A small arrow. "out" points up and to the right, for links that leave the site; the other
+ * names are the same drawing turned. Styled by `.icon` in global.css.
+ */
+interface Props {
+  name?: 'out' | 'right' | 'down' | 'left' | 'up';
+}
+const { name = 'out' } = Astro.props;
+---
+
+<svg class:list={['icon', `icon--${name}`]} viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false"
+  ><path d="M2.75 9.25 9.25 2.75M3.75 2.75h5.5v5.5"></path></svg
+>

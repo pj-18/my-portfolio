@@ -1,0 +1,62 @@
+{
+  "01-last-light.jpg": {
+    "title": "Last light",
+    "alt": "The sun low over a calm sea at dusk, its reflection broken into streaks on the water.",
+    "placeholder": true
+  },
+  "02-ridgelines.jpg": {
+    "title": "Ridgelines",
+    "alt": "Seven mountain ridges receding into blue haze, each paler than the one in front.",
+    "placeholder": true
+  },
+  "03-night-market.jpg": {
+    "title": "Night market",
+    "alt": "Soft, out-of-focus discs of orange, red and blue light against a dark street.",
+    "placeholder": true
+  },
+  "04-window-light.jpg": {
+    "title": "Four o’clock",
+    "alt": "A window casts four slanted panes of warm afternoon light onto a bare wall above a dark floor.",
+    "placeholder": true
+  },
+  "05-dunes.jpg": {
+    "title": "Dunes",
+    "alt": "Sand dunes in low sun, one side of each crest bright orange and the other in deep brown shadow.",
+    "placeholder": true
+  },
+  "06-pines-in-fog.jpg": {
+    "title": "Pines in fog",
+    "alt": "Dark pine trunks in the foreground fade to pale grey shapes in thick fog behind them.",
+    "placeholder": true
+  },
+  "07-facade.jpg": {
+    "title": "Facade",
+    "alt": "A cream apartment block seen straight on: a grid of dark windows, a few lit yellow, crossed by a diagonal shadow.",
+    "placeholder": true
+  },
+  "08-long-road.jpg": {
+    "title": "Long road",
+    "alt": "An empty two-lane road runs dead straight across flat country to a low sun on the horizon.",
+    "placeholder": true
+  },
+  "09-blue-hour.jpg": {
+    "title": "Blue hour",
+    "alt": "A city skyline in silhouette under a deep blue evening sky, scattered windows lit and reflected in the water below.",
+    "placeholder": true
+  },
+  "10-waxing-moon.jpg": {
+    "title": "Waxing moon",
+    "alt": "A bright gibbous moon with grey craters, one edge falling into shadow, on a black sky dotted with stars.",
+    "placeholder": true
+  },
+  "11-red-door.jpg": {
+    "title": "Red door",
+    "alt": "A vermilion door set in a teal wall, with a pale stone step and a long shadow falling across the pavement.",
+    "placeholder": true
+  },
+  "12-shoreline.jpg": {
+    "title": "Shoreline",
+    "alt": "Seen from above: turquoise sea meets pale sand along a line of white surf, with small coloured beach umbrellas scattered on the sand.",
+    "placeholder": true
+  }
+}

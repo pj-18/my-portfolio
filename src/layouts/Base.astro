@@ -1,0 +1,117 @@
+---
+import { Font } from 'astro:assets';
+import skills from '../../content/skills.json';
+import { jsonForScript } from '../lib/format.ts';
+import { isExample, origin, profileLinks, site } from '../lib/site.ts';
+import { themeScript } from '../lib/theme-script.ts';
+import '../styles/global.css';
+
+interface Props {
+  /** Page title; the site name is appended. Omit on the home page. */
+  title?: string;
+  description?: string;
+  /** Path of this page, used for the canonical URL. */
+  path?: string;
+  noindex?: boolean;
+}
+
+const { title, description = site.description, path = '/', noindex = false } = Astro.props;
+
+const pageTitle = title ? `${title} · ${site.name}` : `${site.name} · ${site.role}`;
+const canonical = new URL(path, `${origin}/`).href;
+const socialImage = `${origin}/og.png`;
+
+// Sample values are kept out of the structured data so they can never be indexed as fact.
+const knowsAbout = skills.placeholder ? [] : skills.groups.flatMap((group) => group.items);
+const sameAs = profileLinks.map((link) => link.url).filter((url) => !isExample(url));
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${origin}/#website`,
+      url: `${origin}/`,
+      name: site.name,
+      description: site.description,
+      inLanguage: site.lang,
+      publisher: { '@id': `${origin}/#person` },
+    },
+    {
+      '@type': 'Person',
+      '@id': `${origin}/#person`,
+      name: site.name,
+      url: `${origin}/`,
+      jobTitle: site.role,
+      description: site.description,
+      image: socialImage,
+      ...(isExample(site.email) ? {} : { email: site.email }),
+      ...(site.location ? { homeLocation: { '@type': 'Place', name: site.location } } : {}),
+      ...(sameAs.length > 0 ? { sameAs } : {}),
+      ...(knowsAbout.length > 0 ? { knowsAbout } : {}),
+    },
+  ],
+};
+---
+
+<!doctype html>
+<html lang={site.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {/* Applies a saved "Lights" choice before first paint. See src/lib/theme-script.ts. */}
+    <script is:inline set:html={themeScript} />
+
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={site.name} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f3efe6" media="(prefers-color-scheme: light)" data-light="#f3efe6" data-dark="#0e0d0b" />
+    <meta name="theme-color" content="#0e0d0b" media="(prefers-color-scheme: dark)" data-light="#f3efe6" data-dark="#0e0d0b" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={site.locale.replace('-', '_')} />
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${site.name}: ${site.tagline}`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImage} />
+    <meta name="twitter:image:alt" content={`${site.name}: ${site.tagline}`} />
+
+    {/* Self-hosted fonts. The three files used on the first screen are preloaded; the italic and
+        the medium monospace load when something on the page first needs them. */}
+    <Font cssVariable="--font-display" preload />
+    <Font cssVariable="--font-serif" preload={[{ weight: 400, style: 'normal' }]} />
+    <Font cssVariable="--font-mono" preload={[{ weight: 400, style: 'normal' }]} />
+
+    <script type="application/ld+json" set:html={jsonForScript(structuredData)} />
+
+    {
+      /*
+        Optional analytics. The site ships with no tracking. To add cookieless, privacy-friendly
+        page counts, see README.md ("Analytics") and uncomment ONE of these:
+
+        <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "YOUR_TOKEN"}'></script>
+        <script defer data-domain="yourdomain.com" src="https://plausible.io/js/script.js"></script>
+      */
+    }
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <slot />
+  </body>
+</html>

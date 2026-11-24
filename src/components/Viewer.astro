@@ -1,0 +1,255 @@
+---
+/**
+ * The photo viewer (lightbox). A native <dialog>, so focus is trapped inside it and the page
+ * behind is inert while it is open. Behaviour is in src/scripts/viewer.ts.
+ *
+ *   Left / Right   previous / next        Home / End   first / last
+ *   Esc, the browser's Back button, or a click outside the photo closes it.
+ */
+interface Props {
+  /** The photo list as JSON, already made safe for a script element. */
+  data: string;
+}
+
+const { data } = Astro.props;
+---
+
+<dialog class="viewer" data-viewer aria-label="Photo viewer">
+  <figure class="viewer__figure">
+    <div class="viewer__stage" data-stage>
+      <picture>
+        <source type="image/avif" data-avif />
+        <source type="image/webp" data-webp />
+        <img class="viewer__image" data-image alt="" decoding="async" />
+      </picture>
+    </div>
+
+    <figcaption class="viewer__caption" aria-live="polite" aria-atomic="true">
+      <p class="viewer__count label" data-count></p>
+      <div class="viewer__text">
+        <p class="viewer__title" data-title></p>
+        <p class="viewer__meta label" data-meta></p>
+        <p class="viewer__exif label" data-exif></p>
+      </div>
+    </figcaption>
+  </figure>
+
+  <button class="viewer__button viewer__close" type="button" data-close aria-label="Close photo viewer">
+    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M5 5l14 14M19 5L5 19"></path></svg>
+  </button>
+  <button class="viewer__button viewer__prev" type="button" data-prev aria-label="Previous photo">
+    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M15 4l-8 8 8 8"></path></svg>
+  </button>
+  <button class="viewer__button viewer__next" type="button" data-next aria-label="Next photo">
+    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M9 4l8 8-8 8"></path></svg>
+  </button>
+
+  <script type="application/json" data-photos set:html={data} />
+</dialog>
+
+<script>
+  import '../scripts/viewer.ts';
+</script>
+
+<style is:global>
+  /* Photographs are always viewed with the lights down, whatever the page theme. */
+  .viewer {
+    --v-bg: #0a0908;
+    --v-text: #ede7da;
+    --v-muted: #a49c8e;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: var(--v-bg);
+    color: var(--v-text);
+    border: 0;
+    color-scheme: dark;
+  }
+
+  .viewer::backdrop {
+    background: var(--v-bg);
+  }
+
+  .viewer__figure {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    height: 100%;
+  }
+
+  .viewer__stage {
+    display: grid;
+    place-items: center;
+    min-height: 0;
+    padding: 3.5rem clamp(0.75rem, 5vw, 4.5rem) 0.75rem;
+    /* A size container, so the photo can be fitted to the stage in CSS (cqw / cqh below). */
+    container-type: size;
+    touch-action: pan-y pinch-zoom;
+    cursor: zoom-out;
+  }
+
+  .viewer__stage picture {
+    display: contents;
+  }
+
+  /* Fit inside the stage on both axes and never enlarge past the file's own width. The box has
+     its final size before the file arrives, so nothing shifts when it does. */
+  .viewer__image {
+    width: min(100cqw, 100cqh * var(--ratio, 1.5), var(--natural, 100cqw));
+    max-width: none;
+    height: auto;
+    aspect-ratio: var(--ratio, 1.5);
+    object-fit: contain;
+    /* The thumbnail already on screen stands in until the large file arrives. */
+    background-size: cover;
+    background-position: center;
+    cursor: default;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .viewer__caption {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.25rem 1.25rem;
+    align-items: baseline;
+    min-height: 4.75rem;
+    padding: 0.5rem clamp(1rem, 5vw, 4.5rem) 1.1rem;
+  }
+
+  .viewer__count {
+    color: var(--v-muted);
+    white-space: nowrap;
+  }
+
+  .viewer__title {
+    font-size: var(--step-1);
+    line-height: 1.25;
+  }
+
+  .viewer__meta,
+  .viewer__exif {
+    color: var(--v-muted);
+  }
+
+  /* Camera settings keep their own capitalisation: f/8 and 1/500s, not F/8 and 1/500S. */
+  .viewer__exif {
+    letter-spacing: 0.03em;
+    text-transform: none;
+  }
+
+  .viewer__meta:empty,
+  .viewer__exif:empty {
+    display: none;
+  }
+
+  .viewer__button {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    background: rgb(10 9 8 / 0.55);
+    color: var(--v-text);
+    border: 1px solid rgb(237 231 218 / 0.28);
+    border-radius: 50%;
+    cursor: pointer;
+    transition:
+      background-color 0.15s,
+      border-color 0.15s;
+  }
+
+  .viewer__button:hover {
+    background: var(--v-text);
+    color: var(--v-bg);
+    border-color: var(--v-text);
+  }
+
+  .viewer__button:focus-visible {
+    outline-color: #ff5a36;
+  }
+
+  .viewer__button svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+  }
+
+  .viewer__close {
+    top: 0.5rem;
+    right: clamp(0.5rem, 2vw, 1rem);
+  }
+
+  /* On phones the arrows sit by the caption, within reach of a thumb. */
+  .viewer__prev,
+  .viewer__next {
+    bottom: 1.1rem;
+  }
+
+  .viewer__prev {
+    right: calc(clamp(1rem, 5vw, 4.5rem) + 3.25rem);
+  }
+
+  .viewer__next {
+    right: clamp(1rem, 5vw, 4.5rem);
+  }
+
+  /* Phones: the caption runs full width, with the count and arrows on a row beneath it. */
+  @media (max-width: 47.99em) {
+    .viewer__caption {
+      grid-template-columns: minmax(0, 1fr);
+      padding-bottom: 1.1rem;
+    }
+    .viewer__count {
+      order: 2;
+      display: flex;
+      align-items: center;
+      min-height: 2.75rem;
+      margin-top: 0.4rem;
+    }
+  }
+
+  @media (min-width: 48em) {
+    .viewer__prev,
+    .viewer__next {
+      top: 50%;
+      bottom: auto;
+      translate: 0 -50%;
+    }
+    .viewer__prev {
+      right: auto;
+      left: clamp(0.5rem, 1.2vw, 1rem);
+    }
+    .viewer__next {
+      right: clamp(0.5rem, 1.2vw, 1rem);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .viewer[open] {
+      animation: viewer-in 0.3s var(--ease);
+    }
+    .viewer[open]::backdrop {
+      animation: viewer-fade 0.3s ease-out;
+    }
+  }
+
+  @keyframes viewer-in {
+    from {
+      opacity: 0;
+      scale: 0.985;
+    }
+  }
+
+  @keyframes viewer-fade {
+    from {
+      opacity: 0;
+    }
+  }
+</style>

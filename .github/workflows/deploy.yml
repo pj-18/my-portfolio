@@ -1,0 +1,92 @@
+# Builds the site and, on the main branch, publishes it to Cloudflare Pages.
+#
+# Runs on every push to main, once a day (so new Letterboxd entries and chess ratings show up
+# without anyone touching the repo), and on demand from the Actions tab.
+# Pull requests are built and tested but never deployed.
+#
+# One-time setup is in README.md, "Deploy". Until the two Cloudflare secrets exist the deploy
+# step is skipped, so pushing this file before that is harmless.
+
+name: Build and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '17 3 * * *' # every day at 03:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer run for the same branch replaces one still in progress.
+concurrency:
+  group: site-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  ASTRO_TELEMETRY_DISABLED: 1
+
+jobs:
+  site:
+    name: Build, test and deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Kept between runs: the last diary and ratings that were fetched successfully (the
+      # fallback if Letterboxd or the chess site is unreachable today) and Astro's cache of
+      # optimised images (so photos are not re-encoded on every build).
+      # Restored after `npm ci`, which empties node_modules.
+      - name: Restore fetched data and image cache
+        uses: actions/cache@v6
+        with:
+          path: |
+            src/generated
+            node_modules/.astro
+          key: site-cache-${{ github.run_id }}
+          restore-keys: site-cache-
+
+      - name: Run tests
+        run: npm test
+
+      - name: Type-check
+        run: npm run check
+
+      - name: Fetch data and build
+        run: npm run build
+
+      - name: Is deployment configured?
+        id: cloudflare
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -n "$TOKEN" ] && [ -n "$ACCOUNT" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Built but not deployed: add the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets (README.md, Deploy)."
+          fi
+
+      # The Pages project is assumed to have the same name as this repository. If you named it
+      # something else, set a repository variable called CLOUDFLARE_PAGES_PROJECT.
+      - name: Deploy to Cloudflare Pages
+        if: steps.cloudflare.outputs.ready == 'true' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT || github.event.repository.name }} --branch=main

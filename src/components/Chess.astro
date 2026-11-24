@@ -1,0 +1,489 @@
+---
+/**
+ * Chess: a short blurb (content/chess.md), ratings, and a favourite game that can be stepped
+ * through move by move. Every position is worked out at build time (src/lib/chess.ts); the
+ * page shows one as a static diagram and src/scripts/game.ts only swaps between them.
+ */
+import { Content as Blurb } from '../../content/chess.md';
+import { pieces as artwork } from '../assets/chess/pieces.ts';
+import { getGame, getRatings, squareXY, squares, type GameMove } from '../lib/chess.ts';
+import { estimates } from '../lib/estimate.ts';
+import { formatInstant, jsonForScript } from '../lib/format.ts';
+import { site } from '../lib/site.ts';
+import Chapter from './Chapter.astro';
+import Icon from './Icon.astro';
+
+const { ratings, source, platform, profileUrl, fetchedAt } = getRatings();
+const game = getGame();
+const start = game.startPly;
+const lastPly = game.moves.length;
+
+const statuses = game.positions.map((_, ply) => {
+  // A PGN can be a single position with no moves; then there is only whose turn it is to say.
+  if (game.moves.length === 0) return `${game.whiteStarts ? 'White' : 'Black'} to move.`;
+  const next = game.moves[ply];
+  const toMove = next ? `${next.white ? 'White' : 'Black'} to move.` : `Final position${game.result ? `, ${game.result}` : ''}.`;
+  return ply === 0 ? `Starting position. ${toMove}` : `After ${game.moves[ply - 1]!.label}. ${toMove}`;
+});
+
+// One row per full move for the move list.
+interface Row {
+  number: number;
+  white?: { ply: number; move: GameMove };
+  black?: { ply: number; move: GameMove };
+}
+const rows: Row[] = [];
+game.moves.forEach((move, i) => {
+  let row = rows.at(-1);
+  if (!row || row.number !== move.number) {
+    row = { number: move.number };
+    rows.push(row);
+  }
+  row[move.white ? 'white' : 'black'] = { ply: i + 1, move };
+});
+
+const placed = squares(game.positions[start]!, game.flipped);
+const played = start > 0 ? game.moves[start - 1]! : null;
+const marks = played ? [squareXY(played.from, game.flipped), squareXY(played.to, game.flipped)] : [];
+
+// a1 is a dark square; with (0, 0) at the top left that is every square where x + y is odd.
+const darkSquares = Array.from({ length: 64 }, (_, i) => ({ x: i % 8, y: Math.floor(i / 8) }))
+  .filter(({ x, y }) => (x + y) % 2 === 1)
+  .map(({ x, y }) => `M${x} ${y}h1v1h-1z`)
+  .join('');
+
+const files = [...(game.flipped ? 'hgfedcba' : 'abcdefgh')];
+const ranks = [...(game.flipped ? '12345678' : '87654321')];
+
+const clientData = {
+  start,
+  flipped: game.flipped,
+  positions: game.positions,
+  moves: game.moves.map((move) => [move.from, move.to]),
+  status: statuses,
+};
+---
+
+<section class="section" id="chess" aria-labelledby="chess-title" style={estimates.chess()}>
+  <div class="wrap">
+    <Chapter id="chess" />
+
+    <div class="chess">
+      <div class="chess__about">
+        <div class="prose chess__blurb" data-reveal>
+          <Blurb />
+        </div>
+
+        {
+          ratings.length > 0 && (
+            <div class="ratings" data-reveal>
+              <dl class="ratings__list">
+                {ratings.map((rating) => (
+                  <div class="ratings__item">
+                    <dt class="label muted">{rating.label}</dt>
+                    <dd class="ratings__value display">
+                      {rating.rating}
+                      {rating.provisional && (
+                        <span class="ratings__provisional">
+                          ?<span class="visually-hidden"> (provisional)</span>
+                        </span>
+                      )}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+              <p class="ratings__source label muted">
+                {source === 'live' && fetchedAt && (
+                  <span>
+                    {platform}, updated <time datetime={fetchedAt}>{formatInstant(fetchedAt, site.locale)}</time>
+                  </span>
+                )}
+                {source === 'manual' && profileUrl && <span>{platform}</span>}
+                {source === 'manual' && !profileUrl && (
+                  <span>Sample ratings. Add your chess username in content/site.json to fetch your own.</span>
+                )}
+                {profileUrl && (
+                  <a href={profileUrl}>
+                    Profile
+                    <Icon />
+                  </a>
+                )}
+              </p>
+            </div>
+          )
+        }
+      </div>
+
+      <div class="game" data-game data-reveal>
+        <header class="game__head">
+          <p class="label muted">A favourite game</p>
+          <h3 class="game__title">
+            <span class="game__player">{game.white}</span>
+            <span class="game__versus">v</span>
+            <span class="game__player">{game.black}</span>
+          </h3>
+          {
+            (game.details.length > 0 || game.result) && (
+              <p class="label muted">{[...game.details, game.result].filter(Boolean).join(' · ')}</p>
+            )
+          }
+        </header>
+
+        <figure class="board">
+          <div class="board__ranks label muted" aria-hidden="true">
+            {ranks.map((rank) => <span>{rank}</span>)}
+          </div>
+          <svg class="board__squares" viewBox="0 0 8 8" role="img" aria-labelledby="board-status">
+            <defs>
+              {game.pieces.map((id) => <symbol id={`piece-${id}`} viewBox="0 0 45 45" set:html={artwork[id]} />)}
+            </defs>
+            <rect class="board__light" width="8" height="8"></rect>
+            <path class="board__dark" d={darkSquares}></path>
+            <g class="board__marks" data-marks>
+              {marks.map(({ x, y }) => <rect x={x} y={y} width="1" height="1" />)}
+            </g>
+            <g data-pieces>
+              {placed.map(({ piece, x, y }) => <use href={`#piece-${piece}`} x={x} y={y} width="1" height="1" />)}
+            </g>
+          </svg>
+          <div class="board__files label muted" aria-hidden="true">
+            {files.map((file) => <span>{file}</span>)}
+          </div>
+          <figcaption class="board__status label" id="board-status" data-status aria-live="polite">{statuses[start]}</figcaption>
+        </figure>
+
+        {
+          lastPly > 0 && (
+            <>
+              <div class="game__controls" role="group" aria-label="Step through the game">
+                <button type="button" data-go="first" aria-label="First position">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 5l-8 7 8 7M6 5v14" /></svg>
+                </button>
+                <button type="button" data-go="prev" aria-label="Previous move">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 5l-8 7 8 7" /></svg>
+                </button>
+                <button type="button" data-go="next" aria-label="Next move">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5l8 7-8 7" /></svg>
+                </button>
+                <button type="button" data-go="last" aria-label="Final position">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 5l8 7-8 7M18 5v14" /></svg>
+                </button>
+                <span class="game__hint label muted" aria-hidden="true">or use the arrow keys</span>
+              </div>
+
+              <ol class="moves" aria-label="Moves">
+                {rows.map((row) => (
+                  <li>
+                    <span class="moves__number label muted" aria-hidden="true">
+                      {row.number}.
+                    </span>
+                    {row.white && (
+                      <button type="button" disabled data-ply={row.white.ply} aria-label={row.white.move.label} aria-current={row.white.ply === start ? 'true' : undefined}>
+                        {row.white.move.san}
+                      </button>
+                    )}
+                    {row.black && (
+                      <button type="button" disabled data-ply={row.black.ply} aria-label={row.black.move.label} aria-current={row.black.ply === start ? 'true' : undefined}>
+                        {row.black.move.san}
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            </>
+          )
+        }
+
+        {game.note && <p class="game__note">{game.note}</p>}
+        {
+          game.link && (
+            <p class="label">
+              <a href={game.link}>
+                Open the game
+                <Icon />
+              </a>
+            </p>
+          )
+        }
+
+        <script type="application/json" data-game-data set:html={jsonForScript(clientData)} />
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import '../scripts/game.ts';
+</script>
+
+<style is:global>
+  .chess {
+    display: grid;
+    gap: clamp(2.5rem, 6vw, 4rem) var(--gap);
+  }
+
+  .chess__about {
+    display: grid;
+    gap: clamp(2rem, 5vw, 3rem);
+    align-content: start;
+  }
+
+  .chess__blurb {
+    max-width: 30em;
+    font-size: var(--step-1);
+    line-height: 1.45;
+  }
+
+  /* ── Ratings ── */
+
+  .ratings__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem clamp(1.75rem, 4vw, 3rem);
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .ratings__item {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .ratings__value {
+    font-size: clamp(3.5rem, 2.5rem + 4.5vw, 6rem);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ratings__provisional {
+    color: var(--muted);
+  }
+
+  .ratings__source {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.5rem;
+    margin-top: 1.1rem;
+  }
+
+  .ratings__source a {
+    display: inline-flex;
+    align-items: center;
+    padding-block: 0.3rem;
+  }
+
+  .ratings__source span {
+    padding-block: 0.3rem;
+  }
+
+  /* ── Game ── */
+
+  .game {
+    display: grid;
+    gap: 1.1rem;
+    align-content: start;
+    max-width: 34rem;
+  }
+
+  .game__head {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .game__title {
+    font-size: var(--step-2);
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+  }
+
+  /* Each name stays whole where it can; the line breaks between the players, not inside a name. */
+  .game__player {
+    display: inline-block;
+  }
+
+  .game__versus {
+    font-style: italic;
+    color: var(--muted);
+  }
+
+  .board {
+    --light: light-dark(#ece5d5, #cdc4b1);
+    --dark: light-dark(#b9ab91, #94876f);
+    --mark: light-dark(rgb(178 48 16 / 0.4), rgb(214 62 30 / 0.5));
+    display: grid;
+    grid-template-columns: 1rem minmax(0, 1fr);
+    gap: 0.35rem 0.4rem;
+  }
+
+  .board__squares {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    outline: 1px solid var(--line-strong);
+  }
+
+  .board__light {
+    fill: var(--light);
+  }
+
+  .board__dark {
+    fill: var(--dark);
+  }
+
+  .board__marks {
+    fill: var(--mark);
+  }
+
+  .board__ranks {
+    display: grid;
+    grid-template-rows: repeat(8, 1fr);
+    align-items: center;
+    letter-spacing: 0;
+  }
+
+  /* Chess notation is case-sensitive (B is a bishop, b a file), so none of it is capitalised. */
+  .board__files {
+    grid-column: 2;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    text-align: center;
+    letter-spacing: 0;
+    line-height: 1;
+    text-transform: none;
+  }
+
+  .board__status {
+    grid-column: 2;
+    min-height: 2.9em;
+    margin-top: 0.5rem;
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+
+  .game__controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-inline-start: 1.4rem;
+  }
+
+  .game__controls button {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    background: none;
+    border: 1px solid var(--line-strong);
+    cursor: pointer;
+    transition:
+      background-color 0.15s,
+      color 0.15s;
+  }
+
+  .game__controls button:hover {
+    background: var(--text);
+    color: var(--bg);
+  }
+
+  .game__controls button[aria-disabled='true'] {
+    color: var(--line-strong);
+    border-color: var(--line);
+    background: none;
+    cursor: default;
+  }
+
+  .game__controls svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+  }
+
+  .game__hint {
+    display: none;
+    margin-inline-start: 0.5rem;
+  }
+
+  /* The move list runs on like the notation in a chess book. */
+  .moves {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.1rem 0.75rem;
+    margin: 0;
+    padding-inline-start: 1.4rem;
+  }
+
+  .moves li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.1rem;
+  }
+
+  .moves__number {
+    margin-inline-end: 0.15rem;
+    letter-spacing: 0;
+  }
+
+  .moves button {
+    min-width: 1.5rem;
+    min-height: 1.75rem;
+    padding: 0.1rem 0.3rem;
+    background: none;
+    border: 0;
+    border-radius: 2px;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+
+  .moves button:disabled {
+    color: inherit;
+    cursor: default;
+  }
+
+  .moves button:not(:disabled):hover {
+    color: var(--accent);
+  }
+
+  .moves button[aria-current] {
+    background: var(--text);
+    color: var(--bg);
+  }
+
+  .game__note {
+    max-width: 32em;
+    padding-inline-start: 1.4rem;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* Stepping needs JavaScript; without it the diagram, the moves and the note still read. */
+  html:not(.js) .game__controls {
+    display: none;
+  }
+
+  @media (hover: hover) and (min-width: 40em) {
+    .game__hint {
+      display: inline;
+    }
+  }
+
+  @media (min-width: 60em) {
+    .chess {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+    /* The text keeps the board company on the way down. */
+    .chess__about {
+      grid-column: 1 / span 5;
+      position: sticky;
+      top: calc(var(--masthead) + 2rem);
+      align-self: start;
+    }
+    .game {
+      grid-column: 7 / -1;
+      justify-self: end;
+      width: 100%;
+    }
+  }
+</style>

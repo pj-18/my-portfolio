@@ -1,0 +1,124 @@
+---
+/**
+ * The opener for each section: a rule, the section number, and the title at poster scale.
+ * The title is sized to fit its column using its measured width, so a renamed section
+ * ("Photographs", "Engineering") still fits on a phone.
+ */
+import { pad2 } from '../lib/format.ts';
+import { sectionIds, site, type SectionId } from '../lib/site.ts';
+import { displayEm } from '../lib/typefit.ts';
+
+interface Props {
+  id: SectionId;
+}
+
+const { id } = Astro.props;
+const { title, summary, intro } = site.sections[id];
+const number = pad2(sectionIds.indexOf(id) + 1);
+---
+
+<header class="chapter">
+  <p class="chapter__meta label">
+    <span class="accent" aria-hidden="true">{number}</span>
+    {summary && <span class="muted">{summary}</span>}
+  </p>
+  <div class="chapter__row">
+    <h2 class="chapter__title display" id={`${id}-title`} style={`--em:${displayEm(title)}`}>{title}</h2>
+    {intro && <p class="chapter__intro">{intro}</p>}
+  </div>
+</header>
+
+<style is:global>
+  .chapter {
+    position: relative;
+    margin-bottom: clamp(2.25rem, 6vw, 4.5rem);
+    padding-top: calc(0.8rem + 1px);
+    container-type: inline-size;
+  }
+
+  /* The rule across the top. Drawn as its own line so it can be ruled in from the left as the
+     chapter arrives (below); without that support it is simply a rule. */
+  .chapter::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 1px;
+    background: var(--text);
+    transform-origin: left;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .chapter {
+        view-timeline: --chapter block;
+      }
+      .chapter::before {
+        animation: chapter-rule linear both;
+        animation-timeline: --chapter;
+        animation-range: entry 0% cover 28%;
+      }
+      .chapter__title {
+        animation: chapter-title linear both;
+        animation-timeline: --chapter;
+        animation-range: entry 0% cover 28%;
+      }
+    }
+  }
+
+  @keyframes chapter-rule {
+    from {
+      scale: 0 1;
+    }
+  }
+
+  @keyframes chapter-title {
+    from {
+      opacity: 0;
+      translate: 0 0.18em;
+    }
+  }
+
+  .chapter__meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+
+  .chapter__row {
+    display: grid;
+    gap: 1rem var(--gap);
+    margin-top: clamp(1.25rem, 4vw, 3rem);
+  }
+
+  .chapter__title {
+    font-size: min(clamp(4.25rem, 2rem + 12.5vw, 11.5rem), calc(99cqw / var(--em)));
+    line-height: 0.84;
+    white-space: nowrap;
+  }
+
+  .chapter__intro {
+    max-width: 26ch;
+    font-size: var(--step-1);
+    font-style: italic;
+    line-height: 1.3;
+    color: var(--muted);
+  }
+
+  @container (min-width: 52rem) {
+    .chapter__row {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      align-items: end;
+    }
+    .chapter__title {
+      grid-column: 1 / span 8;
+      /* Eight of the twelve columns, so a long title never runs into the line beside it. */
+      font-size: min(clamp(4.25rem, 2rem + 12.5vw, 11.5rem), calc(64cqw / var(--em)));
+    }
+    .chapter__intro {
+      grid-column: 9 / -1;
+      justify-self: end;
+      padding-bottom: 0.35em;
+      text-align: end;
+    }
+  }
+</style>

@@ -3,7 +3,7 @@ import ReelHead from './ReelHead.astro';
 import { site } from '../site.config';
 import { stats } from '../lib/films';
 import { music } from '../lib/music';
-import { siCypress, siGit, siJavascript, siNodedotjs, siReact, siTypescript } from 'simple-icons';
+import { siCypress, siGit, siJavascript, siNodedotjs, siPostman, siReact, siTypescript } from 'simple-icons';
 import { rich } from '../lib/util';
 
 const about = rich(site.about);
@@ -22,6 +22,7 @@ const logos: Record<string, Logo> = {
   javascript: brand(siJavascript),
   typescript: brand(siTypescript),
   cypress: brand(siCypress),
+  postman: brand(siPostman),
   'node.js': brand(siNodedotjs),
   git: brand(siGit),
   // Playwright's mark: two theatre masks, red behind green
@@ -335,14 +336,16 @@ const stack = [...site.stack, ...site.stack].map((name) => ({ name, logo: logos[
   .stack__item {
     display: flex;
     align-items: center;
-    gap: 0.45em;
-    padding-right: 1em;
-    font-family: var(--f-display);
-    font-size: clamp(1.6rem, 6vw, 2.6rem);
-    font-stretch: 75%;
-    font-weight: 700;
-    line-height: 1;
-    color: var(--paper-dim);
+    gap: 0.4em;
+    padding-right: 1.1em;
+    /* the serif italic of the about text: reads like a film's credits, not a spec sheet */
+    font-family: var(--f-serif);
+    font-size: clamp(1.9rem, 7vw, 3.1rem);
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: 0.005em;
+    color: var(--paper);
     white-space: nowrap;
   }
 
@@ -354,8 +357,8 @@ const stack = [...site.stack, ...site.stack].map((name) => ({ name, logo: logos[
 
   .stack__logo {
     flex: none;
-    width: 0.78em;
-    height: 0.78em;
+    width: 0.7em;
+    height: 0.7em;
   }
 
   @media (min-width: 48rem) {

@@ -14,7 +14,8 @@ if (hanger && arm && ticket) {
   const DAMPING = 0.85;
   const LIMIT = 1.25;
 
-  let angle = calm.matches ? -0.05 : 0.55;
+  // On load it only sways a little (about 7°); a drag or a fling can still send it wide.
+  let angle = calm.matches ? -0.05 : 0.12;
   let velocity = 0;
   let wobble = 0;
   let dragging = false;

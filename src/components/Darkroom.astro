@@ -2,6 +2,7 @@
 import ReelHead from './ReelHead.astro';
 import Icon from './Icon.astro';
 import { loadPhotos } from '../lib/photos';
+import { music } from '../lib/music';
 import { pad, safeJson } from '../lib/util';
 
 const photos = await loadPhotos();
@@ -29,7 +30,7 @@ const data = photos.map((p) => ({
 <section id="darkroom" class="reel darkroom" data-scene="darkroom" aria-labelledby="darkroom-title">
   <ReelHead
     id="darkroom-title"
-    number="03"
+    number={music ? '04' : '03'}
     title="The darkroom"
     kicker="Photographs"
     accent="red"

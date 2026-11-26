@@ -47,6 +47,24 @@ export const site = {
   /** Reviews whose film title is listed here never appear in the one-liner ticker. */
   hideFromQuotes: [] as string[],
 
+  /**
+   * "The soundtrack": your most-played artists and songs, from Last.fm.
+   * Apple Music can't talk to Last.fm by itself, so a scrobbler app sends your plays there
+   * (see the README). `npm run music` then pulls the charts; it needs a free Last.fm API key
+   * in LASTFM_API_KEY (.env locally, a repository secret on GitHub).
+   * Until there is data the section only appears in `npm run dev`, filled with sample data.
+   */
+  music: {
+    /** Your Last.fm username. */
+    lastfm: 'pj_18',
+    /** Apple Music storefront (two-letter country code) used to find artwork, previews and links. */
+    storefront: 'us',
+    /** Which chart opens first: '1month', '12month' or 'overall'. */
+    period: '12month',
+    /** Artists or song titles to leave off the page (case doesn't matter). */
+    hide: [] as string[],
+  },
+
   about:
     "I'm Praveen Ponduru, [PJ|amber] to most. For seven years I've been building web apps and the automated tests that keep them honest. Most of my work sits where product code meets test code: [React|green] up front, [SQL|amber] underneath, and [Playwright|red] and [Cypress|green] suites that tell a team within minutes whether a change is *safe to ship*. When the laptop closes, the lights go down.",
 

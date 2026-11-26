@@ -1,16 +1,17 @@
 ---
 /**
- * Section title: a film strip (or a bulb-lit marquee sign, or film under a safelight)
- * with the title rolling through it. The real heading stays static for screen readers.
+ * Section title: a film strip (or a bulb-lit marquee sign, film under a safelight, or a
+ * print's optical soundtrack) with the title rolling through it. The real heading stays
+ * static for screen readers.
  */
 interface Props {
   id: string;
   number: string;
   title: string;
   kicker: string;
-  accent: 'green' | 'amber' | 'red';
+  accent: 'green' | 'amber' | 'red' | 'cyan';
   symbol?: string;
-  variant?: 'film' | 'sign' | 'safelight';
+  variant?: 'film' | 'sign' | 'safelight' | 'optical';
   dir?: 'ltr' | 'rtl';
   speed?: number;
 }

@@ -2,6 +2,7 @@
 import Icon from './Icon.astro';
 import { site } from '../site.config';
 import { diary, filmUrl, poster, recommendations } from '../lib/films';
+import { headliners, music } from '../lib/music';
 import { dayMonthYear, safeJson } from '../lib/util';
 
 const year = new Date().getFullYear();
@@ -14,6 +15,7 @@ const credits: { role: string; name: string; href?: string }[] = [
   { role: 'Also known as', name: site.nickname },
   { role: 'Day job', name: site.role },
   { role: 'Film critic', name: `@${site.letterboxd} on Letterboxd`, href: letterboxd?.url },
+  ...(music && headliners() ? [{ role: 'Music by', name: `${headliners()}, on repeat`, href: music.profile }] : []),
   { role: 'Cinematography', name: `${site.nickname}, one frame at a time` },
   { role: 'Source code', name: github ? `github.com/${github.handle}` : 'GitHub', href: github?.url },
   { role: 'Typefaces', name: 'Archivo, Instrument Serif, JetBrains Mono' },

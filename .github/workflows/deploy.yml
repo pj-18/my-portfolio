@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-  # Rebuild every morning so new Letterboxd diary entries show up on their own.
+  # Rebuild every morning so new Letterboxd diary entries and Last.fm charts show up on their own.
   schedule:
     - cron: '17 3 * * *'
   workflow_dispatch:
@@ -33,11 +33,14 @@ jobs:
 
       - run: npm ci
 
-      # `npm run build` pulls the latest Letterboxd feed first, then builds.
+      # `npm run build` pulls the latest Letterboxd feed and Last.fm charts first, then builds.
+      # LASTFM_API_KEY is a repository secret (Settings → Secrets and variables → Actions).
+      # Without it the build still passes; the soundtrack keeps its last committed data.
       - run: npm run build
         env:
           SITE_URL: ${{ steps.pages.outputs.origin }}
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
 
       - uses: actions/upload-pages-artifact@v4
         with:

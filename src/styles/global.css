@@ -18,6 +18,8 @@
   --amber: #ffb627;
   --red: #ff5a3c;
   --green: #5fdc8f;
+  /* the cyan dye of a 35mm print's soundtrack */
+  --cyan: #56d2ee;
 
   --ticket: #f2e4c6;
   --ticket-ink: #231c13;
@@ -221,6 +223,9 @@ button {
 .accent-red {
   --accent: var(--red);
 }
+.accent-cyan {
+  --accent: var(--cyan);
+}
 
 .pill {
   display: inline-flex;
@@ -344,6 +349,12 @@ button {
     radial-gradient(70% 40% at 100% 100%, rgb(255 90 60 / 0.06), transparent 70%);
 }
 
+.ambient .a-music {
+  background:
+    radial-gradient(110% 58% at 50% 0%, rgb(86 210 238 / 0.13), transparent 64%),
+    radial-gradient(70% 45% at 0% 100%, rgb(106 76 255 / 0.08), transparent 70%);
+}
+
 .ambient .a-darkroom {
   background:
     radial-gradient(120% 70% at 50% 0%, rgb(255 46 20 / 0.3), transparent 70%),
@@ -357,6 +368,7 @@ button {
 body[data-scene='top'] .a-top,
 body[data-scene='work'] .a-work,
 body[data-scene='films'] .a-films,
+body[data-scene='music'] .a-music,
 body[data-scene='darkroom'] .a-darkroom,
 body[data-scene='credits'] .a-credits {
   opacity: 1;
@@ -512,6 +524,25 @@ body[data-scene='credits'] .a-credits {
 .filmband--safelight .filmband__word {
   color: #ffd9cf;
   text-shadow: 0 0 24px rgb(255 60 30 / 0.35);
+}
+
+/* the music reel: a print's optical soundtrack, the waveform printed beside the picture */
+.filmband--optical {
+  background: linear-gradient(#071419, #050e12);
+  border-color: rgb(86 210 238 / 0.25);
+  --holes: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='26' height='10'><rect x='6' y='0.5' width='14' height='9' rx='2.2' fill='%2356d2ee' fill-opacity='.35'/></svg>");
+}
+
+.filmband--optical .filmband__word {
+  color: #e2f7fc;
+  text-shadow: 0 0 24px rgb(86 210 238 / 0.3);
+}
+
+.filmband--optical .filmband__track::after {
+  bottom: -21px;
+  height: 14px;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='14'><path fill='%2356d2ee' fill-opacity='.7' d='M0 5.1L2 3.6L4 1.5L6 1.9L8 2.1L10 5.5L12 1.9L14 1.9L16 0.5L18 2.9L20 3.5L22 2.5L24 0.5L26 0.9L28 0.5L30 5.9L32 1.3L34 2.6L36 1.0L38 4.5L40 4.8L42 4.3L44 2.2L46 3.2L48 2.7L50 5.6L52 2.1L54 1.8L56 0.5L58 3.2L60 4.7L62 2.5L64 0.5L66 0.5L68 0.8L70 4.1L72 1.0L74 0.5L76 0.5L78 2.2L80 5.2L82 3.2L84 2.1L86 2.0L88 3.7L90 5.1L90 8.9L88 10.3L86 12.0L84 11.9L82 10.8L80 8.8L78 11.8L76 13.5L74 13.5L72 13.0L70 9.9L68 13.2L66 13.5L64 13.5L62 11.5L60 9.3L58 10.8L56 13.5L54 12.2L52 11.9L50 8.4L48 11.3L46 10.8L44 11.8L42 9.7L40 9.2L38 9.5L36 13.0L34 11.4L32 12.7L30 8.1L28 13.5L26 13.1L24 13.5L22 11.5L20 10.5L18 11.1L16 13.5L14 12.1L12 12.1L10 8.5L8 11.9L6 12.1L4 12.5L2 10.4L0 8.9Z'/></svg>")
+    0 0 / 90px 14px repeat-x;
 }
 
 /* ---------- motion preferences ---------- */

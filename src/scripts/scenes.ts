@@ -1,0 +1,91 @@
+export {};
+
+/**
+ * Page-wide choreography: which reel is on screen (dock + scene lighting),
+ * the runtime counter, scroll reveals and the test runner.
+ */
+const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const pad = (n: number) => String(n).padStart(2, '0');
+
+/* ---- the reel in the middle of the screen sets the lighting and the dock ---- */
+const sections = [...document.querySelectorAll<HTMLElement>('section[data-scene]')];
+const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-nav]')];
+
+const setScene = (scene: string) => {
+  document.body.dataset.scene = scene;
+  for (const link of links) {
+    if (link.dataset.nav === scene) link.setAttribute('aria-current', 'true');
+    else link.removeAttribute('aria-current');
+  }
+};
+
+const sceneWatcher = new IntersectionObserver(
+  (entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) setScene((entry.target as HTMLElement).dataset.scene ?? 'top');
+    }
+  },
+  { rootMargin: '-45% 0px -54% 0px' },
+);
+sections.forEach((section) => sceneWatcher.observe(section));
+
+/* ---- runtime counter + progress bar ---- */
+const runtime = document.querySelector<HTMLElement>('[data-runtime]');
+const progress = document.querySelector<HTMLElement>('[data-progress]');
+const RUNTIME = 2 * 3600 + 7 * 60;
+let queued = false;
+
+const tick = () => {
+  queued = false;
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  const share = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+  if (progress) progress.style.transform = `scaleX(${share})`;
+  if (runtime) {
+    const t = Math.round(share * RUNTIME);
+    runtime.textContent = `${pad(Math.floor(t / 3600))}:${pad(Math.floor((t % 3600) / 60))}:${pad(t % 60)}`;
+  }
+};
+
+const queue = () => {
+  if (queued) return;
+  queued = true;
+  requestAnimationFrame(tick);
+};
+window.addEventListener('scroll', queue, { passive: true });
+window.addEventListener('resize', queue);
+tick();
+
+/* ---- reveal on scroll ---- */
+const reveals = [...document.querySelectorAll<HTMLElement>('.reveal')];
+if (calm || !('IntersectionObserver' in window)) {
+  reveals.forEach((el) => el.classList.add('is-in'));
+} else {
+  const revealer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        entry.target.classList.add('is-in');
+        revealer.unobserve(entry.target);
+      }
+    },
+    { rootMargin: '0px 0px -6% 0px', threshold: 0.08 },
+  );
+  reveals.forEach((el) => revealer.observe(el));
+}
+
+/* ---- the test runner runs once it is on screen ---- */
+const runner = document.querySelector<HTMLElement>('[data-runner]');
+if (runner) {
+  if (calm) runner.classList.add('is-run');
+  else {
+    const watcher = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        runner.classList.add('is-run');
+        watcher.disconnect();
+      },
+      { threshold: 0.4 },
+    );
+    watcher.observe(runner);
+  }
+}

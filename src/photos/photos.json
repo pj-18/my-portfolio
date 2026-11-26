@@ -1,0 +1,52 @@
+{
+  "01-last-light.jpg": {
+    "title": "Last light",
+    "place": "The ridge road",
+    "alt": "Layered hills in silhouette under an orange and violet sunset"
+  },
+  "02-blue-hour.jpg": {
+    "title": "Blue hour",
+    "place": "Old city rooftops",
+    "alt": "A city skyline at dusk with lit windows and a thin crescent moon"
+  },
+  "03-shoreline.jpg": {
+    "title": "Shoreline",
+    "place": "Somewhere on the east coast",
+    "alt": "A calm sea at sunrise with light glittering on the water"
+  },
+  "04-pines-in-fog.jpg": {
+    "title": "Pines in fog",
+    "place": "Hill station, early",
+    "alt": "Rows of pine trees fading into morning fog"
+  },
+  "05-night-market.jpg": {
+    "title": "Night market",
+    "place": "Under the string lights",
+    "alt": "Out-of-focus market lights glowing in warm and neon colours"
+  },
+  "06-window-light.jpg": {
+    "title": "Window light",
+    "place": "Home, 4 pm",
+    "alt": "Warm afternoon light falling through a window onto a dark wall"
+  },
+  "07-dunes.jpg": {
+    "title": "Dunes",
+    "place": "Desert camp",
+    "alt": "Sand dunes catching golden-hour light under a pale sky"
+  },
+  "08-monsoon-street.jpg": {
+    "title": "Monsoon street",
+    "place": "After the rain",
+    "alt": "Neon signs reflected on a wet street at night with falling rain"
+  },
+  "09-waxing-moon.jpg": {
+    "title": "Waxing gibbous",
+    "place": "From the terrace",
+    "alt": "A waxing gibbous moon against a starry black sky"
+  },
+  "10-red-door.jpg": {
+    "title": "The red door",
+    "place": "A lane worth walking",
+    "alt": "A red panelled door in a cream wall with a potted plant beside it"
+  }
+}

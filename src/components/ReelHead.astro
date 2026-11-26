@@ -1,0 +1,45 @@
+---
+/**
+ * Section title: a film strip (or a bulb-lit marquee sign, or film under a safelight)
+ * with the title rolling through it. The real heading stays static for screen readers.
+ */
+interface Props {
+  id: string;
+  number: string;
+  title: string;
+  kicker: string;
+  accent: 'green' | 'amber' | 'red';
+  symbol?: string;
+  variant?: 'film' | 'sign' | 'safelight';
+  dir?: 'ltr' | 'rtl';
+  speed?: number;
+}
+
+const { id, number, title, kicker, accent, symbol = '✳', variant = 'film', dir = 'ltr', speed = 42 } = Astro.props;
+const words = Array.from({ length: 6 }, () => title);
+---
+
+<header class:list={['reel-head', `accent-${accent}`]}>
+  <div class="reel-head__meta wrap">
+    <p class="eyebrow"><b>Reel {number}</b> / {kicker}</p>
+    <slot name="aside" />
+  </div>
+  <h2 id={id} class="sr-only">{title}</h2>
+  <div
+    class:list={['filmband', variant !== 'film' && `filmband--${variant}`]}
+    data-dir={dir}
+    style={`--speed:${speed}s`}
+    aria-hidden="true"
+  >
+    <div class="filmband__track">
+      {
+        words.map((word) => (
+          <span class="filmband__word">
+            {word}
+            <i>{symbol}</i>
+          </span>
+        ))
+      }
+    </div>
+  </div>
+</header>

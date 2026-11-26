@@ -1,0 +1,1471 @@
+---
+import ReelHead from './ReelHead.astro';
+import Stars from './Stars.astro';
+import Icon from './Icon.astro';
+import { site } from '../site.config';
+import {
+  diary,
+  entries,
+  filmUrl,
+  histogram,
+  histogramPeak,
+  lists,
+  oneLiners,
+  pick,
+  poster,
+  stats,
+  verdict,
+} from '../lib/films';
+import { dayMonthYear, longDate, pad, ratingLabel, shortDate } from '../lib/util';
+import { starsInSvg, starsMarkup } from '../lib/stars';
+
+const handle = diary.username || site.letterboxd;
+const profile = diary.profile;
+const pickPoster = pick ? poster(pick.poster) : null;
+const rows = oneLiners.length >= 8 ? [oneLiners.filter((_, i) => i % 2 === 0), oneLiners.filter((_, i) => i % 2 === 1)] : [oneLiners];
+
+/* festival laurels around "PJ's pick", drawn from a circle */
+function laurel(mirror: boolean) {
+  const cx = 100;
+  const cy = 64;
+  const r = 50;
+  const leaves: string[] = [];
+  for (let i = 0; i < 9; i++) {
+    const theta = ((112 + i * 15.5) * Math.PI) / 180;
+    const x = cx + r * Math.cos(theta);
+    const y = cy + r * Math.sin(theta);
+    const along = (theta * 180) / Math.PI + 90;
+    for (const tilt of [-28, 28]) {
+      const offset = tilt < 0 ? -3.2 : 3.2;
+      const lx = x + offset * Math.cos(theta);
+      const ly = y + offset * Math.sin(theta);
+      const angle = along + tilt;
+      const px = mirror ? 2 * cx - lx : lx;
+      const deg = mirror ? 180 - angle : angle;
+      leaves.push(
+        `<ellipse cx="${px.toFixed(1)}" cy="${ly.toFixed(1)}" rx="8.2" ry="3.1" transform="rotate(${deg.toFixed(1)} ${px.toFixed(1)} ${ly.toFixed(1)})"/>`,
+      );
+    }
+  }
+  const a0 = (112 * Math.PI) / 180;
+  const a1 = ((112 + 8 * 15.5) * Math.PI) / 180;
+  const sx = cx + r * Math.cos(a0);
+  const ex = cx + r * Math.cos(a1);
+  const stem = mirror
+    ? `<path d="M${(2 * cx - sx).toFixed(1)} ${(cy + r * Math.sin(a0)).toFixed(1)} A${r} ${r} 0 0 0 ${(2 * cx - ex).toFixed(1)} ${(cy + r * Math.sin(a1)).toFixed(1)}" fill="none" stroke="currentColor" stroke-width="1.6"/>`
+    : `<path d="M${sx.toFixed(1)} ${(cy + r * Math.sin(a0)).toFixed(1)} A${r} ${r} 0 0 1 ${ex.toFixed(1)} ${(cy + r * Math.sin(a1)).toFixed(1)}" fill="none" stroke="currentColor" stroke-width="1.6"/>`;
+  return stem + leaves.join('');
+}
+const laurels = laurel(false) + laurel(true);
+---
+
+<section id="films" class="reel films" data-scene="films" aria-labelledby="films-title">
+  <ReelHead
+    id="films-title"
+    number="02"
+    title="The film diary"
+    kicker="Letterboxd"
+    accent="amber"
+    symbol="★"
+    variant="sign"
+    dir="rtl"
+    speed={48}
+  >
+    <a slot="aside" class="eyebrow films__handle" href={profile} target="_blank" rel="noopener noreferrer">
+      @{handle} ↗
+    </a>
+  </ReelHead>
+
+  {
+    entries.length === 0 ? (
+      <div class="wrap films__empty">
+        <p class="lede">The projector is warming up. Until the diary syncs, the reviews live on Letterboxd.</p>
+        <a class="pill pill--solid accent-amber" href={profile} target="_blank" rel="noopener noreferrer">
+          Open the diary <Icon name="arrow" />
+        </a>
+      </div>
+    ) : (
+      <Fragment>
+        <div class="wrap films__intro">
+          <p class="lede reveal">
+            Every film I watch gets logged, rated out of five and, more often than not, summed up in a sentence.
+            Here's the latest from the diary.
+          </p>
+        </div>
+
+        {/* ---- box office ---- */}
+        <div class="wrap boxoffice reveal">
+          <dl class="tally">
+            <div>
+              <dt>Films logged</dt>
+              <dd>{stats.logged}</dd>
+            </div>
+            <div>
+              <dt>Reviews</dt>
+              <dd>{stats.reviews}</dd>
+            </div>
+            <div>
+              <dt>Hearts</dt>
+              <dd>{stats.liked}</dd>
+            </div>
+            <div>
+              <dt>Rewatches</dt>
+              <dd>{stats.rewatches}</dd>
+            </div>
+          </dl>
+
+          {stats.average != null && (
+            <div class="ratings">
+              <p class="ratings__avg">
+                <span class="ratings__num">{stats.average.toFixed(1)}</span>
+                <span class="ratings__label">
+                  average rating
+                  <br />
+                  <em>{verdict(stats.average)}</em>
+                </span>
+              </p>
+              <div class="histogram" role="group" aria-label="Filter the diary by rating">
+                {histogram.map((bucket) => (
+                  <button
+                    type="button"
+                    class="bar"
+                    data-rating={bucket.rating}
+                    aria-pressed="false"
+                    aria-label={`${bucket.count} ${bucket.count === 1 ? 'film' : 'films'} rated ${bucket.rating} out of 5`}
+                    style={`--h:${Math.max(0.04, bucket.count / histogramPeak)}`}
+                    disabled={bucket.count === 0}
+                  >
+                    <span class="bar__count">{bucket.count}</span>
+                    <span class="bar__fill" />
+                  </button>
+                ))}
+              </div>
+              <div class="histogram__axis" aria-hidden="true">
+                <span set:html={starsMarkup(0.5)} />
+                <span class="histogram__hint">tap a bar to filter</span>
+                <span set:html={starsMarkup(5)} />
+              </div>
+            </div>
+          )}
+
+          {stats.since && (
+            <p class="boxoffice__note">
+              Counting the last {stats.logged} diary entries, back to {dayMonthYear(stats.since)}.
+            </p>
+          )}
+        </div>
+
+        {/* ---- the diary strip ---- */}
+        <div class="diary-block">
+          <div class="wrap diary-block__head">
+            <h3 class="sub reveal">Latest screenings</h3>
+            <div class="diary-block__tools">
+              <p class="diary-block__status" aria-live="polite" data-diary-status>
+                {entries.length} films, newest first
+              </p>
+              <button type="button" class="diary-block__clear" data-diary-clear hidden>
+                Show all
+              </button>
+            </div>
+          </div>
+
+          <div class="diary-scroller">
+            <ol class="diary" data-diary>
+              {entries.map((entry, i) => {
+                const art = poster(entry.poster);
+                return (
+                  <li class="stub" data-rating={entry.rating ?? ''}>
+                    <button type="button" class="stub__btn" data-entry={entry.id} aria-haspopup="dialog">
+                      <span class="stub__poster" aria-hidden="true">
+                        {art ? (
+                          <img
+                            src={art.src}
+                            srcset={art.srcset}
+                            sizes="(min-width: 48rem) 190px, 40vw"
+                            width="300"
+                            height="450"
+                            alt=""
+                            loading={i < 4 ? 'eager' : 'lazy'}
+                            decoding="async"
+                          />
+                        ) : (
+                          <span class="stub__blank">{entry.title}</span>
+                        )}
+                        <span class="stub__flags">
+                          {entry.review.length > 0 && <span class="stub__flag stub__flag--review">“</span>}
+                          {entry.liked && (
+                            <span class="stub__flag stub__flag--liked">
+                              <Icon name="heart" stroke={2.2} />
+                            </span>
+                          )}
+                          {entry.rewatch && (
+                            <span class="stub__flag">
+                              <Icon name="rewatch" stroke={2.2} />
+                            </span>
+                          )}
+                        </span>
+                      </span>
+                      <span class="stub__ticket" aria-hidden="true">
+                        <span class="stub__title">{entry.title}</span>
+                        <span class="stub__meta">
+                          <span>{shortDate(entry.watched)}</span>
+                          {entry.rating != null ? (
+                            <span class="stub__stars" set:html={starsMarkup(entry.rating)} />
+                          ) : (
+                            <span class="stub__stars">—</span>
+                          )}
+                        </span>
+                      </span>
+                      <span class="sr-only">
+                        {entry.title}
+                        {entry.year ? ` (${entry.year})` : ''}. {ratingLabel(entry.rating)}. Watched{' '}
+                        {longDate(entry.watched)}.{entry.liked ? ' Liked.' : ''}
+                        {entry.rewatch ? ' Rewatch.' : ''}
+                        {entry.review.length ? ' Has a review.' : ''}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+
+          <div class="wrap diary-block__nav" aria-hidden="true">
+            <button type="button" class="round" data-diary-prev tabindex="-1">
+              <Icon name="left" size={18} />
+            </button>
+            <button type="button" class="round" data-diary-next tabindex="-1">
+              <Icon name="right" size={18} />
+            </button>
+          </div>
+        </div>
+
+        {entries.map((entry) => {
+          const art = poster(entry.poster);
+          return (
+            <template id={`entry-${entry.id}`}>
+              <article class="entry">
+                {art && (
+                  <img
+                    class="entry__poster"
+                    src={art.src}
+                    srcset={art.srcset}
+                    sizes="(min-width: 48rem) 200px, 36vw"
+                    width="300"
+                    height="450"
+                    alt={`Poster for ${entry.title}`}
+                  />
+                )}
+                <header class="entry__head">
+                  <p class="entry__when">
+                    {entry.kind === 'review' ? 'Review' : 'Diary entry'} · {longDate(entry.watched)}
+                  </p>
+                  <h3 class="entry__title" id="sheet-title">
+                    {entry.title} {entry.year && <span>{entry.year}</span>}
+                  </h3>
+                  <p class="entry__badges">
+                    <Stars rating={entry.rating} class="entry__stars" />
+                    {entry.liked && (
+                      <span class="entry__badge entry__badge--liked">
+                        <Icon name="heart" stroke={2.2} /> Liked
+                      </span>
+                    )}
+                    {entry.rewatch && (
+                      <span class="entry__badge">
+                        <Icon name="rewatch" stroke={2.2} /> Rewatch
+                      </span>
+                    )}
+                  </p>
+                </header>
+                <div class="entry__review">
+                  {entry.spoilers && <p class="entry__spoiler">Contains spoilers.</p>}
+                  {entry.review.length ? (
+                    entry.review.map((paragraph) => <p>{paragraph}</p>)
+                  ) : (
+                    <p class="entry__none">No review, just the stars.</p>
+                  )}
+                </div>
+                <footer class="entry__links">
+                  <a class="pill pill--solid accent-amber" href={entry.url} target="_blank" rel="noopener noreferrer">
+                    On Letterboxd <Icon name="arrow" />
+                  </a>
+                  <a class="pill" href={filmUrl(entry)} target="_blank" rel="noopener noreferrer">
+                    Film page <Icon name="arrow" />
+                  </a>
+                </footer>
+              </article>
+            </template>
+          );
+        })}
+
+        {/* ---- one-liners ---- */}
+        {oneLiners.length > 0 && (
+          <div class="quotes" data-quotes>
+            <div class="wrap quotes__head">
+              <h3 class="sub reveal">The one-liners</h3>
+              <button type="button" class="pill quotes__toggle" data-quotes-toggle aria-pressed="false">
+                <Icon name="pause" size={14} />
+                <span data-quotes-label>Pause</span>
+              </button>
+            </div>
+            <ul class="sr-only">
+              {oneLiners.map(({ quote, entry }) => (
+                <li>
+                  “{quote}”, on {entry.title}. {ratingLabel(entry.rating)}.
+                </li>
+              ))}
+            </ul>
+            {rows.map((row, r) => (
+              <div class="quotes__row" data-dir={r % 2 ? 'rtl' : 'ltr'} style={`--speed:${54 + r * 12}s`} aria-hidden="true">
+                <div class="quotes__track">
+                  {[...row, ...row].map(({ quote, entry }) => (
+                    <span class="quote">
+                      <span class="quote__text">“{quote}”</span>
+                      <span class="quote__meta">
+                        <span class="quote__stars" set:html={starsMarkup(entry.rating)} />
+                        {entry.title}
+                      </span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ---- critic's pick ---- */}
+        {pick && (
+          <article class="wrap pick" aria-labelledby="pick-title">
+            <div class="pick__poster reveal">
+              {pickPoster && (
+                <img
+                  src={pickPoster.src}
+                  srcset={pickPoster.srcset}
+                  sizes="(min-width: 64rem) 380px, (min-width: 48rem) 40vw, 76vw"
+                  width="300"
+                  height="450"
+                  alt={`Poster for ${pick.title}`}
+                  loading="lazy"
+                  decoding="async"
+                />
+              )}
+              <svg class="laurels" viewBox="0 0 200 128" aria-hidden="true" focusable="false">
+                <g fill="currentColor" set:html={laurels} />
+                <text x="100" y="52" text-anchor="middle" class="laurels__small">
+                  PJ's pick
+                </text>
+                {pick.rating != null && <g fill="currentColor" set:html={starsInSvg(pick.rating, 100, 64.5, 13.5, 1.6)} />}
+                <text x="100" y="96" text-anchor="middle" class="laurels__small">
+                  {pick.watched.slice(0, 4)}
+                </text>
+              </svg>
+            </div>
+            <div class="pick__copy">
+              <p class="eyebrow reveal">Critic's pick · watched {longDate(pick.watched)}</p>
+              <h3 id="pick-title" class="pick__title reveal">
+                {pick.title} {pick.year && <span>({pick.year})</span>}
+              </h3>
+              <blockquote class="pick__quote reveal" cite={pick.url}>
+                {pick.review.map((paragraph, i) => (
+                  <p class:list={[i === 0 && 'pick__lead']}>{i === 0 ? `“${paragraph}”` : paragraph}</p>
+                ))}
+              </blockquote>
+              <p class="pick__sign reveal">
+                <Stars rating={pick.rating} /> <span>— {site.nickname}</span>
+              </p>
+              <a class="pill reveal" href={pick.url} target="_blank" rel="noopener noreferrer">
+                Read it on Letterboxd <Icon name="arrow" />
+              </a>
+            </div>
+          </article>
+        )}
+
+        {/* ---- lists as cinema programmes ---- */}
+        {lists.length > 0 && (
+          <div class="programmes">
+            <div class="wrap">
+              <h3 class="sub reveal">
+                Programmes <span>{diary.lists.length} lists</span>
+              </h3>
+            </div>
+            <ol class="programmes__list">
+              {lists.map((list, i) => (
+                <li class="programme reveal" style={`--delay:${(i % 3) * 0.08}s`}>
+                  <a href={list.url} target="_blank" rel="noopener noreferrer">
+                    <p class="programme__no">
+                      Programme {pad(i + 1)} · {list.total} {list.total === 1 ? 'film' : 'films'}
+                      {list.ranked ? ' · ranked' : ''}
+                    </p>
+                    <h4 class="programme__title">{list.title}</h4>
+                    {list.description && <p class="programme__desc">{list.description}</p>}
+                    <ol class:list={['programme__films', list.ranked && 'is-ranked']}>
+                      {list.films.slice(0, 5).map((film, k) => (
+                        <li>
+                          <span class="programme__n">{list.ranked ? pad(k + 1) : '·'}</span>
+                          <span class="programme__film">{film.title}</span>
+                        </li>
+                      ))}
+                    </ol>
+                    <p class="programme__more">
+                      {list.total > 5 ? `+ ${list.total - 5} more` : 'See the list'} <Icon name="arrow" />
+                    </p>
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+
+        <div class="wrap films__cta reveal">
+          <a class="pill pill--solid accent-amber" href={profile} target="_blank" rel="noopener noreferrer">
+            Follow @{handle} on Letterboxd <Icon name="arrow" />
+          </a>
+        </div>
+
+        <dialog class="sheet" data-sheet aria-labelledby="sheet-title">
+          <div class="sheet__grip" aria-hidden="true" />
+          <button type="button" class="sheet__close round" data-sheet-close aria-label="Close">
+            <Icon name="close" size={18} />
+          </button>
+          <div class="sheet__body" data-sheet-body />
+        </dialog>
+      </Fragment>
+    )
+  }
+</section>
+
+<style>
+  .lede {
+    max-width: 38ch;
+    font-size: clamp(1.2rem, 4.6vw, 1.7rem);
+    font-weight: 450;
+    line-height: 1.35;
+    color: var(--paper-dim);
+    text-wrap: pretty;
+  }
+
+  .films__handle {
+    color: var(--amber);
+    text-decoration: none;
+  }
+
+  .films__empty {
+    display: grid;
+    gap: 1.5rem;
+    justify-items: start;
+  }
+
+  .sub {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    font-family: var(--f-display);
+    font-size: clamp(2.2rem, 10vw, 4rem);
+    font-stretch: 62%;
+    font-weight: 820;
+    line-height: 0.9;
+    text-transform: uppercase;
+  }
+
+  .sub span {
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+  }
+
+  .round {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--line-2);
+    border-radius: 50%;
+    background: rgb(22 20 15 / 0.8);
+    transition:
+      border-color 0.2s,
+      background-color 0.2s;
+  }
+
+  .round:hover {
+    border-color: var(--paper);
+  }
+
+  /* ---------- box office ---------- */
+
+  .boxoffice {
+    display: grid;
+    gap: 1.75rem;
+    margin-top: 2.5rem;
+    padding: 1.25rem;
+    border: 1px solid rgb(255 182 39 / 0.18);
+    border-radius: var(--radius);
+    background:
+      radial-gradient(120% 90% at 0% 0%, rgb(255 182 39 / 0.07), transparent 60%),
+      var(--ink-2);
+  }
+
+  .tally {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .tally div {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.4rem;
+  }
+
+  .tally dt {
+    font-family: var(--f-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .tally dd {
+    font-family: var(--f-display);
+    font-size: clamp(2.4rem, 11vw, 4rem);
+    font-stretch: 62%;
+    font-weight: 820;
+    line-height: 0.85;
+    color: var(--amber);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ratings {
+    display: grid;
+    gap: 0.9rem;
+    padding-top: 1.5rem;
+    border-top: 1px dashed var(--line-2);
+  }
+
+  .ratings__avg {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
+  .ratings__num {
+    font-family: var(--f-display);
+    font-size: 3.6rem;
+    font-stretch: 62%;
+    font-weight: 820;
+    line-height: 0.8;
+  }
+
+  .ratings__label {
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    line-height: 1.5;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .ratings__label em {
+    font-family: var(--f-serif);
+    font-size: 1.45rem;
+    font-style: italic;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--paper);
+  }
+
+  .histogram {
+    display: grid;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    align-items: end;
+    gap: 4px;
+    height: 7rem;
+  }
+
+  .bar {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+    min-height: 44px;
+    padding: 0;
+  }
+
+  .bar__fill {
+    width: 100%;
+    height: calc(var(--h) * (100% - 1.2rem));
+    min-height: 3px;
+    border-radius: 3px 3px 1px 1px;
+    background: linear-gradient(var(--amber), rgb(255 182 39 / 0.55));
+    transition:
+      background 0.25s,
+      opacity 0.25s,
+      transform 0.25s var(--ease-spring);
+    transform-origin: bottom;
+  }
+
+  .bar__count {
+    font-family: var(--f-mono);
+    font-size: 0.62rem;
+    color: var(--muted);
+    transition: color 0.25s;
+  }
+
+  .bar:disabled {
+    cursor: default;
+  }
+
+  .bar:disabled .bar__fill {
+    background: var(--ink-4);
+  }
+
+  .bar:disabled .bar__count {
+    opacity: 0.4;
+  }
+
+  .histogram:has(.bar[aria-pressed='true']) .bar:not([aria-pressed='true']) .bar__fill {
+    opacity: 0.3;
+  }
+
+  .bar[aria-pressed='true'] .bar__fill {
+    background: linear-gradient(var(--paper), var(--amber));
+  }
+
+  .bar[aria-pressed='true'] .bar__count {
+    color: var(--paper);
+  }
+
+  .bar:not(:disabled):hover .bar__fill {
+    transform: scaleY(1.04);
+  }
+
+  .histogram__axis {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    color: var(--amber);
+    font-size: 0.8rem;
+  }
+
+  .histogram__hint {
+    font-family: var(--f-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .boxoffice__note {
+    font-family: var(--f-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    color: var(--dim);
+  }
+
+  /* ---------- diary strip ---------- */
+
+  .diary-block {
+    margin-top: clamp(3.5rem, 10vw, 6rem);
+  }
+
+  .diary-block__head {
+    display: grid;
+    gap: 0.6rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .diary-block__tools {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 2.25rem;
+  }
+
+  .diary-block__status {
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .diary-block__clear {
+    padding: 0.5rem 0.9rem;
+    border: 1px solid rgb(255 182 39 / 0.5);
+    border-radius: 999px;
+    font-family: var(--f-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--amber);
+  }
+
+  .diary-scroller {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+
+  .diary-scroller::-webkit-scrollbar {
+    display: none;
+  }
+
+  .diary {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 40vw;
+    gap: 0.75rem;
+    width: max-content;
+    padding: 0.25rem var(--gutter) 1rem;
+  }
+
+  .stub {
+    scroll-snap-align: start;
+  }
+
+  .stub[hidden] {
+    display: none;
+  }
+
+  .stub__btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    transition: transform 0.35s var(--ease-spring);
+  }
+
+  .stub__btn:hover {
+    transform: translateY(-4px) rotate(-0.6deg);
+  }
+
+  .stub__btn:active {
+    transform: scale(0.98);
+  }
+
+  .stub__poster {
+    position: relative;
+    display: block;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    border-radius: 8px 8px 3px 3px;
+    background: var(--ink-3);
+    box-shadow: 0 16px 30px -18px rgb(0 0 0 / 0.9);
+  }
+
+  .stub__poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .stub__blank {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    padding: 1rem;
+    font-family: var(--f-display);
+    font-size: 1.5rem;
+    font-stretch: 62%;
+    font-weight: 800;
+    line-height: 1;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--paper-dim);
+  }
+
+  .stub__flags {
+    position: absolute;
+    top: 0.45rem;
+    right: 0.45rem;
+    display: flex;
+    gap: 0.3rem;
+  }
+
+  .stub__flag {
+    display: grid;
+    place-items: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    background: rgb(13 12 10 / 0.72);
+    color: var(--paper);
+    font-size: 0.8rem;
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+  }
+
+  .stub__flag--liked {
+    color: #ff7a8a;
+  }
+
+  .stub__flag--review {
+    font-family: var(--f-serif);
+    font-size: 1.35rem;
+    line-height: 1;
+    padding-top: 0.45rem;
+    color: var(--amber);
+  }
+
+  .stub__ticket {
+    position: relative;
+    display: grid;
+    gap: 0.2rem;
+    margin-top: 2px;
+    padding: 0.6rem 0.65rem 0.65rem;
+    border-radius: 3px 3px 8px 8px;
+    background: var(--ticket);
+    color: var(--ticket-ink);
+    -webkit-mask:
+      radial-gradient(circle at 0 0, transparent 0.42rem, #000 calc(0.42rem + 0.5px)) left / 51% 100% no-repeat,
+      radial-gradient(circle at 100% 0, transparent 0.42rem, #000 calc(0.42rem + 0.5px)) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle at 0 0, transparent 0.42rem, #000 calc(0.42rem + 0.5px)) left / 51% 100% no-repeat,
+      radial-gradient(circle at 100% 0, transparent 0.42rem, #000 calc(0.42rem + 0.5px)) right / 51% 100% no-repeat;
+  }
+
+  .stub__ticket::before {
+    content: '';
+    position: absolute;
+    inset: 0 0.6rem auto;
+    border-top: 2px dashed rgb(35 28 19 / 0.25);
+  }
+
+  .stub__title {
+    overflow: hidden;
+    font-size: 0.86rem;
+    font-weight: 650;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .stub__meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.4rem;
+    font-family: var(--f-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .stub__stars {
+    flex: none;
+    color: #b0560f;
+    font-size: 0.72rem;
+    line-height: 1;
+  }
+
+  .diary-block__nav {
+    display: none;
+  }
+
+  /* ---------- entry sheet ---------- */
+
+  .sheet {
+    width: 100%;
+    max-width: 100%;
+    max-height: min(88dvh, 52rem);
+    margin: auto 0 0;
+    padding: 0;
+    border: 0;
+    border-top: 1px solid var(--line-2);
+    border-radius: 22px 22px 0 0;
+    background: var(--ink-2);
+    color: var(--paper);
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  .sheet[open] {
+    animation: sheet-up 0.42s var(--ease-out);
+  }
+
+  .sheet::backdrop {
+    background: rgb(5 4 3 / 0.72);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+  }
+
+  @keyframes sheet-up {
+    from {
+      transform: translateY(40%);
+      opacity: 0;
+    }
+  }
+
+  .sheet__grip {
+    width: 2.75rem;
+    height: 4px;
+    margin: 0.6rem auto 0;
+    border-radius: 2px;
+    background: var(--line-2);
+  }
+
+  .sheet__close {
+    position: absolute;
+    top: 0.9rem;
+    right: 0.9rem;
+    z-index: 1;
+  }
+
+  .sheet__body {
+    padding: 1.1rem var(--gutter) calc(1.75rem + env(safe-area-inset-bottom));
+  }
+
+  .sheet :global(.entry) {
+    display: grid;
+    grid-template-columns: 36vw minmax(0, 1fr);
+    gap: 1.1rem 1rem;
+    align-items: start;
+  }
+
+  .sheet :global(.entry__poster) {
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 16px 34px -14px rgb(0 0 0 / 0.9);
+  }
+
+  .sheet :global(.entry__head) {
+    display: grid;
+    gap: 0.55rem;
+    padding-right: 2.5rem;
+  }
+
+  .sheet :global(.entry__when) {
+    font-family: var(--f-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .sheet :global(.entry__title) {
+    font-family: var(--f-display);
+    font-size: clamp(2rem, 9vw, 3.2rem);
+    font-stretch: 62%;
+    font-weight: 820;
+    line-height: 0.9;
+    text-transform: uppercase;
+  }
+
+  .sheet :global(.entry__title span) {
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .sheet :global(.entry__badges) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+  }
+
+  .sheet :global(.entry__stars) {
+    font-size: 1.2rem;
+  }
+
+  .sheet :global(.entry__badge) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-family: var(--f-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--paper-dim);
+  }
+
+  .sheet :global(.entry__badge--liked) {
+    color: #ff7a8a;
+  }
+
+  .sheet :global(.entry__review) {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: 0.8rem;
+    font-family: var(--f-serif);
+    font-size: 1.45rem;
+    line-height: 1.3;
+    white-space: pre-line;
+  }
+
+  .sheet :global(.entry__none) {
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .sheet :global(.entry__spoiler) {
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--red);
+  }
+
+  .sheet :global(.entry__links) {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+  }
+
+  /* ---------- one-liners ---------- */
+
+  .quotes {
+    margin-top: clamp(3.5rem, 10vw, 6rem);
+  }
+
+  .quotes__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .quotes__toggle {
+    min-height: 40px;
+    padding-inline: 0.95rem;
+  }
+
+  .quotes__row {
+    overflow: hidden;
+    padding-block: 0.4rem;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  }
+
+  .quotes__track {
+    display: flex;
+    gap: 0.75rem;
+    width: max-content;
+    padding-right: 0.75rem;
+    animation: marquee var(--speed, 56s) linear infinite;
+  }
+
+  .quotes__row[data-dir='rtl'] .quotes__track {
+    animation-direction: reverse;
+  }
+
+  .quotes:hover .quotes__track,
+  .quotes[data-paused] .quotes__track {
+    animation-play-state: paused;
+  }
+
+  .quote {
+    display: grid;
+    gap: 0.5rem;
+    max-width: 19rem;
+    padding: 1rem 1.15rem 0.95rem;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--ink-2);
+  }
+
+  .quote__text {
+    font-family: var(--f-serif);
+    font-size: 1.45rem;
+    font-style: italic;
+    line-height: 1.15;
+    color: var(--paper);
+  }
+
+  .quote__meta {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    overflow: hidden;
+    font-family: var(--f-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .quote__stars {
+    flex: none;
+    color: var(--amber);
+    font-size: 0.8rem;
+    line-height: 1;
+  }
+
+  /* ---------- critic's pick ---------- */
+
+  .pick {
+    display: grid;
+    gap: 2rem;
+    margin-top: clamp(4.5rem, 12vw, 8rem);
+  }
+
+  .pick__poster {
+    position: relative;
+    width: min(76vw, 24rem);
+    margin-inline: auto;
+    color: #ffd27a;
+  }
+
+  .pick__poster img {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow:
+      0 40px 70px -30px rgb(0 0 0 / 0.95),
+      0 0 0 1px rgb(255 182 39 / 0.25);
+  }
+
+  .pick__poster::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 45%;
+    z-index: 1;
+    border-radius: 10px 10px 0 0;
+    background: linear-gradient(rgb(8 6 4 / 0.82), transparent);
+    pointer-events: none;
+  }
+
+  .laurels {
+    position: absolute;
+    top: 3%;
+    left: 50%;
+    z-index: 2;
+    width: 62%;
+    transform: translateX(-50%);
+    filter: drop-shadow(0 2px 6px rgb(0 0 0 / 0.6));
+  }
+
+  .laurels__small {
+    fill: currentColor;
+    font-family: var(--f-mono);
+    font-size: 8.5px;
+    font-weight: 600;
+    letter-spacing: 2.4px;
+    text-transform: uppercase;
+  }
+
+  .pick__copy {
+    display: grid;
+    gap: 1.1rem;
+    justify-items: start;
+  }
+
+  .pick__title {
+    font-family: var(--f-display);
+    font-size: clamp(3.4rem, 17vw, 7rem);
+    font-stretch: 62%;
+    font-weight: 850;
+    line-height: 0.84;
+    text-transform: uppercase;
+  }
+
+  .pick__title span {
+    display: block;
+    margin-top: 0.4rem;
+    font-size: 0.35em;
+    font-weight: 500;
+    color: var(--muted);
+  }
+
+  .pick__quote {
+    display: grid;
+    gap: 0.85rem;
+    max-width: 36ch;
+    font-family: var(--f-serif);
+    font-size: 1.35rem;
+    line-height: 1.3;
+    color: var(--paper-dim);
+    white-space: pre-line;
+  }
+
+  .pick__lead {
+    font-size: 1.6em;
+    font-style: italic;
+    line-height: 1.05;
+    color: var(--paper);
+  }
+
+  .pick__sign {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1.25rem;
+  }
+
+  .pick__sign span {
+    font-family: var(--f-serif);
+    font-style: italic;
+    color: var(--muted);
+  }
+
+  /* ---------- programmes (lists) ---------- */
+
+  .programmes {
+    margin-top: clamp(4.5rem, 12vw, 8rem);
+  }
+
+  .programmes .sub {
+    margin-bottom: 1.5rem;
+  }
+
+  .programmes__list {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: min(80vw, 22rem);
+    gap: 0.85rem;
+    overflow-x: auto;
+    padding: 0.25rem var(--gutter) 1rem;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+
+  .programmes__list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .programme {
+    scroll-snap-align: start;
+  }
+
+  .programme a {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    height: 100%;
+    padding: 1.25rem 1.2rem 1.1rem;
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--amber);
+    border-radius: 6px 6px 14px 14px;
+    background:
+      repeating-linear-gradient(0deg, transparent 0 27px, rgb(243 234 216 / 0.025) 27px 28px),
+      var(--ink-2);
+    text-decoration: none;
+    transition:
+      transform 0.35s var(--ease-spring),
+      border-color 0.25s;
+  }
+
+  .programme a:hover {
+    transform: translateY(-4px);
+    border-color: rgb(255 182 39 / 0.5);
+  }
+
+  .programme__no {
+    font-family: var(--f-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--amber);
+  }
+
+  .programme__title {
+    font-family: var(--f-display);
+    font-size: 2rem;
+    font-stretch: 62%;
+    font-weight: 800;
+    line-height: 0.92;
+    text-transform: uppercase;
+  }
+
+  .programme__desc {
+    font-family: var(--f-serif);
+    font-size: 1.1rem;
+    font-style: italic;
+    line-height: 1.25;
+    color: var(--paper-dim);
+  }
+
+  .programme__films {
+    display: grid;
+    gap: 0.3rem;
+    margin-top: auto;
+    padding-top: 0.8rem;
+    border-top: 1px dashed var(--line-2);
+  }
+
+  .programme__films li {
+    display: flex;
+    gap: 0.65rem;
+    font-size: 0.95rem;
+    line-height: 1.3;
+  }
+
+  .programme__n {
+    flex: none;
+    width: 1.4rem;
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    line-height: 1.85;
+    color: var(--dim);
+  }
+
+  .programme__films.is-ranked li:first-child {
+    align-items: baseline;
+    font-family: var(--f-display);
+    font-size: 1.5rem;
+    font-stretch: 75%;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--amber);
+  }
+
+  .programme__film {
+    min-width: 0;
+  }
+
+  .programme__more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: var(--f-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .films__cta {
+    margin-top: clamp(3rem, 8vw, 5rem);
+  }
+
+  /* ---------- wider screens ---------- */
+
+  @media (min-width: 48rem) {
+    .boxoffice {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+      align-items: center;
+      gap: 2rem 3rem;
+      padding: 2rem;
+    }
+
+    .tally {
+      gap: 1.75rem 1rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .tally dd {
+      font-size: clamp(3.4rem, 6vw, 5rem);
+    }
+
+    .ratings {
+      padding-top: 0;
+      padding-left: 2.5rem;
+      border-top: 0;
+      border-left: 1px dashed var(--line-2);
+    }
+
+    .boxoffice__note {
+      grid-column: 1 / -1;
+    }
+
+    .diary-block__head {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+    }
+
+    .diary {
+      grid-auto-columns: 190px;
+      gap: 1rem;
+    }
+
+    .sheet {
+      width: min(44rem, calc(100% - 3rem));
+      max-height: min(86dvh, 48rem);
+      margin: auto;
+      border: 1px solid var(--line-2);
+      border-radius: 22px;
+    }
+
+    .sheet__grip {
+      display: none;
+    }
+
+    .sheet__body {
+      padding: 2rem;
+    }
+
+    .sheet :global(.entry) {
+      grid-template-columns: 200px minmax(0, 1fr);
+      gap: 1.5rem 2rem;
+    }
+
+    .sheet :global(.entry__review),
+    .sheet :global(.entry__links) {
+      grid-column: 2;
+    }
+
+    .quote {
+      max-width: 24rem;
+    }
+
+    .quote__text {
+      font-size: 1.7rem;
+    }
+
+    .pick {
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+      align-items: center;
+      gap: 4rem;
+    }
+
+    .pick__poster {
+      width: 100%;
+      max-width: 24rem;
+    }
+
+    .programmes__list {
+      grid-auto-columns: 22rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .programmes__list {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      width: min(100% - 2 * var(--gutter), var(--max));
+      margin-inline: auto;
+      padding-inline: 0;
+      overflow: visible;
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .diary-block__nav {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .quotes__track {
+      animation: none;
+    }
+
+    .quotes__row {
+      overflow-x: auto;
+    }
+
+    .sheet[open] {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  import '../scripts/films';
+</script>

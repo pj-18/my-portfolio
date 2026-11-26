@@ -43,7 +43,8 @@ if (section) {
   const spin =
     record && !calm
       ? record.animate([{ transform: 'rotate(0turn)' }, { transform: 'rotate(1turn)' }], {
-          duration: 1800, // 33⅓ rpm
+          // a real 33⅓ rpm (1.8s a turn) looks frantic on screen; this is an easy ~12.5 rpm
+          duration: 4800,
           iterations: Infinity,
         })
       : null;

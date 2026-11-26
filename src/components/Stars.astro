@@ -1,0 +1,31 @@
+---
+import { ratingLabel } from '../lib/util';
+import { starsMarkup } from '../lib/stars';
+
+interface Props {
+  rating: number | null;
+  class?: string;
+}
+
+const { rating, class: className } = Astro.props;
+---
+
+{
+  rating != null && (
+    <span
+      class:list={['stars', className]}
+      role="img"
+      aria-label={ratingLabel(rating)}
+      set:html={starsMarkup(rating)}
+    />
+  )
+}
+
+<style>
+  .stars {
+    display: inline-block;
+    color: var(--amber);
+    white-space: nowrap;
+    line-height: 1;
+  }
+</style>

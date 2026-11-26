@@ -1,0 +1,103 @@
+---
+import Icon from './Icon.astro';
+import type { IconName } from '../lib/icons';
+
+const items: { href: string; scene: string; label: string; icon: IconName; accent: string }[] = [
+  { href: '#top', scene: 'top', label: 'Intro', icon: 'play', accent: 'var(--paper)' },
+  { href: '#work', scene: 'work', label: 'Work', icon: 'code', accent: 'var(--green)' },
+  { href: '#films', scene: 'films', label: 'Films', icon: 'clapper', accent: 'var(--amber)' },
+  { href: '#darkroom', scene: 'darkroom', label: 'Photos', icon: 'aperture', accent: 'var(--red)' },
+  { href: '#credits', scene: 'credits', label: 'Contact', icon: 'mail', accent: 'var(--paper)' },
+];
+---
+
+<nav class="dock" aria-label="Sections">
+  {
+    items.map((item, i) => (
+      <a href={item.href} data-nav={item.scene} style={`--accent:${item.accent}`} aria-current={i === 0 ? 'true' : undefined}>
+        <Icon name={item.icon} size={20} />
+        <span>{item.label}</span>
+      </a>
+    ))
+  }
+</nav>
+
+<style>
+  .dock {
+    position: fixed;
+    left: 50%;
+    bottom: calc(0.75rem + env(safe-area-inset-bottom));
+    z-index: 60;
+    display: flex;
+    gap: 2px;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    background: rgb(22 20 15 / 0.82);
+    box-shadow:
+      0 12px 32px rgb(0 0 0 / 0.5),
+      inset 0 1px 0 rgb(243 234 216 / 0.06);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(16px) saturate(140%);
+    transform: translateX(-50%);
+    transition:
+      opacity 0.6s ease 0.3s,
+      transform 0.6s var(--ease-out) 0.3s;
+  }
+
+  :global(.intro) .dock {
+    opacity: 0;
+    transform: translate(-50%, 140%);
+  }
+
+  a {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    min-width: 3.75rem;
+    padding: 9px 6px 7px;
+    border-radius: 16px;
+    color: var(--muted);
+    font-family: var(--f-mono);
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition:
+      color 0.25s,
+      background-color 0.25s;
+  }
+
+  a:hover {
+    color: var(--paper);
+  }
+
+  a[aria-current='true'] {
+    color: var(--paper);
+    background: rgb(243 234 216 / 0.07);
+  }
+
+  a[aria-current='true'] :global(svg) {
+    color: var(--accent);
+  }
+
+  a[aria-current='true']::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  @media (min-width: 48rem) {
+    a {
+      min-width: 4.5rem;
+      font-size: 0.62rem;
+    }
+  }
+</style>

@@ -1,0 +1,28 @@
+---
+import Base from '../layouts/Base.astro';
+import Intro from '../components/Intro.astro';
+import TopBar from '../components/TopBar.astro';
+import Hero from '../components/Hero.astro';
+import Work from '../components/Work.astro';
+import Films from '../components/Films.astro';
+import Darkroom from '../components/Darkroom.astro';
+import Credits from '../components/Credits.astro';
+import Dock from '../components/Dock.astro';
+---
+
+<Base>
+  <Intro />
+  <TopBar />
+  <main>
+    <Hero />
+    <Work />
+    <Films />
+    <Darkroom />
+    <Credits />
+  </main>
+  <Dock />
+</Base>
+
+<script>
+  import '../scripts/scenes';
+</script>

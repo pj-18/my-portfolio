@@ -1,0 +1,93 @@
+---
+import { site } from '../site.config';
+---
+
+<header class="topbar">
+  <a class="topbar__brand" href="#top" aria-label={`${site.nickname}, back to the top`}>
+    {site.nickname}<span aria-hidden="true">.</span>
+  </a>
+  <p class="topbar__runtime" aria-hidden="true">
+    <span class="topbar__play"></span>
+    <span data-runtime>00:00:00</span>
+    <span class="topbar__total">/ 02:07:00</span>
+  </p>
+  <div class="topbar__progress" aria-hidden="true"><i data-progress></i></div>
+</header>
+
+<style>
+  .topbar {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 3.5rem;
+    padding: env(safe-area-inset-top) var(--gutter) 0;
+    background: linear-gradient(rgb(13 12 10 / 0.88), rgb(13 12 10 / 0));
+    pointer-events: none;
+  }
+
+  .topbar > * {
+    pointer-events: auto;
+  }
+
+  .topbar__brand {
+    font-family: var(--f-display);
+    font-size: 1.65rem;
+    font-stretch: 62%;
+    font-weight: 850;
+    line-height: 1;
+    text-decoration: none;
+    letter-spacing: 0.01em;
+  }
+
+  .topbar__brand span {
+    color: var(--amber);
+  }
+
+  .topbar__runtime {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.06em;
+    color: var(--paper-dim);
+  }
+
+  .topbar__total {
+    color: var(--dim);
+  }
+
+  .topbar__play {
+    width: 0;
+    height: 0;
+    border-block: 5px solid transparent;
+    border-left: 8px solid var(--amber);
+  }
+
+  .topbar__progress {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 2px;
+    background: rgb(243 234 216 / 0.06);
+  }
+
+  .topbar__progress i {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, var(--amber), var(--red));
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+  }
+
+  :global(.intro) .topbar {
+    opacity: 0;
+  }
+
+  .topbar {
+    transition: opacity 0.6s ease 0.2s;
+  }
+</style>

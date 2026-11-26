@@ -1,0 +1,450 @@
+---
+import ReelHead from './ReelHead.astro';
+import { site } from '../site.config';
+import { stats } from '../lib/films';
+import { rich } from '../lib/util';
+
+const about = rich(site.about);
+const tests = site.tests.map((t) => ({
+  ...t,
+  name: t.name.replace('{films}', String(stats.logged)).replace('{reviews}', String(stats.reviews)),
+}));
+// Placeholders show up while you work on the site, never in the published build.
+const jobs = site.experience.filter((job) => import.meta.env.DEV || !job.placeholder);
+const stack = [...site.stack, ...site.stack];
+---
+
+<section id="work" class="reel work" data-scene="work" aria-labelledby="work-title">
+  <ReelHead id="work-title" number="01" title="The day job" kicker="Software engineering" accent="green" />
+
+  <div class="wrap work__body">
+    <p class="about reveal">
+      {
+        about.map((part) =>
+          part.kind === 'hl' ? (
+            <span class={`about__hl accent-${part.accent}`}>{part.text}</span>
+          ) : part.kind === 'em' ? (
+            <em class="about__em">{part.text}</em>
+          ) : (
+            part.text
+          ),
+        )
+      }
+    </p>
+
+    <figure class="runner reveal" data-runner>
+      <div class="runner__bar" aria-hidden="true">
+        <span class="runner__tab">zsh — pj@portfolio: ~/career</span>
+      </div>
+      <div class="runner__screen">
+        <p class="runner__cmd" aria-hidden="true">
+          <span class="runner__prompt">$</span> npx playwright test <span class="runner__flag">--project=pj</span>
+        </p>
+        <p class="runner__meta">Running {tests.length} tests using 1 worker</p>
+        <ol class="runner__tests">
+          {
+            tests.map((test, i) => (
+              <li style={`--i:${i}`}>
+                <span class="runner__state" aria-hidden="true">
+                  <span class="runner__pending" />
+                  <svg class="runner__pass" viewBox="0 0 16 16" focusable="false">
+                    <path d="M3.5 8.5l3 3 6-7" />
+                  </svg>
+                </span>
+                <span class="runner__name">{test.name}</span>
+                <span class="runner__time">({test.time})</span>
+              </li>
+            ))
+          }
+        </ol>
+        <p class="runner__sum" style={`--i:${tests.length}`}>
+          <b>{tests.length} passed</b> <span>({tests[0]?.time ?? '0s'})</span><span class="runner__cursor" aria-hidden="true"></span>
+        </p>
+      </div>
+      <figcaption class="sr-only">A test run: all {tests.length} tests passed.</figcaption>
+    </figure>
+  </div>
+
+  <div class="stack" aria-label="Tools I work with">
+    <ul class="sr-only">{site.stack.map((tool) => <li>{tool}</li>)}</ul>
+    <div class="stack__track" aria-hidden="true">
+      {
+        stack.map((tool) => (
+          <span class="stack__item">
+            {tool}
+            <i>✳</i>
+          </span>
+        ))
+      }
+    </div>
+  </div>
+
+  {
+    jobs.length > 0 && (
+      <div class="wrap filmography">
+        <h3 class="sub reveal">
+          Filmography <span>{jobs.length} {jobs.length === 1 ? 'credit' : 'credits'}</span>
+        </h3>
+        <ol class="filmography__list">
+          {jobs.map((job, i) => (
+            <li class:list={['credit', 'reveal', job.placeholder && 'is-placeholder']} style={`--delay:${i * 0.08}s`}>
+              <p class="credit__years">
+                {job.from} — {job.to}
+              </p>
+              <div class="credit__body">
+                <p class="credit__role">{job.role}</p>
+                <p class="credit__company">{job.company}</p>
+                {job.note && <p class="credit__note">{job.note}</p>}
+              </div>
+            </li>
+          ))}
+        </ol>
+        {import.meta.env.DEV && jobs.some((job) => job.placeholder) && (
+          <p class="dev-note">
+            Dashed entries are placeholders from <code>src/site.config.ts</code>. They are hidden in the published site
+            until you replace them.
+          </p>
+        )}
+      </div>
+    )
+  }
+</section>
+
+<style>
+  .work__body {
+    display: grid;
+    gap: clamp(2.5rem, 7vw, 4.5rem);
+  }
+
+  .about {
+    font-size: clamp(1.5rem, 6.2vw, 3rem);
+    font-weight: 500;
+    line-height: 1.18;
+    letter-spacing: -0.012em;
+    text-wrap: pretty;
+  }
+
+  .about__hl {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .about__em {
+    font-family: var(--f-serif);
+    font-size: 1.12em;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  /* ---- the test runner ---- */
+
+  .runner {
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: #0a0a08;
+    box-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.8);
+  }
+
+  .runner__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--ink-2);
+  }
+
+  .runner__tab {
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    color: var(--dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .runner__screen {
+    padding: 1.1rem 1rem 1.3rem;
+    font-family: var(--f-mono);
+    font-size: 0.78rem;
+    line-height: 1.6;
+  }
+
+  .runner__cmd {
+    color: var(--paper);
+  }
+
+  .runner__prompt {
+    color: var(--green);
+  }
+
+  .runner__flag {
+    color: var(--amber);
+  }
+
+  .runner__meta {
+    margin: 0.4rem 0 0.8rem;
+    color: var(--dim);
+  }
+
+  .runner__tests li {
+    display: grid;
+    grid-template-columns: 1.1rem minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 0.6rem;
+    padding-block: 0.12rem;
+  }
+
+  .runner__state {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 1.1rem;
+    height: 1.25rem;
+  }
+
+  .runner__pending {
+    width: 0.55rem;
+    height: 0.55rem;
+    border: 1.5px solid var(--dim);
+    border-radius: 50%;
+  }
+
+  .runner__pass {
+    position: absolute;
+    width: 0.95rem;
+    height: 0.95rem;
+    fill: none;
+    stroke: var(--green);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0;
+  }
+
+  .runner__name {
+    color: var(--dim);
+  }
+
+  .runner__time {
+    color: var(--dim);
+    white-space: nowrap;
+  }
+
+  .runner__sum {
+    margin-top: 0.9rem;
+    color: var(--dim);
+    opacity: 0;
+  }
+
+  .runner__sum b {
+    color: var(--green);
+    font-weight: 700;
+  }
+
+  .runner__cursor {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.05em;
+    margin-left: 0.4rem;
+    vertical-align: -0.15em;
+    background: var(--paper);
+    animation: blink 1s steps(1) infinite;
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* the run: each test flips from pending to pass in sequence */
+  .runner__pending,
+  .runner__pass,
+  .runner__name,
+  .runner__time,
+  .runner__sum {
+    transition:
+      opacity 0.25s ease,
+      color 0.25s ease;
+    transition-delay: calc(0.5s + var(--i, 0) * 0.32s);
+  }
+
+  :global(.is-run) .runner__pending {
+    opacity: 0;
+  }
+
+  :global(.is-run) .runner__pass,
+  :global(.is-run) .runner__sum {
+    opacity: 1;
+  }
+
+  :global(.is-run) .runner__name {
+    color: var(--paper);
+  }
+
+  :global(.is-run) .runner__time {
+    color: var(--muted);
+  }
+
+  :global(.no-js) .runner__pass,
+  :global(.no-js) .runner__sum {
+    opacity: 1;
+  }
+
+  :global(.no-js) .runner__pending {
+    opacity: 0;
+  }
+
+  /* ---- stack ticker ---- */
+
+  .stack {
+    margin-block: clamp(3rem, 9vw, 6rem);
+    overflow: hidden;
+    border-block: 1px solid var(--line);
+    padding-block: 1rem;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  }
+
+  .stack__track {
+    display: flex;
+    width: max-content;
+    animation: marquee 36s linear infinite reverse;
+  }
+
+  .stack__item {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    padding-right: 1.1rem;
+    font-family: var(--f-display);
+    font-size: clamp(1.6rem, 6vw, 2.6rem);
+    font-stretch: 75%;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--paper-dim);
+    white-space: nowrap;
+  }
+
+  .stack__item i {
+    font-style: normal;
+    font-size: 0.6em;
+    color: var(--green);
+  }
+
+  /* ---- filmography (experience) ---- */
+
+  .sub {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--f-display);
+    font-size: clamp(2.2rem, 10vw, 4rem);
+    font-stretch: 62%;
+    font-weight: 820;
+    line-height: 0.9;
+    text-transform: uppercase;
+  }
+
+  .sub span {
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+  }
+
+  .credit {
+    display: grid;
+    gap: 0.35rem;
+    padding-block: 1.15rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .credit__years {
+    font-family: var(--f-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green);
+  }
+
+  .credit__role {
+    font-size: 1.35rem;
+    font-weight: 650;
+    line-height: 1.2;
+  }
+
+  .credit__company {
+    color: var(--paper-dim);
+  }
+
+  .credit__note {
+    margin-top: 0.35rem;
+    max-width: 60ch;
+    color: var(--muted);
+    font-size: 0.98rem;
+  }
+
+  .dev-note {
+    margin-top: 1rem;
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    color: var(--amber);
+  }
+
+  @media (min-width: 48rem) {
+    .credit {
+      grid-template-columns: 11rem minmax(0, 1fr);
+      gap: 2rem;
+      padding-block: 1.6rem;
+    }
+
+    .credit__years {
+      padding-top: 0.35rem;
+    }
+
+    .runner__screen {
+      padding: 1.4rem 1.5rem 1.6rem;
+      font-size: 0.85rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .work__body {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      align-items: start;
+      gap: 4rem;
+    }
+
+    .about {
+      font-size: clamp(2rem, 2.9vw, 2.9rem);
+    }
+
+    .runner {
+      margin-top: 0.6rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stack__track,
+    .runner__cursor {
+      animation: none;
+    }
+
+    .runner__pending,
+    .runner__pass,
+    .runner__name,
+    .runner__time,
+    .runner__sum {
+      transition: none;
+    }
+  }
+</style>

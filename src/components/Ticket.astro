@@ -1,0 +1,198 @@
+---
+import { site } from '../site.config';
+---
+
+<div class="hanger" data-hanger aria-hidden="true">
+  <div class="hanger__arm" data-arm>
+    <span class="hanger__string"></span>
+    <div class="ticket" data-ticket>
+      <span class="ticket__hole"></span>
+      <p class="ticket__admit">Admit one</p>
+      <p class="ticket__name">{site.nickname}</p>
+      <p class="ticket__role">{site.role}</p>
+      <span class="ticket__perf"></span>
+      <dl class="ticket__seat">
+        <div><dt>Scr</dt><dd>07</dd></div>
+        <div><dt>Row</dt><dd>P</dd></div>
+        <div><dt>Seat</dt><dd>18</dd></div>
+      </dl>
+      <span class="ticket__code"></span>
+      <p class="ticket__no">Nº 000718</p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .hanger {
+    --string: 3.4rem;
+    --tw: 7em;
+    --notch: 8.6em;
+    position: absolute;
+    top: 0;
+    right: calc(var(--gutter) + 3.2rem);
+    z-index: 3;
+    width: 0;
+    height: 0;
+    font-size: 13.5px;
+  }
+
+  .hanger__arm {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;
+    will-change: transform;
+  }
+
+  .hanger__string {
+    position: absolute;
+    top: 0;
+    left: -1px;
+    width: 2px;
+    height: var(--string);
+    background: linear-gradient(#5d564a, var(--paper-dim));
+  }
+
+  .ticket {
+    position: absolute;
+    top: calc(var(--string) - 0.65em);
+    left: calc(var(--tw) / -2);
+    width: var(--tw);
+    padding: 1.35em 0.7em 0.75em;
+    border-radius: 0.45em;
+    color: var(--ticket-ink);
+    text-align: center;
+    background:
+      radial-gradient(120% 70% at 25% 0%, rgb(255 255 255 / 0.4), transparent 60%),
+      radial-gradient(90% 60% at 100% 100%, rgb(160 120 60 / 0.18), transparent 70%),
+      var(--ticket);
+    box-shadow: 0 1.4em 2em -0.8em rgb(0 0 0 / 0.7);
+    transform-origin: 50% 0.65em;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-mask:
+      radial-gradient(circle at 0 var(--notch), transparent 0.5em, #000 calc(0.5em + 0.5px)) left / 51% 100% no-repeat,
+      radial-gradient(circle at 100% var(--notch), transparent 0.5em, #000 calc(0.5em + 0.5px)) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle at 0 var(--notch), transparent 0.5em, #000 calc(0.5em + 0.5px)) left / 51% 100% no-repeat,
+      radial-gradient(circle at 100% var(--notch), transparent 0.5em, #000 calc(0.5em + 0.5px)) right / 51% 100% no-repeat;
+  }
+
+  .ticket:active {
+    cursor: grabbing;
+  }
+
+  .ticket__hole {
+    position: absolute;
+    top: 0.42em;
+    left: 50%;
+    width: 0.5em;
+    height: 0.5em;
+    margin-left: -0.25em;
+    border-radius: 50%;
+    background: #3b3327;
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.6);
+  }
+
+  .ticket__admit {
+    margin: 0 -0.7em 0.5em;
+    padding: 0.32em 0;
+    background: var(--red);
+    color: #fff4ec;
+    font-family: var(--f-mono);
+    font-size: 0.56em;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+
+  .ticket__name {
+    font-family: var(--f-display);
+    font-size: 3.3em;
+    font-stretch: 62%;
+    font-weight: 900;
+    line-height: 0.84;
+    letter-spacing: -0.01em;
+  }
+
+  .ticket__role {
+    margin-top: 0.5em;
+    font-family: var(--f-mono);
+    font-size: 0.5em;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .ticket__perf {
+    display: block;
+    margin: 0.75em -0.7em 0.6em;
+    border-top: 2px dashed rgb(35 28 19 / 0.35);
+  }
+
+  .ticket__seat {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .ticket__seat dt {
+    font-family: var(--f-mono);
+    font-size: 0.42em;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  .ticket__seat dd {
+    font-family: var(--f-display);
+    font-size: 1.1em;
+    font-stretch: 75%;
+    font-weight: 800;
+    line-height: 1.1;
+  }
+
+  .ticket__code {
+    display: block;
+    height: 1.25em;
+    margin: 0.55em 0.15em 0.3em;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--ticket-ink) 0 1px,
+      transparent 1px 3px,
+      var(--ticket-ink) 3px 5px,
+      transparent 5px 6px,
+      var(--ticket-ink) 6px 7px,
+      transparent 7px 10px,
+      var(--ticket-ink) 10px 13px,
+      transparent 13px 14px
+    );
+    opacity: 0.85;
+  }
+
+  .ticket__no {
+    font-family: var(--f-mono);
+    font-size: 0.42em;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.65;
+  }
+
+  @media (min-width: 48rem) {
+    .hanger {
+      --string: 8rem;
+      right: clamp(5rem, 13vw, 13rem);
+      font-size: 21px;
+    }
+  }
+
+  :global(.intro) .hanger__arm {
+    opacity: 0;
+  }
+</style>
+
+<script>
+  import '../scripts/ticket';
+</script>

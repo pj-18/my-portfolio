@@ -171,9 +171,17 @@ const laurels = laurel(false) + laurel(true);
               <p class="diary-block__status" aria-live="polite" data-diary-status>
                 {entries.length} films, newest first
               </p>
-              <button type="button" class="diary-block__clear" data-diary-clear hidden>
-                Show all
-              </button>
+              <div class="diary-block__actions">
+                <button type="button" class="diary-block__clear" data-diary-clear hidden>
+                  Show all
+                </button>
+                <button type="button" class="pill diary-block__auto" data-diary-auto hidden>
+                  <span data-auto-icon="pause"><Icon name="pause" size={14} /></span>
+                  <span data-auto-icon="play" hidden><Icon name="play" size={14} /></span>
+                  <span data-auto-label>Pause</span>
+                  <span class="sr-only">sliding</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -702,6 +710,26 @@ const laurels = laurel(false) + laurel(true);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--muted);
+  }
+
+  .diary-block__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: none;
+  }
+
+  .diary-block__auto {
+    min-height: 36px;
+    padding-inline: 0.85rem;
+  }
+
+  .diary-block__auto [data-auto-icon] {
+    display: inline-flex;
+  }
+
+  .diary-block__auto [hidden] {
+    display: none;
   }
 
   .diary-block__clear {

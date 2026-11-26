@@ -49,6 +49,96 @@ if (section) {
 
   /* ---- entry sheet ---- */
   const sheet = section.querySelector<HTMLDialogElement>('[data-sheet]');
+
+  /* ---- slide the strip on its own: one card every 3 seconds ----
+     It holds still while you're using it (hover, touch, keyboard, an open
+     film), while it's off screen or the tab is hidden, and for reduced motion. */
+  const auto = section.querySelector<HTMLButtonElement>('[data-diary-auto]');
+  if (scroller && auto && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const EVERY = 3000;
+    const IDLE = 6000; // after you touch it, wait this long before sliding again
+    let stopped = false;
+    let inView = false;
+    let hovering = false;
+    let resumeAt = 0;
+
+    const held = () =>
+      stopped ||
+      !inView ||
+      hovering ||
+      document.hidden ||
+      !!sheet?.open ||
+      Date.now() < resumeAt ||
+      !!scroller.querySelector(':focus-visible');
+
+    /* The browser's own smooth scroll is a quick flick, so glide by hand:
+       an unhurried ease-in-out, with snapping off until it lands. */
+    let frame = 0;
+    const settle = () => {
+      cancelAnimationFrame(frame);
+      scroller.style.scrollSnapType = '';
+    };
+    const glide = (to: number, duration: number) => {
+      settle();
+      const from = scroller.scrollLeft;
+      if (Math.abs(to - from) < 1) return;
+      const start = performance.now();
+      scroller.style.scrollSnapType = 'none';
+      const step = (now: number) => {
+        const t = Math.min(1, (now - start) / duration);
+        const eased = t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2;
+        scroller.scrollLeft = from + (to - from) * eased;
+        if (t < 1) frame = requestAnimationFrame(step);
+        else settle();
+      };
+      frame = requestAnimationFrame(step);
+    };
+
+    const advance = () => {
+      const max = scroller.scrollWidth - scroller.clientWidth;
+      if (max <= 2) return;
+      if (scroller.scrollLeft >= max - 2) {
+        glide(0, 1800); // back to the newest film, a longer trip
+        return;
+      }
+      const inset = parseFloat(getComputedStyle(scroller).scrollPaddingLeft) || 0;
+      const next = stubs.find((stub) => !stub.hidden && stub.offsetLeft - inset > scroller.scrollLeft + 4);
+      if (next) glide(Math.min(max, next.offsetLeft - inset), 1100);
+    };
+
+    window.setInterval(() => {
+      if (!held()) advance();
+    }, EVERY);
+
+    const nudge = () => {
+      settle(); // let go the moment you reach for it
+      resumeAt = Date.now() + IDLE;
+    };
+    for (const type of ['pointerdown', 'wheel', 'touchstart', 'keydown']) {
+      scroller.addEventListener(type, nudge, { passive: true });
+    }
+    for (const el of [...bars, clear, ...section.querySelectorAll('[data-diary-prev], [data-diary-next]')]) {
+      el?.addEventListener('click', nudge);
+    }
+    scroller.addEventListener('pointerenter', (event) => {
+      if (event.pointerType === 'mouse') hovering = true;
+    });
+    scroller.addEventListener('pointerleave', () => {
+      hovering = false;
+    });
+    new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+    }, { threshold: 0.6 }).observe(scroller);
+
+    const label = auto.querySelector<HTMLElement>('[data-auto-label]');
+    const icons = [...auto.querySelectorAll<HTMLElement>('[data-auto-icon]')];
+    auto.hidden = false;
+    auto.addEventListener('click', () => {
+      stopped = !stopped;
+      if (label) label.textContent = stopped ? 'Play' : 'Pause';
+      for (const icon of icons) icon.hidden = icon.dataset.autoIcon !== (stopped ? 'play' : 'pause');
+    });
+  }
   const body = sheet?.querySelector<HTMLElement>('[data-sheet-body]');
 
   if (sheet && body) {

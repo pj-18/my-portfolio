@@ -9,6 +9,7 @@ const year = new Date().getFullYear();
 const link = (label: string) => site.links.find((l) => l.label === label);
 const letterboxd = link('Letterboxd');
 const github = link('GitHub');
+const instagram = link('Instagram');
 
 const credits: { role: string; name: string; href?: string }[] = [
   { role: 'Written & directed by', name: site.name },
@@ -16,12 +17,15 @@ const credits: { role: string; name: string; href?: string }[] = [
   { role: 'Day job', name: site.role },
   { role: 'Film critic', name: `@${site.letterboxd} on Letterboxd`, href: letterboxd?.url },
   ...(music && headliners() ? [{ role: 'Music by', name: `${headliners()}, on repeat`, href: music.profile }] : []),
-  { role: 'Cinematography', name: `${site.nickname}, one frame at a time` },
+  { role: 'Cinematography', name: '@frames.by.pj on Instagram', href: instagram?.url },
   { role: 'Source code', name: github ? `github.com/${github.handle}` : 'GitHub', href: github?.url },
   { role: 'Typefaces', name: 'Archivo, Instrument Serif, JetBrains Mono' },
   { role: 'Built with', name: 'Astro and a little vanilla JS' },
 ];
 const mail = Array.from({ length: 4 });
+// The address is only put together in the browser (scripts/credits.ts); this is the no-JS spelling.
+const { user, domain } = site.email;
+const spelled = `${user} [at] ${domain}`;
 ---
 
 <section id="credits" class="credits" data-scene="credits" aria-labelledby="credits-title">
@@ -32,12 +36,19 @@ const mail = Array.from({ length: 4 });
     </h2>
   </div>
 
-  <a class="mailband" href={`mailto:${site.email}`} aria-label={`Email ${site.name} at ${site.email}`}>
+  <a
+    class="mailband"
+    href="#credits"
+    data-mail
+    data-mail-user={user}
+    data-mail-domain={domain}
+    aria-label={`Email ${site.name}: ${spelled}`}
+  >
     <span class="mailband__track" aria-hidden="true">
       {
         mail.map(() => (
           <span class="mailband__item">
-            Say hello <i>✳</i> {site.email} <i>✳</i>
+            Say hello <i>✳</i> <span data-mail-text>{spelled}</span> <i>✳</i>
           </span>
         ))
       }
@@ -45,7 +56,7 @@ const mail = Array.from({ length: 4 });
   </a>
 
   <div class="wrap contact">
-    <button type="button" class="pill pill--solid accent-amber" data-copy={site.email}>
+    <button type="button" class="pill pill--solid accent-amber" data-copy-mail>
       <Icon name="copy" />
       <span data-copy-label>Copy email</span>
     </button>

@@ -52,11 +52,17 @@ export const site = {
   description:
     'Praveen Kumar (PJ) is a senior software engineer who builds web apps and the tests that keep them honest. Off the clock: a Letterboxd film diary and a darkroom of photographs.',
 
-  email: 'praveenkumar.ponduru@gmail.com',
+  /**
+   * Your email, in two halves on purpose: the whole address never appears in this repo or in the
+   * page's HTML, so bots that harvest addresses from source don't find it. The page joins the
+   * halves in the browser; with JavaScript off it reads "name [at] domain".
+   */
+  email: { user: 'praveenkumar.ponduru', domain: 'gmail.com' },
   links: [
     { label: 'GitHub', handle: 'pj-18', url: 'https://github.com/pj-18' },
     { label: 'LinkedIn', handle: 'praveenponduru', url: 'https://www.linkedin.com/in/praveenponduru/' },
     { label: 'Letterboxd', handle: 'pj_18', url: 'https://letterboxd.com/pj_18/' },
+    { label: 'Instagram', handle: 'frames.by.pj', url: 'https://www.instagram.com/frames.by.pj/' },
   ],
 
   /** Your Letterboxd username. `npm run films` pulls its public RSS feed. */

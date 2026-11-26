@@ -1,0 +1,57 @@
+name: Up next
+
+# Shows you've booked are GitHub issues (New issue → "Up next, a show I've booked").
+# When one is opened, edited, closed or deleted, this checks it, replies on the issue and redeploys
+# the site. Every morning it closes the issues of shows that are over.
+# Nothing is committed: the deploy reads the open issues when it builds.
+on:
+  issues:
+    types: [opened, edited, closed, reopened, deleted, labeled, unlabeled]
+  schedule:
+    - cron: '0 3 * * *' # 8:30 IST, just before the daily deploy
+  workflow_dispatch:
+
+permissions:
+  issues: write # label, comment on, rename and close booking issues
+  actions: write # start the deploy
+
+concurrency:
+  group: up-next-${{ github.event.issue.number || 'daily' }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    # anyone can open an issue on a public repository: only the owner's are bookings
+    if: github.event_name == 'issues' && github.event.issue.user.login == github.repository_owner
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+
+      - id: check
+        run: node scripts/up-next-issues.ts check
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      # Changes made with this workflow's token don't start other workflows by themselves.
+      - if: steps.check.outputs.deploy == 'true'
+        run: gh workflow run deploy.yml --repo "$GITHUB_REPOSITORY" --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  tidy:
+    if: github.event_name != 'issues'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+
+      - run: node scripts/up-next-issues.ts close-past
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

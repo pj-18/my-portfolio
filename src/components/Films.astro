@@ -18,8 +18,7 @@ import {
 } from '../lib/films';
 import { dayMonthYear, longDate, pad, ratingLabel, shortDate } from '../lib/util';
 import { starsInSvg, starsMarkup } from '../lib/stars';
-import { filmSlug, type UpNextData } from '../lib/up-next';
-import type { Theatre } from '../site.config';
+import { filmSlug, offsetMinutes, showStatus, showTimes, type UpNextData } from '../lib/up-next';
 
 const handle = diary.username || site.letterboxd;
 const profile = diary.profile;
@@ -32,51 +31,36 @@ function ratingTone(rating: number) {
     : `color-mix(in oklch, var(--green) ${Math.round((t - 0.5) * 200)}%, var(--amber))`;
 }
 
-/* "Up next": booked shows from site.config, dropped once the film is over. */
-function posterSrc(src?: string) {
-  if (!src) return null;
-  if (/^(https?:)?\/\//.test(src)) return src;
-  return `${import.meta.env.BASE_URL.replace(/\/$/, '')}/${src.replace(/^\//, '')}`;
-}
-const DAY = 86_400_000;
-const todayUtc = (() => {
-  const now = new Date();
-  return Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-})();
-const letterboxdFilms = Object.values(
+/* "Up next": shows booked as GitHub issues (saved by scripts/sync-up-next.ts). Each ticket counts down,
+   then reads "Rolling" and "Wrapped", then leaves the page (see src/lib/up-next.ts; the browser keeps it current). */
+const { utcOffset } = site.upNextIssues;
+const offset = offsetMinutes(utcOffset);
+const builtAt = Date.now();
+const upNextData = Object.values(
   import.meta.glob<UpNextData>('../data/up-next.json', { eager: true, import: 'default' }),
-)[0]?.films ?? {};
-const theatres: Record<string, Theatre> = site.theatres;
-const theatreText = (at?: string) => {
-  if (!at) return null;
-  const known = theatres[at];
-  return known ? [known.name, known.area].filter(Boolean).join(', ') : at;
-};
-const booked = site.upNext
-  .filter((show) => import.meta.env.DEV || !show.placeholder)
+)[0];
+const letterboxdFilms = upNextData?.films ?? {};
+const booked = (upNextData?.shows ?? [])
+  // the same film on the same day only once, in case it was booked in two issues
+  .filter((show, i, list) => list.findIndex((other) => filmSlug(other) === filmSlug(show) && other.date === show.date) === i)
   .map((show) => {
-    // an example ticket always looks like it's a week and a bit away
-    const day = show.placeholder ? todayUtc + 9 * DAY : Date.parse(`${show.date}T00:00:00Z`);
-    const slug = show.placeholder ? null : filmSlug(show);
+    const slug = filmSlug(show);
     const film = slug ? letterboxdFilms[slug] : undefined;
+    const times = showTimes(show.date, show.time, film?.runtime, utcOffset);
     return {
       ...show,
-      day,
+      times,
+      status: showStatus(times, builtAt, offset),
       title: show.title || film?.title || slug || 'Untitled',
-      art: posterSrc(show.poster) ?? film?.poster ?? null,
+      art: film?.poster ?? null,
       link: film?.url ?? null,
-      where: theatreText(show.at),
+      where: show.at || null,
     };
   })
-  .filter((show) => Number.isFinite(show.day) && (show.placeholder || show.day >= todayUtc))
-  .sort((a, b) => a.day - b.day || (a.time ?? '').localeCompare(b.time ?? ''));
-const hasPlaceholderShow = booked.some((show) => show.placeholder);
-const whenText = (day: number) =>
-  new Date(day).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
-const countdown = (day: number) => {
-  const days = Math.round((day - todayUtc) / DAY);
-  return days <= 0 ? { num: 'Today', unit: '' } : days === 1 ? { num: '1', unit: 'day to go' } : { num: String(days), unit: 'days to go' };
-};
+  .filter((show) => Number.isFinite(show.times.gone) && show.status.state !== 'gone')
+  .sort((a, b) => (a.times.start ?? a.times.day) - (b.times.start ?? b.times.day));
+const whenText = (date: string) =>
+  new Date(`${date}T00:00:00Z`).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
 
 const rows = oneLiners.length >= 8 ? [oneLiners.filter((_, i) => i % 2 === 0), oneLiners.filter((_, i) => i % 2 === 1)] : [oneLiners];
 
@@ -220,17 +204,18 @@ const laurels = laurel(false) + laurel(true);
                 {booked.length === 1 ? 'Ticket in the pocket' : `${booked.length} tickets in the pocket`}
               </p>
             </div>
-            <ul class="wrap upnext__list">
+            <ul class="wrap upnext__list" data-utc-offset={offset}>
               {booked.map((show) => {
                 const art = show.art;
-                const left = countdown(show.day);
+                const left = show.status;
                 return (
                   <li
-                    class:list={['pass', 'reveal', show.placeholder && 'is-placeholder']}
-                    data-show-day={show.day}
-                    data-show-date={show.date}
-                    data-show-time={show.time}
-                    data-placeholder={show.placeholder ? '' : undefined}
+                    class="pass reveal"
+                    data-state={left.state}
+                    data-show-day={show.times.day}
+                    data-show-start={show.times.start ?? undefined}
+                    data-show-wraps={show.times.wraps ?? undefined}
+                    data-show-gone={show.times.gone}
                   >
                     <span class="pass__poster" aria-hidden="true">
                       {art ? <img src={art} alt="" loading="lazy" decoding="async" /> : <span class="pass__mono">{show.title.charAt(0)}</span>}
@@ -248,7 +233,7 @@ const laurels = laurel(false) + laurel(true);
                         )}
                       </h4>
                       <p class="pass__when">
-                        {whenText(show.day)}
+                        {whenText(show.date)}
                         {show.time ? ` · ${show.time}` : ''}
                       </p>
                       {show.where && <p class="pass__where">{show.where}</p>}
@@ -261,12 +246,6 @@ const laurels = laurel(false) + laurel(true);
                 );
               })}
             </ul>
-            {import.meta.env.DEV && hasPlaceholderShow && (
-              <p class="wrap upnext__dev">
-                The dashed ticket is an example from <code>upNext</code> in <code>src/site.config.ts</code>. It is hidden
-                in the published site until you replace it.
-              </p>
-            )}
           </div>
         )}
 
@@ -846,11 +825,6 @@ const laurels = laurel(false) + laurel(true);
       radial-gradient(circle at 100% 50%, transparent 0.6rem, #000 calc(0.6rem + 0.5px)) right / 51% 100% no-repeat;
   }
 
-  .pass.is-placeholder {
-    outline: 2px dashed rgb(255 182 39 / 0.8);
-    outline-offset: -6px;
-  }
-
   .pass__poster {
     display: grid;
     place-items: center;
@@ -1051,12 +1025,50 @@ const laurels = laurel(false) + laurel(true);
     display: none;
   }
 
-  .upnext__dev {
-    margin-top: 0.9rem;
-    font-family: var(--f-mono);
-    font-size: 0.66rem;
-    letter-spacing: 0.04em;
-    color: var(--dim);
+  /* the show's on: the stub says so in a word, which needs a smaller size than a number */
+  .pass[data-state='rolling'] .pass__num,
+  .pass[data-state='wrapped'] .pass__num {
+    font-size: 1.3rem;
+    line-height: 1.05;
+  }
+
+  .pass[data-state='rolling'] .pass__num {
+    color: #b3261e;
+  }
+
+  /* a live dot, like a camera's tally light */
+  .pass[data-state='rolling'] .pass__num::before {
+    content: '';
+    display: inline-block;
+    width: 0.42em;
+    height: 0.42em;
+    margin-right: 0.22em;
+    vertical-align: 0.12em;
+    border-radius: 50%;
+    background: currentColor;
+    animation: tally 1.6s ease-in-out infinite;
+  }
+
+  @keyframes tally {
+    50% {
+      opacity: 0.25;
+    }
+  }
+
+  /* after the credits the ticket fades, like a used stub */
+  .pass[data-state='wrapped'] {
+    filter: saturate(0.35);
+    opacity: 0.8;
+  }
+
+  .pass[data-state='wrapped'] .pass__num {
+    color: rgb(35 28 19 / 0.75);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pass[data-state='rolling'] .pass__num::before {
+      animation: none;
+    }
   }
 
   .diary-block__head {

@@ -1,4 +1,5 @@
 import { starsLabel, starsMarkup } from '../lib/stars';
+import { showStatus } from '../lib/up-next';
 
 const section = document.querySelector<HTMLElement>('#films');
 
@@ -195,36 +196,43 @@ if (section) {
     });
   }
 
-  /* ---- up next: keep the countdown honest between rebuilds ---- */
+  /* ---- up next: countdown → rolling → wrapped → gone, kept current between rebuilds ---- */
   const passes = [...section.querySelectorAll<HTMLElement>('[data-show-day]')];
   if (passes.length) {
-    const now = new Date();
-    const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-    for (const pass of passes) {
-      if (pass.hasAttribute('data-placeholder')) continue;
-      const day = Number(pass.dataset.showDay);
-      // over ~4 hours after the start (in your own time zone), or at midnight with no time given
-      const { showDate, showTime } = pass.dataset;
-      const over = showTime
-        ? new Date(`${showDate}T${showTime}`).getTime() + 4 * 3_600_000
-        : new Date(`${showDate}T23:59:59`).getTime();
-      if (Date.now() > over) {
-        pass.hidden = true; // the next rebuild drops it for good
-        continue;
-      }
-      const days = Math.round((day - today) / 86_400_000);
-      const num = pass.querySelector('[data-count-num]');
-      const unit = pass.querySelector('[data-count-unit]');
-      if (num) num.textContent = days <= 0 ? 'Today' : String(days);
-      if (unit) unit.textContent = days <= 0 ? '' : days === 1 ? 'day to go' : 'days to go';
-    }
-    const left = passes.filter((pass) => !pass.hidden).length;
+    const offset = Number(section.querySelector<HTMLElement>('[data-utc-offset]')?.dataset.utcOffset ?? 0);
     const block = section.querySelector<HTMLElement>('[data-upnext]');
     const note = block?.querySelector<HTMLElement>('[data-upnext-note]');
-    if (!left) {
-      block?.setAttribute('hidden', ''); // every booked show is over
-    } else if (note && left !== passes.length) {
-      note.textContent = left === 1 ? 'Ticket in the pocket' : `${left} tickets in the pocket`;
+    const time = (value?: string) => (value ? Number(value) : null);
+    const update = () => {
+      const now = Date.now();
+      for (const pass of passes) {
+        if (pass.hidden) continue;
+        const { showDay, showStart, showWraps, showGone } = pass.dataset;
+        const ticket = showStatus(
+          { day: Number(showDay), start: time(showStart), wraps: time(showWraps), gone: Number(showGone) },
+          now,
+          offset,
+        );
+        if (ticket.state === 'gone') {
+          pass.hidden = true; // the next rebuild drops it for good
+          continue;
+        }
+        pass.dataset.state = ticket.state;
+        const num = pass.querySelector('[data-count-num]');
+        const unit = pass.querySelector('[data-count-unit]');
+        if (num && num.textContent !== ticket.num) num.textContent = ticket.num;
+        if (unit && unit.textContent !== ticket.unit) unit.textContent = ticket.unit;
+      }
+      const left = passes.filter((pass) => !pass.hidden).length;
+      if (!left) block?.setAttribute('hidden', ''); // every booked show is over
+      else if (note) note.textContent = left === 1 ? 'Ticket in the pocket' : `${left} tickets in the pocket`;
+      return left;
+    };
+    // a ticket changes on the minute (lights down, credits, gone): check once a minute while any remain
+    if (update()) {
+      const timer = window.setInterval(() => {
+        if (!update()) window.clearInterval(timer);
+      }, 60_000);
     }
   }
 

@@ -1,79 +1,66 @@
 /**
- * Looks up the films you've booked (upNext in src/site.config.ts) on Letterboxd and
- * caches their poster, title and page link in src/data/up-next.json.
+ * Gathers the shows you've booked from your open "Up next" GitHub issues, looks their films
+ * up on Letterboxd, and saves both in src/data/up-next.json.
  *
  *   npm run up-next
  *
- * Only films that aren't cached yet are fetched, one page at a time, so a build
- * normally makes no requests at all. It never fails a build: anything it can't
- * find just shows without a poster (or with the `poster` you set yourself).
+ * Each film is fetched from Letterboxd once, then cached. It never fails a build: if GitHub
+ * can't be reached the last saved shows are kept, and a film it can't find just shows without
+ * a poster (or with the `poster` you set yourself).
  */
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { site } from '../src/site.config.ts';
-import { filmSlug, type LetterboxdFilm, type UpNextData } from '../src/lib/up-next.ts';
+import { filmSlug, type UpNextData } from '../src/lib/up-next.ts';
+import { lookUp, openShowIssues, readShow, REPO, todayUtc } from './up-next-shared.ts';
 
 const OUT = new URL('../src/data/up-next.json', import.meta.url);
-const UA = 'Mozilla/5.0 (compatible; portfolio-build/1.0)';
 const RETRY_MISSES_AFTER = 24 * 3_600_000;
-const today = new Date().toISOString().slice(0, 10);
+const today = todayUtc();
 
 const log = (message: string) => console.log(`[up-next] ${message}`);
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function load(): Promise<UpNextData> {
   try {
-    const data = JSON.parse(await readFile(OUT, 'utf8')) as UpNextData;
-    return { fetchedAt: data.fetchedAt ?? null, films: data.films ?? {}, misses: data.misses ?? {} };
+    const data = JSON.parse(await readFile(OUT, 'utf8')) as Partial<UpNextData>;
+    return { fetchedAt: data.fetchedAt ?? null, shows: data.shows ?? [], films: data.films ?? {}, misses: data.misses ?? {} };
   } catch {
-    return { fetchedAt: null, films: {}, misses: {} };
+    return { fetchedAt: null, shows: [], films: {}, misses: {} };
   }
 }
 
-/** The film page's JSON-LD block carries the title, release date and poster. */
-async function lookUp(slug: string): Promise<LetterboxdFilm | null> {
-  const url = `https://letterboxd.com/film/${encodeURIComponent(slug)}/`;
-  const response = await fetch(url, {
-    headers: { 'user-agent': UA, accept: 'text/html' },
-    signal: AbortSignal.timeout(20_000),
-  });
-  if (response.status === 404) return null;
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  const html = await response.text();
-  const block = html.match(/<script type="application\/ld\+json">([^]*?)<\/script>/)?.[1] ?? '';
-  const json = block.slice(block.indexOf('{'), block.lastIndexOf('}') + 1);
-  const info = JSON.parse(json) as {
-    name?: string;
-    image?: string;
-    url?: string;
-    releasedEvent?: { startDate?: string }[];
-  };
-  const year = Number(
-    info.releasedEvent?.[0]?.startDate?.slice(0, 4) || html.match(/\/films\/year\/(\d{4})\//)?.[1],
-  );
-  return {
-    slug,
-    title: info.name ?? slug,
-    year: Number.isFinite(year) && year > 0 ? year : null,
-    // Letterboxd serves a few fixed sizes; 230×345 is plenty for the ticket (and sharp at 2x).
-    poster: info.image ? info.image.replace(/-0-\d+-0-\d+-crop/, '-0-230-0-345-crop') : null,
-    url: info.url ?? url,
-  };
+/** Shows booked as issues. Ones that don't read cleanly are skipped (the issue itself says why). */
+async function syncIssues(data: UpNextData) {
+  try {
+    const issues = await openShowIssues();
+    const shows = [];
+    for (const issue of issues) {
+      const { booking } = await readShow(issue.body, today);
+      if (booking && booking.date >= today) shows.push(booking);
+      else if (!booking) log(`issue #${issue.number} doesn't read as a show yet; skipped`);
+    }
+    data.shows = shows.sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? '').localeCompare(b.time ?? ''));
+    log(`${shows.length} ${shows.length === 1 ? 'show' : 'shows'} booked in ${REPO}'s issues`);
+  } catch (error) {
+    data.shows = data.shows.filter((show) => show.date >= today);
+    log(`couldn't read the booking issues (${(error as Error).message}); keeping the last ${data.shows.length} saved`);
+  }
 }
 
 async function main() {
   const data = await load();
-  const upcoming = site.upNext.filter((show) => !show.placeholder && show.date >= today);
-  const slugs = [...new Set(upcoming.map(filmSlug).filter((slug): slug is string => !!slug))];
+  const before = JSON.stringify({ ...data, fetchedAt: null });
+  await syncIssues(data);
+
+  const slugs = [...new Set(data.shows.map(filmSlug).filter((slug): slug is string => !!slug))];
   const now = Date.now();
   const todo = slugs.filter(
-    (slug) => !data.films[slug] && !(data.misses[slug] && now - Date.parse(data.misses[slug]) < RETRY_MISSES_AFTER),
+    (slug) =>
+      // not looked up yet, or cached before running times were saved
+      (!data.films[slug] || !('runtime' in data.films[slug])) &&
+      !(data.misses[slug] && now - Date.parse(data.misses[slug]) < RETRY_MISSES_AFTER),
   );
 
-  if (!todo.length) {
-    if (slugs.length) log(`${slugs.length} booked ${slugs.length === 1 ? 'film' : 'films'}, all cached`);
-    return;
-  }
-
+  if (!todo.length && slugs.length) log(`${slugs.length} booked ${slugs.length === 1 ? 'film' : 'films'}, all cached`);
   let found = 0;
   for (const [i, slug] of todo.entries()) {
     if (i) await wait(1500); // be gentle: one page at a time
@@ -83,22 +70,23 @@ async function main() {
         data.films[slug] = film;
         delete data.misses[slug];
         found++;
-        log(`${slug} → ${film.title}${film.year ? ` (${film.year})` : ''}${film.poster ? '' : ', no poster'}`);
+        log(
+          `${slug} → ${film.title}${film.year ? ` (${film.year})` : ''}, ${film.runtime ? `${film.runtime} mins` : 'no running time'}${film.poster ? '' : ', no poster'}`,
+        );
       } else {
         data.misses[slug] = new Date().toISOString();
-        log(
-          `no Letterboxd page at /film/${slug}/: set \`film\` to the film's Letterboxd URL in upNext (src/site.config.ts)`,
-        );
+        log(`no Letterboxd page at /film/${slug}/: give the film's Letterboxd link instead of its title`);
       }
     } catch (error) {
       log(`couldn't reach Letterboxd for ${slug} (${(error as Error).message}); it'll be tried again next build`);
     }
   }
+  if (todo.length) log(`found ${found} of ${todo.length} new ${todo.length === 1 ? 'film' : 'films'}`);
 
+  if (JSON.stringify({ ...data, fetchedAt: null }) === before) return;
   data.fetchedAt = new Date().toISOString();
   await mkdir(new URL('.', OUT), { recursive: true });
   await writeFile(OUT, `${JSON.stringify(data, null, 2)}\n`);
-  log(`found ${found} of ${todo.length} new ${todo.length === 1 ? 'film' : 'films'}`);
 }
 
 try {

@@ -18,16 +18,11 @@ export interface TestCase {
   time: string;
 }
 
-// `.ts` so the build scripts, which run this file in plain Node, can load it too
-import { theatres } from './theatres.ts';
-export type { Theatre } from './theatres.ts';
-
-/** A show you've booked. Shown as a ticket in "Up next" until it's over. */
+/** A show you've booked (read from its GitHub issue). Shown as a ticket in "Up next" until it's over. */
 export interface Booking {
   /**
-   * The film on Letterboxd: its page URL ('https://letterboxd.com/film/dune-part-two/') or just
-   * the slug ('dune-part-two'). Leave it out and it's guessed from `title`; set it when the guess
-   * picks the wrong film (remakes, films sharing a name).
+   * The film's Letterboxd page ('https://letterboxd.com/film/dune-part-two/'), when the issue gave
+   * a link. Otherwise the page is guessed from `title`.
    */
   film?: string;
   /** Shown on the ticket. Optional when `film` is set: Letterboxd's title is used. */
@@ -36,13 +31,10 @@ export interface Booking {
   date: string;
   /** Start time, 24-hour `HH:MM` (optional). */
   time?: string;
-  /** A key from src/theatres.ts (e.g. 'amb'), or any text like 'Prasads, Hyderabad' (optional). */
+  /** The cinema, as picked or typed on the issue form, e.g. 'Prasads Multiplex: Hyderabad' (optional). */
   at?: string;
   /** Format or language, e.g. 'IMAX', 'Telugu', '4DX' (optional). */
   tag?: string;
-  /** Your own poster, overriding Letterboxd's: a full URL, or a file in /public like '/up-next/film.jpg'. */
-  poster?: string;
-  placeholder?: boolean;
 }
 
 export const site = {
@@ -68,20 +60,20 @@ export const site = {
   /** Your Letterboxd username. `npm run films` pulls its public RSS feed. */
   letterboxd: 'pj_18',
 
-  /** Your regular cinemas live in their own file: src/theatres.ts. */
-  theatres,
 
   /**
    * "Up next": the shows you've booked. BookMyShow has no public API and your bookings sit behind
-   * your login, so add them here when you book; each one drops off by itself once it's over.
-   * Posters come from Letterboxd when the site builds (`npm run up-next` fetches them right away).
-   * Never put seat numbers or booking IDs in here: this file is published with the site.
-   *
-   *   { film: 'dune-part-two', date: '2026-12-18', time: '19:30', at: 'amb', tag: 'IMAX' }
+   * your login, so when you book, open an issue on this repository with the "Up next" form
+   * (edit it to change the show, close it to cancel). Each one drops off by itself once it's over;
+   * posters come from Letterboxd. Issues are public: never put seat numbers or booking IDs in them.
+   * Only issues the repository's owner opens are read.
    */
-  upNext: [
-    { title: 'Dune: Part Three', date: '2026-12-16', time: '20:50', at: 'prasads' },
-  ] as Booking[],
+  upNextIssues: {
+    repo: 'pj-18/my-portfolio',
+    label: 'up-next',
+    /** Show times are the cinema's local time: its UTC offset ('+05:30' is India). */
+    utcOffset: '+05:30',
+  },
 
   /** Reviews whose film title is listed here never appear in the one-liner ticker. */
   hideFromQuotes: [] as string[],

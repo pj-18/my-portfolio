@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  issues: read # "Up next" bookings are issues
   pages: write
   id-token: write
 
@@ -33,7 +34,8 @@ jobs:
 
       - run: npm ci
 
-      # `npm run build` pulls the latest Letterboxd feed and Last.fm charts first, then builds.
+      # `npm run build` pulls the latest Letterboxd feed, Last.fm charts and booked shows
+      # (open "Up next" issues) first, then builds.
       # LASTFM_API_KEY is a repository secret (Settings → Secrets and variables → Actions).
       # Without it the build still passes; the soundtrack keeps its last committed data.
       - run: npm run build
@@ -41,6 +43,7 @@ jobs:
           SITE_URL: ${{ steps.pages.outputs.origin }}
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
           LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
 
       - uses: actions/upload-pages-artifact@v4
         with:

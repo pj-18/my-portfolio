@@ -74,16 +74,31 @@ The film diary comes from your public Letterboxd RSS feed (`letterboxd` in `site
 
 ### Up next: booked shows
 
-Tickets you've booked show above the diary as "Up next", with a countdown, and each drops off by itself once the show is over. BookMyShow has no public API (and bookings sit behind your login), so you add a line to `upNext` in `site.config.ts` when you book:
+Tickets you've booked show above the diary as "Up next", with a countdown, and each drops off by itself once the show is over. BookMyShow has no public API (and bookings sit behind your login), so when you book, you open a GitHub issue for the show. Nothing is committed: the site reads your open booking issues each time it builds.
 
-```ts
-{ film: 'https://letterboxd.com/film/dune-part-two/', date: '2026-12-18', time: '19:30', at: 'amb', tag: 'IMAX' }
-```
+**Issues → New issue → "Up next, a show I've booked"** (works from your phone or the GitHub app), and fill in the form: the film (its title, or better, its Letterboxd link; a `boxd.it` link from the app's Share button works too), the date (`2026-12-18`, `18/12` or `18 Dec`), and optionally the time (24-hour, like `20:50`), cinema and format. Then:
 
-- `film` is the film's Letterboxd page (or just its slug). The build reads the poster, title and link from it and saves them in `src/data/up-next.json`, so each film is fetched once. Leave `film` out and give a `title` instead, and the page is guessed from the title. If the guess finds nothing, or the wrong film, `npm run up-next` tells you and you set `film`.
-- `at` is a key from `src/theatres.ts` (your regular cinemas; the list itself isn't shown on the page) or any text. Name them the way BookMyShow does, so they're easy to recognise.
-- `poster` (a URL or a file in `public/`) overrides Letterboxd's.
-- This file is published with the site: never put seat numbers or booking IDs in it.
+- the `Up next` workflow reads it, names the issue after the show, and replies with the film it found on Letterboxd (or what it couldn't read), then redeploys the site; the ticket is live a couple of minutes later
+- **edit** the issue to change the show, **close** it to cancel
+- the morning after the show the issue is closed for you
+
+On the night, the ticket follows the show, using the film's running time from Letterboxd (150 minutes if it doesn't have one yet). For a 21:00 show of a 120-minute film:
+
+| Time | The ticket says |
+|---|---|
+| before 21:00 | the countdown: "3 days to go", then "Today" |
+| 21:00 to 23:15 | **Rolling**, till 23:15 (the running time plus a 15-minute interval) |
+| 23:15 to 00:00 | **Wrapped**, credits rolled |
+| from 00:00 | gone (an hour after the running time is up) |
+
+The page keeps this current by itself, minute by minute, without a rebuild. Show times are read as Indian time (`utcOffset` in `site.config.ts`), whatever time zone the visitor is in. A show without a time just says "Today" and leaves at midnight. The interval, the hour and the 150-minute guess are at the top of `src/lib/up-next.ts`.
+
+Good to know:
+
+- Each film's poster, title and link are fetched from Letterboxd once and saved in `src/data/up-next.json`. If the title leads to no page, or the wrong film, the issue's comment says so: edit it and paste the film's Letterboxd link.
+- The cinema dropdown (your regular cinemas, named the way BookMyShow does) lives in `.github/ISSUE_TEMPLATE/up-next.yml`: edit it there to add or rename one. The ticket shows the name exactly as picked; the list itself isn't shown on the site. "Another cinema" takes any name.
+- Only issues opened by the repository's owner count, so nobody else can put a show on your site. The repository and label are `upNextIssues` in `site.config.ts`.
+- Issues are public, like the site: never put seat numbers or booking IDs in them.
 
 ### Music: Apple Music, via Last.fm
 
@@ -119,8 +134,7 @@ The project site path (`/my-portfolio/`) and a custom domain are both handled au
 
 ```
 src/
-  site.config.ts        your words, links and bookings
-  theatres.ts           your regular cinemas (BookMyShow names), for "Up next"
+  site.config.ts        your words and links
   photos/               your photos + photos.json captions
   data/letterboxd.json  saved diary (written by `npm run films`)
   data/music.json       saved Last.fm charts + artwork lookups (written by `npm run music`)

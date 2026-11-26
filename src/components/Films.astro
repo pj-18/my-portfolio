@@ -22,6 +22,14 @@ import { starsInSvg, starsMarkup } from '../lib/stars';
 const handle = diary.username || site.letterboxd;
 const profile = diary.profile;
 const pickPoster = pick ? poster(pick.poster) : null;
+/* Each rating gets its own colour: red at ½★, through amber, to green at 5★. */
+function ratingTone(rating: number) {
+  const t = (rating - 0.5) / 4.5;
+  return t <= 0.5
+    ? `color-mix(in oklch, var(--amber) ${Math.round(t * 200)}%, var(--red))`
+    : `color-mix(in oklch, var(--green) ${Math.round((t - 0.5) * 200)}%, var(--amber))`;
+}
+
 const rows = oneLiners.length >= 8 ? [oneLiners.filter((_, i) => i % 2 === 0), oneLiners.filter((_, i) => i % 2 === 1)] : [oneLiners];
 
 /* festival laurels around "PJ's pick", drawn from a circle */
@@ -132,7 +140,7 @@ const laurels = laurel(false) + laurel(true);
                     data-rating={bucket.rating}
                     aria-pressed="false"
                     aria-label={`${bucket.count} ${bucket.count === 1 ? 'film' : 'films'} rated ${bucket.rating} out of 5`}
-                    style={`--h:${Math.max(0.04, bucket.count / histogramPeak)}`}
+                    style={`--h:${Math.max(0.04, bucket.count / histogramPeak)};--tone:${ratingTone(bucket.rating)}`}
                     disabled={bucket.count === 0}
                   >
                     <span class="bar__count">{bucket.count}</span>
@@ -141,9 +149,9 @@ const laurels = laurel(false) + laurel(true);
                 ))}
               </div>
               <div class="histogram__axis" aria-hidden="true">
-                <span set:html={starsMarkup(0.5)} />
+                <span style={`color:${ratingTone(0.5)}`} set:html={starsMarkup(0.5)} />
                 <span class="histogram__hint">tap a bar to filter</span>
-                <span set:html={starsMarkup(5)} />
+                <span style={`color:${ratingTone(5)}`} set:html={starsMarkup(5)} />
               </div>
             </div>
           )}
@@ -602,7 +610,7 @@ const laurels = laurel(false) + laurel(true);
     height: calc(var(--h) * (100% - 1.2rem));
     min-height: 3px;
     border-radius: 3px 3px 1px 1px;
-    background: linear-gradient(var(--amber), rgb(255 182 39 / 0.55));
+    background: linear-gradient(var(--tone, var(--amber)), color-mix(in oklch, var(--tone, var(--amber)) 80%, transparent));
     transition:
       background 0.25s,
       opacity 0.25s,
@@ -634,11 +642,11 @@ const laurels = laurel(false) + laurel(true);
   }
 
   .bar[aria-pressed='true'] .bar__fill {
-    background: linear-gradient(var(--paper), var(--amber));
+    background: linear-gradient(var(--paper), var(--tone, var(--amber)));
   }
 
   .bar[aria-pressed='true'] .bar__count {
-    color: var(--paper);
+    color: var(--tone, var(--paper));
   }
 
   .bar:not(:disabled):hover .bar__fill {

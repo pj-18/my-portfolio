@@ -3,6 +3,7 @@ import ReelHead from './ReelHead.astro';
 import { site } from '../site.config';
 import { stats } from '../lib/films';
 import { music } from '../lib/music';
+import { siCypress, siGit, siJavascript, siNodedotjs, siReact, siTypescript } from 'simple-icons';
 import { rich } from '../lib/util';
 
 const about = rich(site.about);
@@ -10,7 +11,33 @@ const tests = site.tests.map((t) => ({
   ...t,
   name: t.name.replace('{films}', String(stats.logged)).replace('{reviews}', String(stats.reviews)),
 }));
-const stack = [...site.stack, ...site.stack];
+/* ---- a logo for each tool in the ticker ----
+   Brand marks come from Simple Icons (CC0). Playwright isn't in it any more, and SQL, REST and
+   CI/CD have no brand mark, so those get a small drawn glyph in the section's green instead. */
+type Logo = { color: string; body: string; stroke?: boolean };
+const brand = (icon: { hex: string; path: string }): Logo => ({ color: `#${icon.hex}`, body: `<path d="${icon.path}"/>` });
+const drawn = (body: string): Logo => ({ color: 'var(--green)', body, stroke: true });
+const logos: Record<string, Logo> = {
+  react: brand(siReact),
+  javascript: brand(siJavascript),
+  typescript: brand(siTypescript),
+  cypress: brand(siCypress),
+  'node.js': brand(siNodedotjs),
+  git: brand(siGit),
+  // Playwright's mark: two theatre masks, red behind green
+  playwright: {
+    color: '#2EAD33',
+    body:
+      '<path fill="#E2574C" fill-rule="evenodd" transform="rotate(-14 8 9)" d="M2.5 3.5h11v5a5.5 5.5 0 0 1-11 0zM5 6.2a1 1 0 1 0 2 0a1 1 0 1 0-2 0zm4 0a1 1 0 1 0 2 0a1 1 0 1 0-2 0zM5.2 11.6a2.8 2.8 0 0 1 5.6 0z"/>' +
+      '<path fill="currentColor" fill-rule="evenodd" stroke="var(--ink)" stroke-width="1.4" paint-order="stroke" d="M9.5 9h12v5.5a6 6 0 0 1-12 0zM12.4 11.6a1.1 1.1 0 1 0 2.2 0a1.1 1.1 0 1 0-2.2 0zm4.4 0a1.1 1.1 0 1 0 2.2 0a1.1 1.1 0 1 0-2.2 0zM12.5 14.6h6a3 3 0 0 1-6 0z"/>',
+  },
+  sql: drawn('<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>'),
+  'rest apis': drawn(
+    '<path d="M8 3H7a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2 2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2 2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-1"/>',
+  ),
+  'ci/cd': drawn('<path d="M12 12c-2-2.7-4-4-6-4a4 4 0 0 0 0 8c2 0 4-1.3 6-4zm0 0c2 2.7 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.3-6 4z"/>'),
+};
+const stack = [...site.stack, ...site.stack].map((name) => ({ name, logo: logos[name.toLowerCase()] }));
 ---
 
 <section id="work" class="reel work" data-scene="work" aria-labelledby="work-title">
@@ -68,10 +95,25 @@ const stack = [...site.stack, ...site.stack];
     <ul class="sr-only">{site.stack.map((tool) => <li>{tool}</li>)}</ul>
     <div class="stack__track" aria-hidden="true">
       {
-        stack.map((tool) => (
+        stack.map(({ name, logo }) => (
           <span class="stack__item">
-            {tool}
-            <i>✳</i>
+            {logo ? (
+              <svg
+                class="stack__logo"
+                viewBox="0 0 24 24"
+                style={`color:${logo.color}`}
+                fill={logo.stroke ? 'none' : 'currentColor'}
+                stroke={logo.stroke ? 'currentColor' : undefined}
+                stroke-width={logo.stroke ? 2 : undefined}
+                stroke-linecap={logo.stroke ? 'round' : undefined}
+                stroke-linejoin={logo.stroke ? 'round' : undefined}
+                focusable="false"
+                set:html={logo.body}
+              />
+            ) : (
+              <i>✳</i>
+            )}
+            {name}
           </span>
         ))
       }
@@ -285,11 +327,16 @@ const stack = [...site.stack, ...site.stack];
     animation: marquee 36s linear infinite reverse;
   }
 
+  /* the ticker closes the reel: no extra gap before the credits */
+  .stack:last-child {
+    margin-bottom: 0;
+  }
+
   .stack__item {
     display: flex;
     align-items: center;
-    gap: 1.1rem;
-    padding-right: 1.1rem;
+    gap: 0.45em;
+    padding-right: 1em;
     font-family: var(--f-display);
     font-size: clamp(1.6rem, 6vw, 2.6rem);
     font-stretch: 75%;
@@ -303,6 +350,12 @@ const stack = [...site.stack, ...site.stack];
     font-style: normal;
     font-size: 0.6em;
     color: var(--green);
+  }
+
+  .stack__logo {
+    flex: none;
+    width: 0.78em;
+    height: 0.78em;
   }
 
   @media (min-width: 48rem) {

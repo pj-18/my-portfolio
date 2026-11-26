@@ -119,5 +119,5 @@ export const site = {
   ] satisfies TestCase[],
 
   /** Rolls past in the work section. Trim or extend freely. */
-  stack: ['React', 'JavaScript', 'TypeScript', 'Playwright', 'Cypress', 'SQL', 'Node.js', 'REST APIs', 'Git', 'CI/CD'],
+  stack: ['React', 'JavaScript', 'Playwright', 'Cypress', 'SQL', 'Node.js', 'TypeScript', 'REST APIs', 'Git', 'CI/CD'],
 };

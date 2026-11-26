@@ -92,9 +92,15 @@ const latestPoster = latest ? poster(latest.poster) : null;
     position: relative;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
+    /* Phones: anchor to the top so the space beside the ticket is used on tall
+       screens too; any slack falls to the bottom, behind the floating nav. */
+    justify-content: flex-start;
     min-height: 100svh;
-    padding-top: 16.5rem;
+    /* The ticket hangs top-right. Let the kicker and the first two (short) title
+       rows sit beside it, and only push far enough that row three ("cinema ( )",
+       the widest) clears the ticket's bottom edge. 1.72 = two rows at
+       line-height 0.86 of the title's own font-size clamp. */
+    padding-top: max(10rem, calc(16rem - 1.72 * clamp(3.4rem, 16.2vw, 6.4rem)));
     padding-bottom: 1.25rem;
     overflow: clip;
     isolation: isolate;
@@ -354,11 +360,14 @@ const latestPoster = latest ? poster(latest.poster) : null;
     }
   }
 
-  @media (min-width: 64rem) {
+  /* Very narrow phones: even "code ( )" reaches under the ticket. */
+  @media (max-width: 22.5rem) {
     .hero {
-      padding-top: 9rem;
+      padding-top: 16.5rem;
     }
+  }
 
+  @media (min-width: 64rem) {
     .hero__title {
       font-size: clamp(4rem, 8.4vw, 9.5rem);
     }
@@ -370,6 +379,7 @@ const latestPoster = latest ? poster(latest.poster) : null;
 
   @media (min-width: 48rem) {
     .hero {
+      justify-content: flex-end;
       padding-bottom: 2.5rem;
     }
 

@@ -195,6 +195,39 @@ if (section) {
     });
   }
 
+  /* ---- up next: keep the countdown honest between rebuilds ---- */
+  const passes = [...section.querySelectorAll<HTMLElement>('[data-show-day]')];
+  if (passes.length) {
+    const now = new Date();
+    const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    for (const pass of passes) {
+      if (pass.hasAttribute('data-placeholder')) continue;
+      const day = Number(pass.dataset.showDay);
+      // over ~4 hours after the start (in your own time zone), or at midnight with no time given
+      const { showDate, showTime } = pass.dataset;
+      const over = showTime
+        ? new Date(`${showDate}T${showTime}`).getTime() + 4 * 3_600_000
+        : new Date(`${showDate}T23:59:59`).getTime();
+      if (Date.now() > over) {
+        pass.hidden = true; // the next rebuild drops it for good
+        continue;
+      }
+      const days = Math.round((day - today) / 86_400_000);
+      const num = pass.querySelector('[data-count-num]');
+      const unit = pass.querySelector('[data-count-unit]');
+      if (num) num.textContent = days <= 0 ? 'Today' : String(days);
+      if (unit) unit.textContent = days <= 0 ? '' : days === 1 ? 'day to go' : 'days to go';
+    }
+    const left = passes.filter((pass) => !pass.hidden).length;
+    const block = section.querySelector<HTMLElement>('[data-upnext]');
+    const note = block?.querySelector<HTMLElement>('[data-upnext-note]');
+    if (!left) {
+      block?.setAttribute('hidden', ''); // every booked show is over
+    } else if (note && left !== passes.length) {
+      note.textContent = left === 1 ? 'Ticket in the pocket' : `${left} tickets in the pocket`;
+    }
+  }
+
   /* ---- one-liners: pause / play ---- */
   const quotes = section.querySelector<HTMLElement>('[data-quotes]');
   const toggle = quotes?.querySelector<HTMLButtonElement>('[data-quotes-toggle]');

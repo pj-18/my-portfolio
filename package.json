@@ -8,12 +8,13 @@
     "node": ">=22.23.4"
   },
   "scripts": {
-    "predev": "node scripts/sync-letterboxd.ts --if-missing && node scripts/sync-music.ts --if-missing",
+    "predev": "node scripts/sync-letterboxd.ts --if-missing && node scripts/sync-music.ts --if-missing && node scripts/sync-up-next.ts",
     "dev": "astro dev",
     "films": "node scripts/sync-letterboxd.ts",
+    "up-next": "node scripts/sync-up-next.ts",
     "music": "node scripts/sync-music.ts",
     "music:sample": "node scripts/sync-music.ts --sample",
-    "build": "node scripts/sync-letterboxd.ts && node scripts/sync-music.ts && astro build",
+    "build": "node scripts/sync-letterboxd.ts && node scripts/sync-music.ts && node scripts/sync-up-next.ts && astro build",
     "build:offline": "astro build",
     "preview": "astro preview",
     "check": "astro check",

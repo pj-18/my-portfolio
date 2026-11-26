@@ -9,6 +9,7 @@ import {
   filmUrl,
   histogram,
   histogramPeak,
+  latest,
   lists,
   oneLiners,
   pick,
@@ -23,6 +24,7 @@ import { filmSlug, offsetMinutes, showStatus, showTimes, type UpNextData } from 
 const handle = diary.username || site.letterboxd;
 const profile = diary.profile;
 const pickPoster = pick ? poster(pick.poster) : null;
+const latestPoster = latest ? poster(latest.poster) : null;
 /* Each rating gets its own colour: red at ½★, through amber, to green at 5★. */
 function ratingTone(rating: number) {
   const t = (rating - 0.5) / 4.5;
@@ -131,6 +133,33 @@ const laurels = laurel(false) + laurel(true);
             Every film I watch gets logged, rated out of five and, more often than not, summed up in a sentence.
             Here's the latest from the diary.
           </p>
+          {latest && (
+            <a class="now reveal" href={latest.url} target="_blank" rel="noopener noreferrer">
+              {latestPoster && (
+                <img
+                  class="now__poster"
+                  src={latestPoster.src}
+                  srcset={latestPoster.srcset}
+                  sizes="44px"
+                  width="44"
+                  height="66"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              )}
+              <span class="now__text">
+                <span class="now__label">
+                  <span class="now__dot" />
+                  Last watched · {shortDate(latest.watched)}
+                </span>
+                <span class="now__title">
+                  {latest.title} {latest.year && <span>({latest.year})</span>}
+                </span>
+              </span>
+              <Stars rating={latest.rating} class="now__stars" />
+            </a>
+          )}
         </div>
 
         {/* ---- box office ---- */}
@@ -616,9 +645,12 @@ const laurels = laurel(false) + laurel(true);
     gap: 0.5rem;
   }
 
+  /* number on top, label under it; packed to the top so a label that wraps to two
+     lines ("Films logged" on phones) doesn't push its number out of line */
   .tally div {
     display: flex;
     flex-direction: column-reverse;
+    justify-content: flex-end;
     gap: 0.4rem;
   }
 
@@ -678,6 +710,94 @@ const laurels = laurel(false) + laurel(true);
     letter-spacing: 0;
     text-transform: none;
     color: var(--paper);
+  }
+
+  /* the intro line, with the latest diary entry under it (phones) or beside it (wider) */
+  .films__intro {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .now {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    width: fit-content;
+    max-width: 100%;
+    padding: 0.5rem 1rem 0.5rem 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: rgb(22 20 15 / 0.6);
+    text-decoration: none;
+    transition: border-color 0.25s;
+  }
+
+  .now:hover {
+    border-color: rgb(255 182 39 / 0.5);
+  }
+
+  .now__poster {
+    flex: none;
+    width: 44px;
+    height: 66px;
+    border-radius: 5px;
+    object-fit: cover;
+    background: var(--ink-3);
+  }
+
+  .now__text {
+    display: grid;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  .now__label {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: var(--f-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .now__dot {
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--amber);
+    box-shadow: 0 0 0 0 rgb(255 182 39 / 0.6);
+    animation: ping 2s infinite;
+  }
+
+  @keyframes ping {
+    70% {
+      box-shadow: 0 0 0 7px rgb(255 182 39 / 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgb(255 182 39 / 0);
+    }
+  }
+
+  .now__title {
+    overflow: hidden;
+    font-weight: 600;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .now__title span {
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  .now :global(.now__stars) {
+    flex: none;
+    margin-left: auto;
+    font-size: 0.95rem;
   }
 
   .histogram {
@@ -1278,11 +1398,16 @@ const laurels = laurel(false) + laurel(true);
     text-transform: uppercase;
   }
 
+  /* one deep amber: reads clearly on the cream ticket */
   .stub__stars {
     flex: none;
     color: #b0560f;
-    font-size: 0.72rem;
+    font-size: 0.95rem;
     line-height: 1;
+  }
+
+  .stub__meta {
+    align-items: center;
   }
 
   .diary-block__nav {
@@ -1781,6 +1906,12 @@ const laurels = laurel(false) + laurel(true);
   /* ---------- wider screens ---------- */
 
   @media (min-width: 48rem) {
+    .films__intro {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+      gap: 1.5rem 3rem;
+    }
+
     .boxoffice {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
       align-items: center;
@@ -1901,7 +2032,8 @@ const laurels = laurel(false) + laurel(true);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .quotes__track {
+    .quotes__track,
+    .now__dot {
       animation: none;
     }
 

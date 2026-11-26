@@ -41,6 +41,8 @@ export const site = {
   name: 'Praveen Kumar',
   nickname: 'PJ',
   role: 'Senior Software Engineer',
+  /** The line under the name on the hanging ticket in the hero. Keep it short: the ticket is small. */
+  ticketTitle: 'Plot-hole detective',
   description:
     'Praveen Kumar (PJ) is a senior software engineer who builds web apps and the tests that keep them honest. Off the clock: a Letterboxd film diary and a darkroom of photographs.',
 

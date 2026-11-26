@@ -1,10 +1,7 @@
 ---
 import Icon from './Icon.astro';
-import Stars from './Stars.astro';
 import Ticket from './Ticket.astro';
 import { site } from '../site.config';
-import { latest, poster } from '../lib/films';
-import { shortDate } from '../lib/util';
 import type { IconName } from '../lib/icons';
 
 const lines: { word: string; rest: string; accent: string; icons: IconName[] }[] = [
@@ -13,15 +10,24 @@ const lines: { word: string; rest: string; accent: string; icons: IconName[] }[]
   { word: 'frames', rest: 'in between.', accent: 'red', icons: ['camera', 'aperture', 'frame'] },
 ];
 
-const latestPoster = latest ? poster(latest.poster) : null;
+const [first, ...others] = site.name.toUpperCase().split(' ');
+const last = others.join(' ');
 ---
 
 <section id="top" class="hero" data-scene="top" aria-labelledby="hero-title">
+  <div class="hero__backdrop" data-parallax aria-hidden="true">
+    <div class="backdrop__screen" data-depth="0.12"></div>
+    <div class="backdrop__name" data-depth="0.32">
+      <span>{first}</span>
+      {last && <span>{last}</span>}
+    </div>
+    <div class="backdrop__dust" data-depth="0.5"></div>
+  </div>
   <div class="hero__beam" aria-hidden="true"></div>
   <Ticket />
 
   <div class="hero__inner wrap">
-    <p class="hero__kicker eyebrow">{site.name}</p>
+    <p class="hero__kicker">{site.name}</p>
 
     <h1 id="hero-title" class="hero__title">
       <span class="sr-only">{site.name}, {site.nickname} for short: code by day, cinema by night, frames in between.</span>
@@ -50,35 +56,6 @@ const latestPoster = latest ? poster(latest.poster) : null;
         the tests that keep them honest. Grab a seat, the feature is about to start.
       </p>
 
-      {
-        latest && (
-          <a class="now" href={latest.url} target="_blank" rel="noopener noreferrer">
-            {latestPoster && (
-              <img
-                class="now__poster"
-                src={latestPoster.src}
-                srcset={latestPoster.srcset}
-                sizes="44px"
-                width="44"
-                height="66"
-                alt=""
-                decoding="async"
-              />
-            )}
-            <span class="now__text">
-              <span class="now__label">
-                <span class="now__dot" />
-                Last watched · {shortDate(latest.watched)}
-              </span>
-              <span class="now__title">
-                {latest.title} {latest.year && <span>({latest.year})</span>}
-              </span>
-            </span>
-            <Stars rating={latest.rating} class="now__stars" />
-          </a>
-        )
-      }
-
       <a class="hero__cue" href="#films">
         <span>Roll the feature</span>
         <Icon name="down" size={16} />
@@ -104,6 +81,106 @@ const latestPoster = latest ? poster(latest.poster) : null;
     padding-bottom: 1.25rem;
     overflow: clip;
     isolation: isolate;
+  }
+
+  /* ---------- the backdrop: a dark auditorium with the name across the screen ---------- */
+
+  .hero__backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    overflow: hidden;
+    pointer-events: none;
+    /* melt into the page below instead of ending on a hard edge */
+    -webkit-mask-image: linear-gradient(#000 62%, transparent);
+    mask-image: linear-gradient(#000 62%, transparent);
+  }
+
+  .hero__backdrop > * {
+    position: absolute;
+    will-change: transform;
+  }
+
+  /* screen glow, warm floor light and curtain folds at the edges */
+  .backdrop__screen {
+    inset: -20% 0;
+    background:
+      radial-gradient(70% 45% at 60% 30%, rgb(255 214 150 / 0.08), transparent 70%),
+      radial-gradient(120% 60% at 50% 100%, rgb(176 38 30 / 0.1), transparent 65%);
+  }
+
+  .backdrop__screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      rgb(0 0 0 / 0.28) 0 1.1rem,
+      rgb(120 24 20 / 0.1) 1.6rem 2.2rem,
+      rgb(0 0 0 / 0.28) 2.8rem 3.3rem
+    );
+    -webkit-mask-image: linear-gradient(90deg, #000, transparent 14%, transparent 86%, #000);
+    mask-image: linear-gradient(90deg, #000, transparent 14%, transparent 86%, #000);
+  }
+
+  .backdrop__name {
+    inset: 14% 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: var(--f-display);
+    font-size: 31vw;
+    font-stretch: 62%;
+    font-weight: 900;
+    line-height: 0.8;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    color: rgb(243 234 216 / 0.025);
+    -webkit-text-stroke: 1.5px rgb(243 234 216 / 0.11);
+    -webkit-mask-image: linear-gradient(transparent, #000 18%, #000 72%, transparent);
+    mask-image: linear-gradient(transparent, #000 18%, #000 72%, transparent);
+  }
+
+  /* specks and a scratch, like an old print */
+  .backdrop__dust {
+    inset: -10% 0;
+    background:
+      linear-gradient(90deg, transparent calc(71% - 0.5px), rgb(243 234 216 / 0.06) 71%, transparent calc(71% + 0.5px)),
+      radial-gradient(circle at 12% 22%, rgb(255 226 170 / 0.4) 0 1px, transparent 1.6px),
+      radial-gradient(circle at 34% 64%, rgb(255 226 170 / 0.3) 0 1.2px, transparent 1.8px),
+      radial-gradient(circle at 58% 12%, rgb(255 226 170 / 0.35) 0 1px, transparent 1.6px),
+      radial-gradient(circle at 81% 48%, rgb(255 226 170 / 0.3) 0 1.4px, transparent 2px),
+      radial-gradient(circle at 90% 78%, rgb(255 226 170 / 0.25) 0 1px, transparent 1.6px),
+      radial-gradient(circle at 22% 86%, rgb(255 226 170 / 0.3) 0 1px, transparent 1.6px),
+      radial-gradient(circle at 66% 38%, rgb(255 226 170 / 0.22) 0 0.8px, transparent 1.4px);
+    animation: flicker 5s steps(1) infinite;
+  }
+
+  @keyframes flicker {
+    0%,
+    100% {
+      opacity: 0.9;
+    }
+    23% {
+      opacity: 0.55;
+    }
+    47% {
+      opacity: 1;
+    }
+    71% {
+      opacity: 0.7;
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .backdrop__name {
+      inset: 9% 0 auto;
+      flex-direction: row;
+      justify-content: center;
+      gap: 0.22em;
+      font-size: 15.5vw;
+      -webkit-text-stroke-width: 2px;
+    }
   }
 
   .hero__beam {
@@ -143,10 +220,13 @@ const latestPoster = latest ? poster(latest.poster) : null;
 
   .hero__kicker {
     margin-bottom: 1.1rem;
-  }
-
-  .hero__kicker span {
-    color: var(--dim);
+    font-family: var(--f-mono);
+    font-size: clamp(1.05rem, 4.4vw, 1.9rem);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--paper);
   }
 
   .hero__title {
@@ -256,86 +336,6 @@ const latestPoster = latest ? poster(latest.poster) : null;
     font-weight: 600;
   }
 
-  .now {
-    display: flex;
-    align-items: center;
-    gap: 0.85rem;
-    width: fit-content;
-    max-width: 100%;
-    padding: 0.5rem 1rem 0.5rem 0.5rem;
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    background: rgb(22 20 15 / 0.6);
-    text-decoration: none;
-    transition: border-color 0.25s;
-  }
-
-  .now:hover {
-    border-color: rgb(255 182 39 / 0.5);
-  }
-
-  .now__poster {
-    flex: none;
-    width: 44px;
-    height: 66px;
-    border-radius: 5px;
-    object-fit: cover;
-    background: var(--ink-3);
-  }
-
-  .now__text {
-    display: grid;
-    gap: 0.25rem;
-    min-width: 0;
-  }
-
-  .now__label {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-    font-family: var(--f-mono);
-    font-size: 0.64rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .now__dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--amber);
-    box-shadow: 0 0 0 0 rgb(255 182 39 / 0.6);
-    animation: ping 2s infinite;
-  }
-
-  @keyframes ping {
-    70% {
-      box-shadow: 0 0 0 7px rgb(255 182 39 / 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgb(255 182 39 / 0);
-    }
-  }
-
-  .now__title {
-    overflow: hidden;
-    font-weight: 600;
-    line-height: 1.2;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .now__title span {
-    color: var(--muted);
-    font-weight: 400;
-  }
-
-  .now :global(.now__stars) {
-    margin-left: auto;
-    font-size: 0.95rem;
-  }
-
   .hero__cue {
     display: inline-flex;
     align-items: center;
@@ -384,26 +384,20 @@ const latestPoster = latest ? poster(latest.poster) : null;
     }
 
     .hero__foot {
-      grid-template-columns: minmax(0, 1fr) auto;
-      align-items: end;
-      gap: 1.5rem 3rem;
+      gap: 1.5rem;
       margin-top: 2.5rem;
     }
 
     .hero__intro {
       font-size: 1.15rem;
     }
-
-    .hero__cue {
-      grid-column: 1 / -1;
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .hero__beam,
+    .backdrop__dust,
     .hero__line,
     .hero__foot,
-    .now__dot,
     .hero__cue :global(svg) {
       animation: none;
     }
@@ -417,3 +411,7 @@ const latestPoster = latest ? poster(latest.poster) : null;
     }
   }
 </style>
+
+<script>
+  import '../scripts/parallax';
+</script>

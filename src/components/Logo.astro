@@ -1,0 +1,42 @@
+---
+/**
+ * The PJ mark: an amber ticket stub, "PJ" punched into it, a play button on the tear-off.
+ * Drawn with paths (no <text>) so it looks the same without fonts and at favicon size.
+ * public/favicon.svg carries the same drawing: change both together.
+ */
+interface Props {
+  class?: string;
+  title?: string;
+}
+
+const { class: className, title } = Astro.props;
+---
+
+<svg
+  class:list={['logo', className]}
+  viewBox="0 0 56 36"
+  role={title ? 'img' : undefined}
+  aria-hidden={title ? undefined : 'true'}
+  focusable="false"
+>
+  {title && <title>{title}</title>}
+  <path
+    fill="#ffb627"
+    d="M4 2H52a2 2 0 0 1 2 2V14a4 4 0 0 0 0 8V32a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V22a4 4 0 0 0 0-8V4a2 2 0 0 1 2-2Z"
+  />
+  <g fill="none" stroke="#0d0c0a" stroke-width="4.4">
+    <path d="M11 28.3V7.6M9 9.8H15.5a5.2 5.2 0 0 1 0 10.4H11" />
+    <path d="M29.5 9.8H36V21.5a4.4 4.4 0 0 1-8.8 0V20" />
+  </g>
+  <path stroke="#0d0c0a" stroke-width="1.4" stroke-dasharray="2.4 2.2" d="M41 4.6V31.4" />
+  <path fill="#0d0c0a" d="M45.2 13.6 51.4 18l-6.2 4.4Z" />
+</svg>
+
+<style>
+  .logo {
+    display: block;
+    height: 100%;
+    width: auto;
+    overflow: visible;
+  }
+</style>

@@ -19,6 +19,9 @@ const cued = firstChart?.cuts.find((cut) => cut.preview) ?? firstChart?.cuts[0];
 const hasPreviews = charts.some((chart) => chart.cuts.some((cut) => cut.preview));
 const opening = firstChart?.key;
 const pressed = (on: boolean) => (on ? 'true' : 'false');
+/* "Last spun" links to Apple Music when it can; otherwise it's just a card. */
+const Spun = lastPlayed?.apple ? 'a' : 'div';
+const spunProps = lastPlayed?.apple ? { href: lastPlayed.apple, target: '_blank', rel: 'noopener noreferrer' } : {};
 ---
 
 {
@@ -35,16 +38,12 @@ const pressed = (on: boolean) => (on ? 'true' : 'false');
         id="music-title"
         number="02"
         title="The soundtrack"
-        kicker="Apple Music, via Last.fm"
+        kicker="Apple Music"
         accent="cyan"
         symbol="♪"
         variant="optical"
         speed={44}
-      >
-        <a slot="aside" class="eyebrow music__handle" href={music.profile} target="_blank" rel="noopener noreferrer">
-          {isSample ? 'last.fm' : `@${music.username}`} ↗
-        </a>
-      </ReelHead>
+      />
 
       <div class="wrap music__intro">
         {isSample && (
@@ -54,7 +53,7 @@ const pressed = (on: boolean) => (on ? 'true' : 'false');
           </p>
         )}
         <p class="lede reveal">
-          What's on repeat: my Apple Music plays, scrobbled to Last.fm and pressed onto a record.
+          What's on repeat: my Apple Music plays, pressed onto a record.
           {hasPreviews && ' Tap a song for thirty seconds of it.'}
         </p>
         <div class="music__tools reveal">
@@ -70,7 +69,7 @@ const pressed = (on: boolean) => (on ? 'true' : 'false');
           <dl class="meter">
             {music.scrobbles && (
               <div>
-                <dt>Scrobbles</dt>
+                <dt>Plays</dt>
                 <dd>{count.format(music.scrobbles)}</dd>
               </div>
             )}
@@ -130,15 +129,6 @@ const pressed = (on: boolean) => (on ? 'true' : 'false');
                           </span>
                         )}
                       </div>
-                      <a
-                        class="spot__link"
-                        href={act.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`${act.name} on Last.fm`}
-                      >
-                        Last.fm <Icon name="arrow" size={14} />
-                      </a>
                       <figcaption class="spot__caption">
                         <span class="spot__rank">No. {pad(act.rank)}</span>
                         <span class="spot__name">{act.name}</span>
@@ -179,7 +169,7 @@ const pressed = (on: boolean) => (on ? 'true' : 'false');
                 </div>
 
                 <p class="poster__fine" aria-hidden="true">
-                  Gates open whenever the headphones go on · Plays counted by Last.fm · No refunds
+                  Gates open whenever the headphones go on · Plays counted by the needle · No refunds
                 </p>
               </article>
             ))}
@@ -256,10 +246,11 @@ const pressed = (on: boolean) => (on ? 'true' : 'false');
               <a
                 class="deck__out"
                 data-now-link
-                href={cued?.apple ?? cued?.url}
+                href={cued?.apple ?? undefined}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Open the cued song"
+                aria-label={cued ? `${cued.name} on Apple Music` : 'Open the cued song'}
+                hidden={!cued?.apple}
               >
                 <Icon name="arrow" size={18} />
               </a>
@@ -293,8 +284,7 @@ const pressed = (on: boolean) => (on ? 'true' : 'false');
                                 data-art={sized(cut.art, 400) ?? ''}
                                 data-art-big={sized(cut.art, 600) ?? ''}
                                 data-preview={cut.preview ?? ''}
-                                data-link={cut.apple ?? cut.url}
-                                data-apple={cut.apple ? 'true' : 'false'}
+                                data-link={cut.apple ?? ''}
                                 aria-pressed="false"
                               >
                                 <span class="track__code" aria-hidden="true">
@@ -332,15 +322,19 @@ const pressed = (on: boolean) => (on ? 'true' : 'false');
                                   <small> plays</small>
                                 </span>
                               </button>
-                              <a
-                                class="track__out"
-                                href={cut.apple ?? cut.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                aria-label={`${cut.name} on ${cut.apple ? 'Apple Music' : 'Last.fm'}`}
-                              >
-                                <Icon name="arrow" size={16} />
-                              </a>
+                              {cut.apple ? (
+                                <a
+                                  class="track__out"
+                                  href={cut.apple}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label={`${cut.name} on Apple Music`}
+                                >
+                                  <Icon name="arrow" size={16} />
+                                </a>
+                              ) : (
+                                <span class="track__out" aria-hidden="true" />
+                              )}
                             </li>
                           ))}
                         </ol>
@@ -354,9 +348,9 @@ const pressed = (on: boolean) => (on ? 'true' : 'false');
         </div>
       </div>
 
-      <div class="wrap music__foot reveal">
-        {lastPlayed && (
-          <a class="spun" href={lastPlayed.apple ?? lastPlayed.url} target="_blank" rel="noopener noreferrer">
+      {lastPlayed && (
+        <div class="wrap music__foot reveal">
+          <Spun class="spun" {...spunProps}>
             {lastPlayed.art ? (
               <img
                 class="spun__art"
@@ -384,12 +378,9 @@ const pressed = (on: boolean) => (on ? 'true' : 'false');
                 {lastPlayed.name} <span>— {lastPlayed.artist}</span>
               </span>
             </span>
-          </a>
-        )}
-        <a class="pill" href={music.profile} target="_blank" rel="noopener noreferrer">
-          Follow the scrobbles <Icon name="arrow" />
-        </a>
-      </div>
+          </Spun>
+        </div>
+      )}
     </section>
   )
 }
@@ -398,11 +389,6 @@ const pressed = (on: boolean) => (on ? 'true' : 'false');
   .music {
     --cyan-dim: #a8dbe6;
     --violet: #6a4cff;
-  }
-
-  .music__handle {
-    color: var(--cyan);
-    text-decoration: none;
   }
 
   .music__intro {
@@ -662,30 +648,6 @@ const pressed = (on: boolean) => (on ? 'true' : 'false');
     font-size: 0.68rem;
     letter-spacing: 0.04em;
     color: var(--paper-dim);
-  }
-
-  .spot__link {
-    position: absolute;
-    z-index: 1;
-    top: 0.75rem;
-    right: 0.75rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.45rem 0.7rem;
-    border-radius: 999px;
-    background: rgb(4 10 13 / 0.72);
-    font-family: var(--f-mono);
-    font-size: 0.62rem;
-    letter-spacing: 0.1em;
-    text-decoration: none;
-    text-transform: uppercase;
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
-  }
-
-  .spot__link:hover {
-    color: var(--cyan);
   }
 
   /* the bill: every act, sized by rank */
@@ -1304,8 +1266,12 @@ const pressed = (on: boolean) => (on ? 'true' : 'false');
     transition: border-color 0.25s;
   }
 
-  .spun:hover {
+  a.spun:hover {
     border-color: rgb(86 210 238 / 0.5);
+  }
+
+  .deck__out[hidden] {
+    display: none;
   }
 
   .spun__art {

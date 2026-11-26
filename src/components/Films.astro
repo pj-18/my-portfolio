@@ -320,7 +320,8 @@ const laurels = laurel(false) + laurel(true);
             <div class="wrap quotes__head">
               <h3 class="sub reveal">The one-liners</h3>
               <button type="button" class="pill quotes__toggle" data-quotes-toggle aria-pressed="false">
-                <Icon name="pause" size={14} />
+                <span data-quotes-icon="pause"><Icon name="pause" size={14} /></span>
+                <span data-quotes-icon="play" hidden><Icon name="play" size={14} /></span>
                 <span data-quotes-label>Pause</span>
               </button>
             </div>
@@ -1078,6 +1079,14 @@ const laurels = laurel(false) + laurel(true);
     padding-inline: 0.95rem;
   }
 
+  .quotes__toggle [data-quotes-icon] {
+    display: inline-flex;
+  }
+
+  .quotes__toggle [hidden] {
+    display: none;
+  }
+
   .quotes__row {
     position: relative;
     overflow: hidden;
@@ -1098,9 +1107,16 @@ const laurels = laurel(false) + laurel(true);
     animation-direction: reverse;
   }
 
-  .quotes:hover .quotes__track,
   .quotes[data-paused] .quotes__track {
     animation-play-state: paused;
+  }
+
+  /* Rest while a mouse is over the cards, but not over the Play button (which
+     lives in the same section), and never on touch, where :hover sticks after a tap. */
+  @media (hover: hover) and (pointer: fine) {
+    .quotes__row:hover .quotes__track {
+      animation-play-state: paused;
+    }
   }
 
   .quote {

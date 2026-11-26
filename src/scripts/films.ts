@@ -55,8 +55,8 @@ if (section) {
      film), while it's off screen or the tab is hidden, and for reduced motion. */
   const auto = section.querySelector<HTMLButtonElement>('[data-diary-auto]');
   if (scroller && auto && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    const EVERY = 3000;
-    const IDLE = 6000; // after you touch it, wait this long before sliding again
+    const EVERY = 4000;
+    const IDLE = 8000; // after you touch it, wait this long before sliding again
     let stopped = false;
     let inView = false;
     let hovering = false;
@@ -98,12 +98,12 @@ if (section) {
       const max = scroller.scrollWidth - scroller.clientWidth;
       if (max <= 2) return;
       if (scroller.scrollLeft >= max - 2) {
-        glide(0, 1800); // back to the newest film, a longer trip
+        glide(0, 2800); // back to the newest film, a longer trip
         return;
       }
       const inset = parseFloat(getComputedStyle(scroller).scrollPaddingLeft) || 0;
       const next = stubs.find((stub) => !stub.hidden && stub.offsetLeft - inset > scroller.scrollLeft + 4);
-      if (next) glide(Math.min(max, next.offsetLeft - inset), 1100);
+      if (next) glide(Math.min(max, next.offsetLeft - inset), 1800);
     };
 
     window.setInterval(() => {
@@ -137,6 +137,14 @@ if (section) {
       stopped = !stopped;
       if (label) label.textContent = stopped ? 'Play' : 'Pause';
       for (const icon of icons) icon.hidden = icon.dataset.autoIcon !== (stopped ? 'play' : 'pause');
+      if (stopped) {
+        settle(); // stop the slide now; the strip rests on the nearest card
+      } else {
+        resumeAt = 0;
+        window.setTimeout(() => {
+          if (!held()) advance(); // set off again without waiting a full beat
+        }, 600);
+      }
     });
   }
   const body = sheet?.querySelector<HTMLElement>('[data-sheet-body]');
@@ -194,6 +202,10 @@ if (section) {
   toggle?.addEventListener('click', () => {
     const paused = toggle.getAttribute('aria-pressed') !== 'true';
     toggle.setAttribute('aria-pressed', String(paused));
+    // the icon shows the action on offer: play while paused, pause while moving
+    for (const icon of toggle.querySelectorAll<HTMLElement>('[data-quotes-icon]')) {
+      icon.hidden = icon.dataset.quotesIcon !== (paused ? 'play' : 'pause');
+    }
     quotes?.toggleAttribute('data-paused', paused);
     if (label) label.textContent = paused ? 'Play' : 'Pause';
   });

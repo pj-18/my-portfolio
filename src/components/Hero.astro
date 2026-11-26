@@ -21,7 +21,7 @@ const latestPoster = latest ? poster(latest.poster) : null;
   <Ticket />
 
   <div class="hero__inner wrap">
-    <p class="hero__kicker eyebrow">{site.name} <span>/</span> {site.role}</p>
+    <p class="hero__kicker eyebrow">{site.name}</p>
 
     <h1 id="hero-title" class="hero__title">
       <span class="sr-only">{site.name}, {site.nickname} for short: code by day, cinema by night, frames in between.</span>
@@ -79,7 +79,7 @@ const latestPoster = latest ? poster(latest.poster) : null;
         )
       }
 
-      <a class="hero__cue" href="#work">
+      <a class="hero__cue" href="#films">
         <span>Roll the feature</span>
         <Icon name="down" size={16} />
       </a>

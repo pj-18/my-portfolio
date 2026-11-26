@@ -1,6 +1,6 @@
 # PJ: a feature presentation
 
-The personal site of Praveen Ponduru (PJ): code by day, cinema by night, frames in between.
+The personal site of Praveen Kumar (PJ): code by day, cinema by night, frames in between.
 
 It's one page staged like a night at the cinema:
 
@@ -8,10 +8,10 @@ It's one page staged like a night at the cinema:
 | --- | --- |
 | Countdown | A 3·2·1 film leader. It plays once per visit; tap, Enter or Esc skips it. |
 | Title card | The headline, plus a hanging "Admit one" ticket you can grab and swing. |
-| 01 · The day job | About, a Playwright-style test run of your career, the stack, and a filmography (experience). |
-| 02 · The film diary | Live from Letterboxd: stats, a ratings histogram that filters the diary, ticket-stub posters, full reviews in a bottom sheet, the one-liners ticker, a critic's pick, and your lists as cinema programmes. |
-| 03 · The soundtrack | Your top 10 artists and songs from Apple Music (via Last.fm) for the last 30 days, 12 months or all time: the artists as a gig-poster line-up with a spotlight, the songs as a two-sided record on a turntable that plays 30-second previews. |
-| 04 · The darkroom | Your photos on a film strip that "develop" as they scroll in, a contact-sheet view, and a viewfinder lightbox with the camera settings read from EXIF. |
+| 01 · The film diary | Live from Letterboxd: stats, a ratings histogram that filters the diary, ticket-stub posters, full reviews in a bottom sheet, the one-liners ticker, a critic's pick, and your lists as cinema programmes. |
+| 02 · The soundtrack | Your top 10 artists and songs from Apple Music (via Last.fm) for the last 30 days, 12 months or all time: the artists as a gig-poster line-up with a spotlight, the songs as a two-sided record on a turntable that plays 30-second previews. |
+| 03 · The darkroom | Your photos on a film strip that "develop" as they scroll in, a contact-sheet view, and a viewfinder lightbox with the camera settings read from EXIF. |
+| 04 · The day job | About, a Playwright-style test run of your career, and the stack. |
 | Fin. | Contact, rolling credits and a post-credits "spin the reel" film picker. |
 
 It is built mobile first with [Astro](https://astro.build) and a little vanilla TypeScript, with no UI framework.
@@ -43,10 +43,9 @@ npm run dev        # http://localhost:4321
 
 ### Words: `src/site.config.ts`
 
-Everything personal is in this file: name, role, email, links, the about paragraph, the test names the terminal "runs", the stack ticker and the filmography (experience).
+Everything personal is in this file: name, role, email, links, the about paragraph, the test names the terminal "runs" and the stack ticker.
 
 - In `about`, `[word|green]`, `[word|amber]` and `[word|red]` highlight a keyword, and `*words*` sets them in italic serif.
-- Experience entries ship as placeholders marked `placeholder: true`. They show in `npm run dev` with a dashed outline and are **left out of production builds** until you replace them and remove the flag.
 - `hideFromQuotes` takes film titles whose reviews you'd rather keep out of the one-liners ticker. Reviews are otherwise shown exactly as written on Letterboxd.
 
 ### Photos: `src/photos/`
@@ -120,7 +119,7 @@ The project site path (`/my-portfolio/`) and a custom domain are both handled au
 
 ```
 src/
-  site.config.ts        your words, links and experience
+  site.config.ts        your words, links and bookings
   theatres.ts           your regular cinemas (BookMyShow names), for "Up next"
   photos/               your photos + photos.json captions
   data/letterboxd.json  saved diary (written by `npm run films`)

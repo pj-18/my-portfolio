@@ -12,15 +12,6 @@
 
 export type Accent = 'green' | 'amber' | 'red';
 
-export interface Job {
-  from: string;
-  to: string;
-  role: string;
-  company: string;
-  note?: string;
-  placeholder?: boolean;
-}
-
 export interface TestCase {
   /** `{films}` and `{reviews}` are swapped for live Letterboxd numbers. */
   name: string;
@@ -55,11 +46,11 @@ export interface Booking {
 }
 
 export const site = {
-  name: 'Praveen Ponduru',
+  name: 'Praveen Kumar',
   nickname: 'PJ',
   role: 'Senior Software Engineer',
   description:
-    'Praveen Ponduru (PJ) is a senior software engineer who builds web apps and the tests that keep them honest. Off the clock: a Letterboxd film diary and a darkroom of photographs.',
+    'Praveen Kumar (PJ) is a senior software engineer who builds web apps and the tests that keep them honest. Off the clock: a Letterboxd film diary and a darkroom of photographs.',
 
   email: 'praveenkumar.ponduru@gmail.com',
   links: [
@@ -108,7 +99,7 @@ export const site = {
   },
 
   about:
-    "I'm Praveen Ponduru, [PJ|amber] to most. For seven years I've been building web apps and the automated tests that keep them honest. Most of my work sits where product code meets test code: [React|green] up front, [SQL|amber] underneath, and [Playwright|red] and [Cypress|green] suites that tell a team within minutes whether a change is *safe to ship*. When the laptop closes, the lights go down.",
+    "I'm Praveen Kumar, [PJ|amber] to most. For seven years I've been building web apps and the automated tests that keep them honest. Most of my work sits where product code meets test code: [React|green] up front, [SQL|amber] underneath, and [Playwright|red] and [Cypress|green] suites that tell a team within minutes whether a change is *safe to ship*. When the laptop closes, the lights go down.",
 
   /** The terminal in "The Day Job" runs these as passing tests. */
   tests: [
@@ -123,32 +114,4 @@ export const site = {
 
   /** Rolls past in the work section. Trim or extend freely. */
   stack: ['React', 'JavaScript', 'TypeScript', 'Playwright', 'Cypress', 'SQL', 'Node.js', 'REST APIs', 'Git', 'CI/CD'],
-
-  /** "Filmography": your roles, newest first. Replace these placeholders. */
-  experience: [
-    {
-      from: '2023',
-      to: 'Now',
-      role: 'Senior Software Engineer',
-      company: 'Company name',
-      note: 'What you own, the scale of it, and the result you are proudest of.',
-      placeholder: true,
-    },
-    {
-      from: '2021',
-      to: '2023',
-      role: 'Software Engineer',
-      company: 'Company name',
-      note: 'What you built or tested, with which tools, and what changed because of it.',
-      placeholder: true,
-    },
-    {
-      from: '2019',
-      to: '2021',
-      role: 'Associate Software Engineer',
-      company: 'Company name',
-      note: 'Where you started and what you learned to do well.',
-      placeholder: true,
-    },
-  ] satisfies Job[],
 };

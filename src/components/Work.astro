@@ -2,6 +2,7 @@
 import ReelHead from './ReelHead.astro';
 import { site } from '../site.config';
 import { stats } from '../lib/films';
+import { music } from '../lib/music';
 import { rich } from '../lib/util';
 
 const about = rich(site.about);
@@ -9,13 +10,11 @@ const tests = site.tests.map((t) => ({
   ...t,
   name: t.name.replace('{films}', String(stats.logged)).replace('{reviews}', String(stats.reviews)),
 }));
-// Placeholders show up while you work on the site, never in the published build.
-const jobs = site.experience.filter((job) => import.meta.env.DEV || !job.placeholder);
 const stack = [...site.stack, ...site.stack];
 ---
 
 <section id="work" class="reel work" data-scene="work" aria-labelledby="work-title">
-  <ReelHead id="work-title" number="01" title="The day job" kicker="Software engineering" accent="green" />
+  <ReelHead id="work-title" number={music ? '04' : '03'} title="The day job" kicker="Software engineering" accent="green" />
 
   <div class="wrap work__body">
     <p class="about reveal">
@@ -78,36 +77,6 @@ const stack = [...site.stack, ...site.stack];
       }
     </div>
   </div>
-
-  {
-    jobs.length > 0 && (
-      <div class="wrap filmography">
-        <h3 class="sub reveal">
-          Filmography <span>{jobs.length} {jobs.length === 1 ? 'credit' : 'credits'}</span>
-        </h3>
-        <ol class="filmography__list">
-          {jobs.map((job, i) => (
-            <li class:list={['credit', 'reveal', job.placeholder && 'is-placeholder']} style={`--delay:${i * 0.08}s`}>
-              <p class="credit__years">
-                {job.from} — {job.to}
-              </p>
-              <div class="credit__body">
-                <p class="credit__role">{job.role}</p>
-                <p class="credit__company">{job.company}</p>
-                {job.note && <p class="credit__note">{job.note}</p>}
-              </div>
-            </li>
-          ))}
-        </ol>
-        {import.meta.env.DEV && jobs.some((job) => job.placeholder) && (
-          <p class="dev-note">
-            Dashed entries are placeholders from <code>src/site.config.ts</code>. They are hidden in the published site
-            until you replace them.
-          </p>
-        )}
-      </div>
-    )
-  }
 </section>
 
 <style>
@@ -336,82 +305,7 @@ const stack = [...site.stack, ...site.stack];
     color: var(--green);
   }
 
-  /* ---- filmography (experience) ---- */
-
-  .sub {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1.25rem;
-    padding-bottom: 0.9rem;
-    border-bottom: 1px solid var(--line);
-    font-family: var(--f-display);
-    font-size: clamp(2.2rem, 10vw, 4rem);
-    font-stretch: 62%;
-    font-weight: 820;
-    line-height: 0.9;
-    text-transform: uppercase;
-  }
-
-  .sub span {
-    font-family: var(--f-mono);
-    font-size: 0.72rem;
-    font-weight: 500;
-    letter-spacing: 0.14em;
-    color: var(--muted);
-  }
-
-  .credit {
-    display: grid;
-    gap: 0.35rem;
-    padding-block: 1.15rem;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .credit__years {
-    font-family: var(--f-mono);
-    font-size: 0.74rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--green);
-  }
-
-  .credit__role {
-    font-size: 1.35rem;
-    font-weight: 650;
-    line-height: 1.2;
-  }
-
-  .credit__company {
-    color: var(--paper-dim);
-  }
-
-  .credit__note {
-    margin-top: 0.35rem;
-    max-width: 60ch;
-    color: var(--muted);
-    font-size: 0.98rem;
-  }
-
-  .dev-note {
-    margin-top: 1rem;
-    font-family: var(--f-mono);
-    font-size: 0.72rem;
-    color: var(--amber);
-  }
-
   @media (min-width: 48rem) {
-    .credit {
-      grid-template-columns: 11rem minmax(0, 1fr);
-      gap: 2rem;
-      padding-block: 1.6rem;
-    }
-
-    .credit__years {
-      padding-top: 0.35rem;
-    }
-
     .runner__screen {
       padding: 1.4rem 1.5rem 1.6rem;
       font-size: 0.85rem;

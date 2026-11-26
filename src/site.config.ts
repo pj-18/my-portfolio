@@ -12,43 +12,92 @@
 
 export type Accent = 'green' | 'amber' | 'red';
 
-export interface Job {
-  from: string;
-  to: string;
-  role: string;
-  company: string;
-  note?: string;
-  placeholder?: boolean;
-}
-
 export interface TestCase {
   /** `{films}` and `{reviews}` are swapped for live Letterboxd numbers. */
   name: string;
   time: string;
 }
 
+/** A show you've booked (read from its GitHub issue). Shown as a ticket in "Up next" until it's over. */
+export interface Booking {
+  /**
+   * The film's Letterboxd page ('https://letterboxd.com/film/dune-part-two/'), when the issue gave
+   * a link. Otherwise the page is guessed from `title`.
+   */
+  film?: string;
+  /** Shown on the ticket. Optional when `film` is set: Letterboxd's title is used. */
+  title?: string;
+  /** Show day, `YYYY-MM-DD`. */
+  date: string;
+  /** Start time, 24-hour `HH:MM` (optional). */
+  time?: string;
+  /** The cinema, as picked or typed on the issue form, e.g. 'Prasads Multiplex: Hyderabad' (optional). */
+  at?: string;
+  /** Format or language, e.g. 'IMAX', 'Telugu', '4DX' (optional). */
+  tag?: string;
+}
+
 export const site = {
-  name: 'Praveen Ponduru',
+  name: 'Praveen Kumar',
   nickname: 'PJ',
   role: 'Senior Software Engineer',
   description:
-    'Praveen Ponduru (PJ) is a senior software engineer who builds web apps and the tests that keep them honest. Off the clock: a Letterboxd film diary and a darkroom of photographs.',
+    'Praveen Kumar (PJ) is a senior software engineer who builds web apps and the tests that keep them honest. Off the clock: a Letterboxd film diary and a darkroom of photographs.',
 
-  email: 'praveenkumar.ponduru@gmail.com',
+  /**
+   * Your email, in two halves on purpose: the whole address never appears in this repo or in the
+   * page's HTML, so bots that harvest addresses from source don't find it. The page joins the
+   * halves in the browser; with JavaScript off it reads "name [at] domain".
+   */
+  email: { user: 'praveenkumar.ponduru', domain: 'gmail.com' },
   links: [
     { label: 'GitHub', handle: 'pj-18', url: 'https://github.com/pj-18' },
     { label: 'LinkedIn', handle: 'praveenponduru', url: 'https://www.linkedin.com/in/praveenponduru/' },
     { label: 'Letterboxd', handle: 'pj_18', url: 'https://letterboxd.com/pj_18/' },
+    { label: 'Instagram', handle: 'frames.by.pj', url: 'https://www.instagram.com/frames.by.pj/' },
   ],
 
   /** Your Letterboxd username. `npm run films` pulls its public RSS feed. */
   letterboxd: 'pj_18',
 
+
+  /**
+   * "Up next": the shows you've booked. BookMyShow has no public API and your bookings sit behind
+   * your login, so when you book, open an issue on this repository with the "Up next" form
+   * (edit it to change the show, close it to cancel). Each one drops off by itself once it's over;
+   * posters come from Letterboxd. Issues are public: never put seat numbers or booking IDs in them.
+   * Only issues the repository's owner opens are read.
+   */
+  upNextIssues: {
+    repo: 'pj-18/my-portfolio',
+    label: 'up-next',
+    /** Show times are the cinema's local time: its UTC offset ('+05:30' is India). */
+    utcOffset: '+05:30',
+  },
+
   /** Reviews whose film title is listed here never appear in the one-liner ticker. */
   hideFromQuotes: [] as string[],
 
+  /**
+   * "The soundtrack": your most-played artists and songs, from Last.fm.
+   * Apple Music can't talk to Last.fm by itself, so a scrobbler app sends your plays there
+   * (see the README). `npm run music` then pulls the charts; it needs a free Last.fm API key
+   * in LASTFM_API_KEY (.env locally, a repository secret on GitHub).
+   * Until there is data the section only appears in `npm run dev`, filled with sample data.
+   */
+  music: {
+    /** Your Last.fm username. */
+    lastfm: 'pj_18',
+    /** Apple Music storefront (two-letter country code) used to find artwork, previews and links. */
+    storefront: 'us',
+    /** Which chart opens first: '1month', '12month' or 'overall'. */
+    period: '12month',
+    /** Artists or song titles to leave off the page (case doesn't matter). */
+    hide: [] as string[],
+  },
+
   about:
-    "I'm Praveen Ponduru, [PJ|amber] to most. For seven years I've been building web apps and the automated tests that keep them honest. Most of my work sits where product code meets test code: [React|green] up front, [SQL|amber] underneath, and [Playwright|red] and [Cypress|green] suites that tell a team within minutes whether a change is *safe to ship*. When the laptop closes, the lights go down.",
+    "I'm Praveen Kumar, [PJ|amber] to most. For seven years I've been building web apps and the automated tests that keep them honest. Most of my work sits where product code meets test code: [React|green] up front, [SQL|amber] underneath, and [Playwright|red] and [Cypress|green] suites that tell a team within minutes whether a change is *safe to ship*. When the laptop closes, the lights go down.",
 
   /** The terminal in "The Day Job" runs these as passing tests. */
   tests: [
@@ -62,33 +111,5 @@ export const site = {
   ] satisfies TestCase[],
 
   /** Rolls past in the work section. Trim or extend freely. */
-  stack: ['React', 'JavaScript', 'TypeScript', 'Playwright', 'Cypress', 'SQL', 'Node.js', 'REST APIs', 'Git', 'CI/CD'],
-
-  /** "Filmography": your roles, newest first. Replace these placeholders. */
-  experience: [
-    {
-      from: '2023',
-      to: 'Now',
-      role: 'Senior Software Engineer',
-      company: 'Company name',
-      note: 'What you own, the scale of it, and the result you are proudest of.',
-      placeholder: true,
-    },
-    {
-      from: '2021',
-      to: '2023',
-      role: 'Software Engineer',
-      company: 'Company name',
-      note: 'What you built or tested, with which tools, and what changed because of it.',
-      placeholder: true,
-    },
-    {
-      from: '2019',
-      to: '2021',
-      role: 'Associate Software Engineer',
-      company: 'Company name',
-      note: 'Where you started and what you learned to do well.',
-      placeholder: true,
-    },
-  ] satisfies Job[],
+  stack: ['React', 'JavaScript', 'Playwright', 'Cypress', 'SQL', 'Node.js', 'TypeScript', 'REST APIs', 'Git', 'CI/CD'],
 };

@@ -1,0 +1,62 @@
+name: 🎟️ Up next, a show I've booked
+description: Puts a booked show on the site's "Up next". Edit the issue to change it, close it to cancel.
+title: 'Up next'
+labels: [up-next]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The show appears on the site a couple of minutes after you submit. A comment confirms the film that was found on Letterboxd, and the issue is closed by itself once the show is over.
+        **This is public, just like the site: no seat numbers or booking IDs.**
+
+  # The labels below are what scripts/up-next-shared.ts reads: rename one there too.
+  - type: input
+    id: film
+    attributes:
+      label: Film
+      description: Its title, or its Letterboxd link (the surest way to get the right film; the app's Share link works).
+      placeholder: 'Dune: Part Three'
+    validations:
+      required: true
+
+  - type: input
+    id: date
+    attributes:
+      label: Date
+      description: '2026-12-18, 18/12, or 18 Dec'
+      placeholder: 18 Dec
+    validations:
+      required: true
+
+  - type: input
+    id: time
+    attributes:
+      label: Time
+      description: 24-hour, as on the ticket. Lets the site show the film as rolling while you're in there.
+      placeholder: '20:50'
+
+  # Your regular cinemas, named the way BookMyShow does; the ticket shows the name as written here.
+  # Add, rename or reorder them freely (keep "Another cinema" last). The list itself is never shown on the site.
+  - type: dropdown
+    id: cinema
+    attributes:
+      label: Cinema
+      options:
+        - 'AMB Cinemas: Gachibowli'
+        - 'Prasads Multiplex: Hyderabad'
+        - 'PVR: Nexus Mall Kukatpally, Hyderabad'
+        - 'PVR: Irrum Manzil, Hyderabad'
+        - 'PVR Superplex Inorbit: LUXE, PXL, 4DX: Cyberabad'
+        - Another cinema (type it below)
+
+  - type: input
+    id: other-cinema
+    attributes:
+      label: Another cinema
+      description: Only if it isn't in the list above.
+
+  - type: input
+    id: tag
+    attributes:
+      label: Format or language
+      placeholder: IMAX, Telugu, 4DX

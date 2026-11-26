@@ -18,6 +18,7 @@ export const icons = {
     '<circle cx="12" cy="12" r="9.5"/><path d="M14.3 8l5.5 9.5M9.7 8h11M7.4 12l5.5-9.5M9.7 16L4.2 6.5M14.3 16h-11M16.6 12l-5.5 9.5"/>',
   frame: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 16.5l5.2-5.2 4 4 2.6-2.6L21 18.8"/><circle cx="16" cy="9" r="1.6"/>',
   play: '<circle cx="12" cy="12" r="9.5"/><path d="M10 8.6v6.8l5.4-3.4z"/>',
+  note: '<path d="M9 17.5V5.8l10-2.3v11.7"/><circle cx="6.6" cy="17.6" r="2.6"/><circle cx="16.6" cy="15.3" r="2.6"/><path d="M9 9.3l10-2.3"/>',
   mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.8 6.5l8.2 6.3 8.2-6.3"/>',
   arrow: '<path d="M7 17L17 7M8.5 7H17v8.5"/>',
   down: '<path d="M12 4v16M6 14l6 6 6-6"/>',

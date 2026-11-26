@@ -1,0 +1,250 @@
+---
+import Icon from './Icon.astro';
+import { filmUrl, poster, recommendations } from '../lib/films';
+import { safeJson } from '../lib/util';
+
+const reel = recommendations.map((e) => {
+  const art = poster(e.poster);
+  return {
+    title: e.title,
+    year: e.year,
+    rating: e.rating,
+    liked: e.liked,
+    src: art?.src ?? null,
+    srcset: art?.srcset ?? null,
+    url: filmUrl(e),
+    take: e.review[0]?.replace(/\s*\n\s*/g, ' ') ?? null,
+  };
+});
+---
+
+{
+  reel.length > 0 && (
+    <section class="wrap post" data-scene="films" aria-labelledby="post-title">
+      <p class="eyebrow post__kicker">
+        <span /> Post-credits scene
+      </p>
+      <h3 id="post-title" class="post__title">Can't pick tonight's film?</h3>
+      <p class="post__text">Spin the reel. It only stops on films I loved or rated three and a half stars or more.</p>
+      <div class="spinner" data-spinner>
+        <div class="spinner__gate" aria-hidden="true">
+          <img data-spin-img alt="" width="300" height="450" hidden />
+          <span class="spinner__leader">?</span>
+        </div>
+        <div class="spinner__result" aria-live="polite" data-spin-result>
+          <p class="spinner__idle">The projector is loaded. Press the button.</p>
+        </div>
+      </div>
+      <button type="button" class="pill pill--solid accent-amber post__spin" data-spin>
+        <Icon name="shuffle" /> Spin the reel
+      </button>
+      <script type="application/json" id="reel-data" is:inline set:html={safeJson(reel)} />
+    </section>
+  )
+}
+
+<style>
+  .post {
+    display: grid;
+    justify-items: center;
+    gap: 1rem;
+    margin-block: clamp(1rem, 4vw, 2.5rem);
+    padding: 2rem 1.25rem;
+    border: 1px dashed var(--line-2);
+    border-radius: var(--radius);
+    text-align: center;
+  }
+
+  .post__kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .post__kicker span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--amber);
+  }
+
+  .post__title {
+    font-family: var(--f-display);
+    font-size: clamp(2.2rem, 10vw, 3.6rem);
+    font-stretch: 62%;
+    font-weight: 820;
+    line-height: 0.92;
+    text-transform: uppercase;
+  }
+
+  .post__text {
+    max-width: 34ch;
+    color: var(--muted);
+  }
+
+  .spinner {
+    display: grid;
+    justify-items: center;
+    gap: 1.1rem;
+    width: 100%;
+    margin-block: 0.5rem 0.25rem;
+  }
+
+  .spinner__gate {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 8.5rem;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    border-radius: 8px;
+    background:
+      radial-gradient(circle, transparent 38%, rgb(243 234 216 / 0.14) 39%, transparent 40%),
+      repeating-linear-gradient(0deg, var(--ink-3) 0 6px, var(--ink-2) 6px 12px);
+    box-shadow:
+      0 0 0 6px var(--ink-2),
+      0 0 0 7px var(--line-2),
+      0 24px 40px -18px rgb(0 0 0 / 0.9);
+  }
+
+  .spinner__gate img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* the strip of posters that rolls through the gate while spinning */
+  .spinner__gate :global(.spinner__reel) {
+    position: absolute;
+    inset: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    will-change: transform, filter;
+  }
+
+  .spinner__gate :global(.spinner__reel[hidden]) {
+    display: none;
+  }
+
+  .spinner__gate :global(.spinner__reel img) {
+    position: static;
+    flex: none;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    background: var(--ink-3);
+  }
+
+  /* gate shadow so the frames read as passing behind the aperture */
+  .spinner__gate::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    background: linear-gradient(rgb(0 0 0 / 0.55), transparent 22%, transparent 78%, rgb(0 0 0 / 0.55));
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+
+  .spinner.is-spinning .spinner__gate::after {
+    opacity: 1;
+  }
+
+  .spinner__leader {
+    font-family: var(--f-display);
+    font-size: 4rem;
+    font-stretch: 62%;
+    font-weight: 850;
+    color: var(--dim);
+  }
+
+  .spinner__result {
+    display: grid;
+    gap: 0.35rem;
+    min-height: 5.5rem;
+    max-width: 32ch;
+  }
+
+  .spinner__idle {
+    color: var(--dim);
+    font-family: var(--f-serif);
+    font-size: 1.2rem;
+    font-style: italic;
+  }
+
+  .spinner__result :global(.spin-title) {
+    font-family: var(--f-display);
+    font-size: 1.9rem;
+    font-stretch: 62%;
+    font-weight: 820;
+    line-height: 0.95;
+    text-transform: uppercase;
+  }
+
+  .spinner__result :global(.spin-title span) {
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .spinner__result :global(.spin-stars) {
+    color: var(--amber);
+    line-height: 1;
+  }
+
+  .spinner__result :global(.spin-heart) {
+    margin-left: 0.5em;
+    color: var(--red);
+  }
+
+  .spinner__result :global(.spin-take) {
+    font-family: var(--f-serif);
+    font-size: 1.25rem;
+    font-style: italic;
+    line-height: 1.2;
+    color: var(--paper-dim);
+  }
+
+  .spinner__result :global(.spin-link) {
+    justify-self: center;
+    margin-top: 0.3rem;
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--amber);
+  }
+
+  @media (min-width: 48rem) {
+    .post {
+      grid-template-columns: auto minmax(0, 1fr);
+      justify-items: start;
+      align-items: center;
+      gap: 1rem 2.5rem;
+      padding: 2.5rem;
+      text-align: left;
+    }
+
+    .post > :not(.spinner) {
+      grid-column: 2;
+    }
+
+    .spinner {
+      grid-column: 1;
+      grid-row: 1 / span 5;
+      justify-items: center;
+    }
+
+    .spinner__result :global(.spin-link) {
+      justify-self: center;
+    }
+  }
+</style>
+
+<script>
+  import '../scripts/post-credits';
+</script>

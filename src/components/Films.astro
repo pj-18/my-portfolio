@@ -18,10 +18,50 @@ import {
 } from '../lib/films';
 import { dayMonthYear, longDate, pad, ratingLabel, shortDate } from '../lib/util';
 import { starsInSvg, starsMarkup } from '../lib/stars';
+import { filmSlug, offsetMinutes, showStatus, showTimes, type UpNextData } from '../lib/up-next';
 
 const handle = diary.username || site.letterboxd;
 const profile = diary.profile;
 const pickPoster = pick ? poster(pick.poster) : null;
+/* Each rating gets its own colour: red at ½★, through amber, to green at 5★. */
+function ratingTone(rating: number) {
+  const t = (rating - 0.5) / 4.5;
+  return t <= 0.5
+    ? `color-mix(in oklch, var(--amber) ${Math.round(t * 200)}%, var(--red))`
+    : `color-mix(in oklch, var(--green) ${Math.round((t - 0.5) * 200)}%, var(--amber))`;
+}
+
+/* "Up next": shows booked as GitHub issues (saved by scripts/sync-up-next.ts). Each ticket counts down,
+   then reads "Rolling" and "Wrapped", then leaves the page (see src/lib/up-next.ts; the browser keeps it current). */
+const { utcOffset } = site.upNextIssues;
+const offset = offsetMinutes(utcOffset);
+const builtAt = Date.now();
+const upNextData = Object.values(
+  import.meta.glob<UpNextData>('../data/up-next.json', { eager: true, import: 'default' }),
+)[0];
+const letterboxdFilms = upNextData?.films ?? {};
+const booked = (upNextData?.shows ?? [])
+  // the same film on the same day only once, in case it was booked in two issues
+  .filter((show, i, list) => list.findIndex((other) => filmSlug(other) === filmSlug(show) && other.date === show.date) === i)
+  .map((show) => {
+    const slug = filmSlug(show);
+    const film = slug ? letterboxdFilms[slug] : undefined;
+    const times = showTimes(show.date, show.time, film?.runtime, utcOffset);
+    return {
+      ...show,
+      times,
+      status: showStatus(times, builtAt, offset),
+      title: show.title || film?.title || slug || 'Untitled',
+      art: film?.poster ?? null,
+      link: film?.url ?? null,
+      where: show.at || null,
+    };
+  })
+  .filter((show) => Number.isFinite(show.times.gone) && show.status.state !== 'gone')
+  .sort((a, b) => (a.times.start ?? a.times.day) - (b.times.start ?? b.times.day));
+const whenText = (date: string) =>
+  new Date(`${date}T00:00:00Z`).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+
 const rows = oneLiners.length >= 8 ? [oneLiners.filter((_, i) => i % 2 === 0), oneLiners.filter((_, i) => i % 2 === 1)] : [oneLiners];
 
 /* festival laurels around "PJ's pick", drawn from a circle */
@@ -62,7 +102,7 @@ const laurels = laurel(false) + laurel(true);
 <section id="films" class="reel films" data-scene="films" aria-labelledby="films-title">
   <ReelHead
     id="films-title"
-    number="02"
+    number="01"
     title="The film diary"
     kicker="Letterboxd"
     accent="amber"
@@ -132,7 +172,7 @@ const laurels = laurel(false) + laurel(true);
                     data-rating={bucket.rating}
                     aria-pressed="false"
                     aria-label={`${bucket.count} ${bucket.count === 1 ? 'film' : 'films'} rated ${bucket.rating} out of 5`}
-                    style={`--h:${Math.max(0.04, bucket.count / histogramPeak)}`}
+                    style={`--h:${Math.max(0.04, bucket.count / histogramPeak)};--tone:${ratingTone(bucket.rating)}`}
                     disabled={bucket.count === 0}
                   >
                     <span class="bar__count">{bucket.count}</span>
@@ -141,9 +181,9 @@ const laurels = laurel(false) + laurel(true);
                 ))}
               </div>
               <div class="histogram__axis" aria-hidden="true">
-                <span set:html={starsMarkup(0.5)} />
+                <span style={`color:${ratingTone(0.5)}`} set:html={starsMarkup(0.5)} />
                 <span class="histogram__hint">tap a bar to filter</span>
-                <span set:html={starsMarkup(5)} />
+                <span style={`color:${ratingTone(5)}`} set:html={starsMarkup(5)} />
               </div>
             </div>
           )}
@@ -155,6 +195,60 @@ const laurels = laurel(false) + laurel(true);
           )}
         </div>
 
+        {/* ---- booked shows ---- */}
+        {booked.length > 0 && (
+          <div class="upnext" data-upnext>
+            <div class="wrap upnext__head">
+              <h3 class="sub reveal">Up next</h3>
+              <p class="upnext__note" data-upnext-note>
+                {booked.length === 1 ? 'Ticket in the pocket' : `${booked.length} tickets in the pocket`}
+              </p>
+            </div>
+            <ul class="wrap upnext__list" data-utc-offset={offset}>
+              {booked.map((show) => {
+                const art = show.art;
+                const left = show.status;
+                return (
+                  <li
+                    class="pass reveal"
+                    data-state={left.state}
+                    data-show-day={show.times.day}
+                    data-show-start={show.times.start ?? undefined}
+                    data-show-wraps={show.times.wraps ?? undefined}
+                    data-show-gone={show.times.gone}
+                  >
+                    <span class="pass__poster" aria-hidden="true">
+                      {art ? <img src={art} alt="" loading="lazy" decoding="async" /> : <span class="pass__mono">{show.title.charAt(0)}</span>}
+                    </span>
+                    <div class="pass__body">
+                      <p class="pass__kicker">Admit one{show.tag ? ` · ${show.tag}` : ''}</p>
+                      <h4 class="pass__title">
+                        {show.link ? (
+                          <a class="pass__link" href={show.link} target="_blank" rel="noopener">
+                            {show.title}
+                            <span class="sr-only"> on Letterboxd (opens in a new tab)</span>
+                          </a>
+                        ) : (
+                          show.title
+                        )}
+                      </h4>
+                      <p class="pass__when">
+                        {whenText(show.date)}
+                        {show.time ? ` · ${show.time}` : ''}
+                      </p>
+                      {show.where && <p class="pass__where">{show.where}</p>}
+                    </div>
+                    <p class="pass__count">
+                      <span class="pass__num" data-count-num>{left.num}</span>
+                      <span class="pass__unit" data-count-unit>{left.unit}</span>
+                    </p>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+
         {/* ---- the diary strip ---- */}
         <div class="diary-block">
           <div class="wrap diary-block__head">
@@ -163,9 +257,17 @@ const laurels = laurel(false) + laurel(true);
               <p class="diary-block__status" aria-live="polite" data-diary-status>
                 {entries.length} films, newest first
               </p>
-              <button type="button" class="diary-block__clear" data-diary-clear hidden>
-                Show all
-              </button>
+              <div class="diary-block__actions">
+                <button type="button" class="diary-block__clear" data-diary-clear hidden>
+                  Show all
+                </button>
+                <button type="button" class="pill diary-block__auto" data-diary-auto hidden>
+                  <span data-auto-icon="pause"><Icon name="pause" size={14} /></span>
+                  <span data-auto-icon="play" hidden><Icon name="play" size={14} /></span>
+                  <span data-auto-label>Pause</span>
+                  <span class="sr-only">sliding</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -304,7 +406,8 @@ const laurels = laurel(false) + laurel(true);
             <div class="wrap quotes__head">
               <h3 class="sub reveal">The one-liners</h3>
               <button type="button" class="pill quotes__toggle" data-quotes-toggle aria-pressed="false">
-                <Icon name="pause" size={14} />
+                <span data-quotes-icon="pause"><Icon name="pause" size={14} /></span>
+                <span data-quotes-icon="play" hidden><Icon name="play" size={14} /></span>
                 <span data-quotes-label>Pause</span>
               </button>
             </div>
@@ -602,7 +705,7 @@ const laurels = laurel(false) + laurel(true);
     height: calc(var(--h) * (100% - 1.2rem));
     min-height: 3px;
     border-radius: 3px 3px 1px 1px;
-    background: linear-gradient(var(--amber), rgb(255 182 39 / 0.55));
+    background: linear-gradient(var(--tone, var(--amber)), color-mix(in oklch, var(--tone, var(--amber)) 80%, transparent));
     transition:
       background 0.25s,
       opacity 0.25s,
@@ -634,11 +737,11 @@ const laurels = laurel(false) + laurel(true);
   }
 
   .bar[aria-pressed='true'] .bar__fill {
-    background: linear-gradient(var(--paper), var(--amber));
+    background: linear-gradient(var(--paper), var(--tone, var(--amber)));
   }
 
   .bar[aria-pressed='true'] .bar__count {
-    color: var(--paper);
+    color: var(--tone, var(--paper));
   }
 
   .bar:not(:disabled):hover .bar__fill {
@@ -674,6 +777,300 @@ const laurels = laurel(false) + laurel(true);
     margin-top: clamp(3.5rem, 10vw, 6rem);
   }
 
+  /* ---------- up next: booked tickets ---------- */
+
+  .upnext {
+    margin-top: clamp(3.5rem, 10vw, 6rem);
+  }
+
+  .upnext__head {
+    display: grid;
+    gap: 0.6rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .upnext__note {
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .upnext__list {
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .upnext__list > .pass[hidden] {
+    display: none;
+  }
+
+  .pass {
+    position: relative;
+    display: grid;
+    grid-template-columns: 4.4rem minmax(0, 1fr) auto;
+    align-items: stretch;
+    gap: 0.85rem;
+    padding: 0.8rem 0.9rem 0.8rem 0.8rem;
+    border-radius: 12px;
+    background: var(--ticket);
+    color: var(--ticket-ink);
+    box-shadow: 0 22px 36px -24px rgb(0 0 0 / 0.95);
+    -webkit-mask:
+      radial-gradient(circle at 0 50%, transparent 0.6rem, #000 calc(0.6rem + 0.5px)) left / 51% 100% no-repeat,
+      radial-gradient(circle at 100% 50%, transparent 0.6rem, #000 calc(0.6rem + 0.5px)) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle at 0 50%, transparent 0.6rem, #000 calc(0.6rem + 0.5px)) left / 51% 100% no-repeat,
+      radial-gradient(circle at 100% 50%, transparent 0.6rem, #000 calc(0.6rem + 0.5px)) right / 51% 100% no-repeat;
+  }
+
+  .pass__poster {
+    display: grid;
+    place-items: center;
+    align-self: center;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #231c13;
+    box-shadow: 0 8px 16px -10px rgb(0 0 0 / 0.8);
+  }
+
+  .pass__poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .pass__mono {
+    font-family: var(--f-display);
+    font-size: 2.4rem;
+    font-stretch: 62%;
+    font-weight: 850;
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--amber);
+  }
+
+  .pass__body {
+    display: grid;
+    align-content: center;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  .pass__kicker {
+    font-family: var(--f-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #b0560f;
+  }
+
+  .pass__title {
+    font-family: var(--f-display);
+    font-size: clamp(1.35rem, 6.2vw, 1.9rem);
+    font-stretch: 68%;
+    font-weight: 850;
+    line-height: 0.98;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+  }
+
+  .pass__when {
+    margin-top: 0.2rem;
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .pass__where {
+    font-size: 0.82rem;
+    line-height: 1.3;
+    opacity: 0.72;
+  }
+
+  .pass__count {
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    width: 5.6rem; /* fixed, so the perforations line up from ticket to ticket */
+    padding-left: 0.85rem;
+    border-left: 2px dashed rgb(35 28 19 / 0.35);
+    text-align: center;
+  }
+
+  .pass__num {
+    font-family: var(--f-display);
+    font-size: 2.3rem;
+    font-stretch: 62%;
+    font-weight: 850;
+    line-height: 0.95;
+    color: #b0560f;
+  }
+
+  .pass__unit {
+    font-family: var(--f-mono);
+    font-size: 0.56rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* the title link covers the whole ticket */
+  .pass__link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .pass__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  .pass__link:focus-visible {
+    outline: none;
+  }
+
+  .pass:has(.pass__link:focus-visible) {
+    outline: 2px solid var(--amber);
+    outline-offset: 3px;
+  }
+
+  .pass:has(.pass__link) {
+    transition: transform 0.35s var(--ease-spring);
+  }
+
+  @media (hover: hover) {
+    .pass:has(.pass__link):hover {
+      transform: translateY(-3px) rotate(-0.4deg);
+    }
+  }
+
+  /* everyday phones (360–415px: base and Pro iPhones, Pixels, most Androids):
+     the same side column, just tighter */
+  @media (max-width: 26rem) {
+    .pass {
+      grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+      gap: 0.65rem;
+      padding: 0.7rem 0.75rem 0.7rem 0.7rem;
+    }
+
+    .pass__title {
+      font-size: clamp(1.2rem, 5.8vw, 1.5rem);
+    }
+
+    .pass__when {
+      font-size: 0.68rem;
+    }
+
+    .pass__where {
+      font-size: 0.78rem;
+    }
+
+    .pass__count {
+      width: 4.6rem;
+      padding-left: 0.65rem;
+    }
+
+    .pass__num {
+      font-size: 1.95rem;
+    }
+
+    .pass__unit {
+      font-size: 0.52rem;
+      letter-spacing: 0.06em;
+    }
+  }
+
+  /* very narrow phones (under 360px, e.g. the 320px iPhone SE): the countdown becomes
+     a strip along the bottom of the ticket so the title keeps the full width */
+  @media (max-width: 22.4rem) {
+    .pass {
+      grid-template-columns: 3.9rem minmax(0, 1fr);
+      row-gap: 0.7rem;
+    }
+
+    .pass__title {
+      font-size: clamp(1.3rem, 7vw, 1.7rem);
+      overflow-wrap: break-word;
+    }
+
+    .pass__count {
+      grid-column: 1 / -1;
+      grid-auto-flow: column;
+      justify-content: center;
+      align-items: baseline;
+      gap: 0.55rem;
+      width: auto;
+      padding: 0.6rem 0 0;
+      border-left: 0;
+      border-top: 2px dashed rgb(35 28 19 / 0.35);
+    }
+
+    .pass__num {
+      font-size: 1.8rem;
+    }
+
+    .pass__unit {
+      font-size: 0.62rem;
+    }
+  }
+
+  /* "Today" stands on its own */
+  .pass__unit:empty {
+    display: none;
+  }
+
+  /* the show's on: the stub says so in a word, which needs a smaller size than a number */
+  .pass[data-state='rolling'] .pass__num,
+  .pass[data-state='wrapped'] .pass__num {
+    font-size: 1.3rem;
+    line-height: 1.05;
+  }
+
+  .pass[data-state='rolling'] .pass__num {
+    color: #b3261e;
+  }
+
+  /* a live dot, like a camera's tally light */
+  .pass[data-state='rolling'] .pass__num::before {
+    content: '';
+    display: inline-block;
+    width: 0.42em;
+    height: 0.42em;
+    margin-right: 0.22em;
+    vertical-align: 0.12em;
+    border-radius: 50%;
+    background: currentColor;
+    animation: tally 1.6s ease-in-out infinite;
+  }
+
+  @keyframes tally {
+    50% {
+      opacity: 0.25;
+    }
+  }
+
+  /* after the credits the ticket fades, like a used stub */
+  .pass[data-state='wrapped'] {
+    filter: saturate(0.35);
+    opacity: 0.8;
+  }
+
+  .pass[data-state='wrapped'] .pass__num {
+    color: rgb(35 28 19 / 0.75);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pass[data-state='rolling'] .pass__num::before {
+      animation: none;
+    }
+  }
+
   .diary-block__head {
     display: grid;
     gap: 0.6rem;
@@ -696,6 +1093,26 @@ const laurels = laurel(false) + laurel(true);
     color: var(--muted);
   }
 
+  .diary-block__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: none;
+  }
+
+  .diary-block__auto {
+    min-height: 36px;
+    padding-inline: 0.85rem;
+  }
+
+  .diary-block__auto [data-auto-icon] {
+    display: inline-flex;
+  }
+
+  .diary-block__auto [hidden] {
+    display: none;
+  }
+
   .diary-block__clear {
     padding: 0.5rem 0.9rem;
     border: 1px solid rgb(255 182 39 / 0.5);
@@ -707,7 +1124,10 @@ const laurels = laurel(false) + laurel(true);
     color: var(--amber);
   }
 
+  /* Scrollers are positioned so hidden screen-reader labels inside them
+     (position: absolute) stay inside too, not widen the whole page. */
   .diary-scroller {
+    position: relative;
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
@@ -1039,7 +1459,16 @@ const laurels = laurel(false) + laurel(true);
     padding-inline: 0.95rem;
   }
 
+  .quotes__toggle [data-quotes-icon] {
+    display: inline-flex;
+  }
+
+  .quotes__toggle [hidden] {
+    display: none;
+  }
+
   .quotes__row {
+    position: relative;
     overflow: hidden;
     padding-block: 0.4rem;
     -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
@@ -1058,9 +1487,16 @@ const laurels = laurel(false) + laurel(true);
     animation-direction: reverse;
   }
 
-  .quotes:hover .quotes__track,
   .quotes[data-paused] .quotes__track {
     animation-play-state: paused;
+  }
+
+  /* Rest while a mouse is over the cards, but not over the Play button (which
+     lives in the same section), and never on touch, where :hover sticks after a tap. */
+  @media (hover: hover) and (pointer: fine) {
+    .quotes__row:hover .quotes__track {
+      animation-play-state: paused;
+    }
   }
 
   .quote {
@@ -1221,6 +1657,7 @@ const laurels = laurel(false) + laurel(true);
   }
 
   .programmes__list {
+    position: relative;
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: min(80vw, 22rem);
@@ -1371,9 +1808,21 @@ const laurels = laurel(false) + laurel(true);
       grid-column: 1 / -1;
     }
 
-    .diary-block__head {
+    .diary-block__head,
+    .upnext__head {
       grid-template-columns: minmax(0, 1fr) auto;
       align-items: end;
+    }
+
+    .upnext__list {
+      grid-template-columns: repeat(auto-fill, minmax(26rem, 1fr));
+      gap: 1.1rem;
+    }
+
+    .pass {
+      grid-template-columns: 5.4rem minmax(0, 1fr) auto;
+      gap: 1.1rem;
+      padding: 1rem 1.2rem 1rem 1rem;
     }
 
     .diary {

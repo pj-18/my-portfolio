@@ -1,0 +1,758 @@
+{
+  "username": "sample",
+  "profile": "https://www.last.fm/",
+  "fetchedAt": "2026-11-26T05:28:51.968Z",
+  "sample": true,
+  "scrobbles": 18240,
+  "artistCount": 1137,
+  "since": "2016-03-12T00:00:00.000Z",
+  "recent": {
+    "name": "Derezzed",
+    "artist": "Daft Punk",
+    "plays": 0,
+    "url": "https://www.last.fm/music/Daft+Punk/_/Derezzed",
+    "art": "https://is1-ssl.mzstatic.com/image/thumb/Music118/v4/f3/ff/7d/f3ff7d57-3d4c-4ca6-45df-11dcd1fcfe3a/00050087237196.rgb.jpg/100x100bb.jpg",
+    "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/b0/31/b2/b031b227-88da-3dee-05fe-520b96f30285/mzaf_8299314304356888270.plus.aac.p.m4a",
+    "apple": "https://music.apple.com/us/album/derezzed/1440617583?i=1440617959",
+    "at": "2026-11-26T03:28:51.972Z",
+    "nowPlaying": false,
+    "looked": true
+  },
+  "periods": [
+    {
+      "key": "1month",
+      "artists": [
+        {
+          "name": "Ludwig Göransson",
+          "plays": 64,
+          "url": "https://www.last.fm/music/Ludwig+G%C3%B6ransson",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/70c6fb0d92d44244caf1897cdfccd8c3/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Thaman S",
+          "plays": 54,
+          "url": "https://www.last.fm/music/Thaman+S",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/fe520c37ba48ea96638cf2f52f1bbc08/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Sid Sriram",
+          "plays": 45,
+          "url": "https://www.last.fm/music/Sid+Sriram",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/fbe3e1d17fc6958e047f011f74233f82/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Daft Punk",
+          "plays": 38,
+          "url": "https://www.last.fm/music/Daft+Punk",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/638e69b9caaf9f9f3f8826febea7b543/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Ennio Morricone",
+          "plays": 32,
+          "url": "https://www.last.fm/music/Ennio+Morricone",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/5c185197d4a6b59d44fa048dec47be24/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Justin Hurwitz",
+          "plays": 27,
+          "url": "https://www.last.fm/music/Justin+Hurwitz",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/6877edaf48102d5568c760b3eefb3819/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Santhosh Narayanan",
+          "plays": 22,
+          "url": "https://www.last.fm/music/Santhosh+Narayanan",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/74004fed94dddf9ae2d7c83084eaf1ad/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Devi Sri Prasad",
+          "plays": 19,
+          "url": "https://www.last.fm/music/Devi+Sri+Prasad",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/a904f8ee6cc4dcb472f75bd8ae1a21da/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Hildur Guðnadóttir",
+          "plays": 16,
+          "url": "https://www.last.fm/music/Hildur+Gu%C3%B0nad%C3%B3ttir",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/ced03473672472fee6d92570180644ad/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "M.M. Keeravaani",
+          "plays": 13,
+          "url": "https://www.last.fm/music/M.M.+Keeravaani",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/dda61305d6a8f2953a74e5a417605237/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "A.R. Rahman",
+          "plays": 11,
+          "url": "https://www.last.fm/music/A.R.+Rahman",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/bd34315ef977a62a9e28c1ab19bb8ac4/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Anirudh Ravichander",
+          "plays": 9,
+          "url": "https://www.last.fm/music/Anirudh+Ravichander",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/9da0a547b39e99bc35c6a9724aef91bf/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Hans Zimmer",
+          "plays": 8,
+          "url": "https://www.last.fm/music/Hans+Zimmer",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/1bd0b9f7a3cf12e01bdcc26fa69673f7/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Ilaiyaraaja",
+          "plays": 7,
+          "url": "https://www.last.fm/music/Ilaiyaraaja",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/aeeca2a4b9f808c8e8f5d281b1fb48d0/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        }
+      ],
+      "tracks": [
+        {
+          "name": "Samajavaragamana",
+          "artist": "Sid Sriram",
+          "plays": 16,
+          "url": "https://www.last.fm/music/Sid+Sriram/_/Samajavaragamana",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music123/v4/46/14/df/4614df1c-3f61-6bf5-5c3e-ee304895cfca/cover.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/ad/22/44/ad224483-fb25-67ae-71cd-d1da020127ae/mzaf_17415433725855260412.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/samajavaragamana/1493907854?i=1493907867",
+          "looked": true
+        },
+        {
+          "name": "Derezzed",
+          "artist": "Daft Punk",
+          "plays": 13,
+          "url": "https://www.last.fm/music/Daft+Punk/_/Derezzed",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music118/v4/f3/ff/7d/f3ff7d57-3d4c-4ca6-45df-11dcd1fcfe3a/00050087237196.rgb.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/b0/31/b2/b031b227-88da-3dee-05fe-520b96f30285/mzaf_8299314304356888270.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/derezzed/1440617583?i=1440617959",
+          "looked": true
+        },
+        {
+          "name": "Mia & Sebastian's Theme",
+          "artist": "Justin Hurwitz",
+          "plays": 11,
+          "url": "https://www.last.fm/music/Justin+Hurwitz/_/Mia+%26+Sebastian's+Theme",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/bb/47/a3/bb47a36e-57b8-9260-f9a4-d09851145c45/00602557100556.rgb.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/2f/71/b1/2f71b1e5-32d2-7af3-1fe9-f1ab9f4246a7/mzaf_8802631728964213098.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/mia-sebastians-theme/1440863506?i=1440863816",
+          "looked": true
+        },
+        {
+          "name": "The Ecstasy of Gold",
+          "artist": "Ennio Morricone",
+          "plays": 9,
+          "url": "https://www.last.fm/music/Ennio+Morricone/_/The+Ecstasy+of+Gold",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/4f/1b/0a/4f1b0a74-1951-bd22-3b1a-ad516eb0ec13/00724359862156.rgb.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/54/43/d6/5443d6d2-574c-1352-aa76-cd4d4c0540a7/mzaf_3946620439450132340.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/the-ecstasy-of-gold/715628596?i=715630264",
+          "looked": true
+        },
+        {
+          "name": "Cornfield Chase",
+          "artist": "Hans Zimmer",
+          "plays": 8,
+          "url": "https://www.last.fm/music/Hans+Zimmer/_/Cornfield+Chase",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/f4/5b/73/f45b735a-8d7a-9713-b217-0f8e1593c28b/794043201943.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/3a/ee/23/3aee2300-f6f7-a006-e20f-28092e814cbe/mzaf_1624587954644600228.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/cornfield-chase/1533983552?i=1533984393",
+          "looked": true
+        },
+        {
+          "name": "Naatu Naatu",
+          "artist": "Rahul Sipligunj & Kaala Bhairava",
+          "plays": 7,
+          "url": "https://www.last.fm/music/Rahul+Sipligunj+%26+Kaala+Bhairava/_/Naatu+Naatu",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/91/85/29/918529f8-5187-19c7-ac4f-983a9c7c5b78/8903431821683_cover.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/0f/08/19/0f0819a6-b68f-573d-0f3b-fc25ccd4bb54/mzaf_5031428267982532814.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/naatu-naatu/1619744666?i=1619744668",
+          "looked": true
+        },
+        {
+          "name": "Arabic Kuthu",
+          "artist": "Anirudh Ravichander",
+          "plays": 6,
+          "url": "https://www.last.fm/music/Anirudh+Ravichander/_/Arabic+Kuthu",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/e9/19/b9/e919b921-d5a8-9e9a-8508-3551da375aee/196626458629.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/58/ac/9a/58ac9a48-9e3e-15c9-5085-3a13a6187992/mzaf_12322264242631159198.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/arabic-kuthu-from-beast/1609970851?i=1609971105",
+          "looked": true
+        },
+        {
+          "name": "Srivalli",
+          "artist": "Sid Sriram",
+          "plays": 5,
+          "url": "https://www.last.fm/music/Sid+Sriram/_/Srivalli",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/ec/34/7b/ec347b9b-0add-c529-4746-799277a5e1c0/cover.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/9b/4a/e3/9b4ae3a2-43ee-dd7b-0474-3b7e914513cf/mzaf_10743675123561433132.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/srivalli/1602184415?i=1602184669",
+          "looked": true
+        },
+        {
+          "name": "Bathroom Dance",
+          "artist": "Hildur Guðnadóttir",
+          "plays": 4,
+          "url": "https://www.last.fm/music/Hildur+Gu%C3%B0nad%C3%B3ttir/_/Bathroom+Dance",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/bb/45/af/bb45afd7-eef7-84d5-40fc-943aef24a3c8/794043201745.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/6c/f9/69/6cf96973-586c-fe49-d7e9-4620f69effef/mzaf_17835458061250199713.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/bathroom-dance/1481598135?i=1481598347",
+          "looked": true
+        },
+        {
+          "name": "Kaathalae Kaathalae",
+          "artist": "Govind Vasantha",
+          "plays": 3,
+          "url": "https://www.last.fm/music/Govind+Vasantha/_/Kaathalae+Kaathalae",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/7e/47/2a/7e472a2a-1130-75e8-47e6-a24c7971df0c/1200214615888.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/1a/29/cf/1a29cf41-1493-2012-6855-c9407b8a6493/mzaf_328983497802766278.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/kaathalae-kaathalae/6791642078?i=6791642278",
+          "looked": true
+        },
+        {
+          "name": "Time",
+          "artist": "Hans Zimmer",
+          "plays": 3,
+          "url": "https://www.last.fm/music/Hans+Zimmer/_/Time",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/2b/62/eb/2b62ebd7-aa99-988a-0fee-714162f6fbeb/093624965008.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/e0/1d/a4/e01da4a2-a75f-7ebf-9971-3d49e17efc57/mzaf_10500078769097048384.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/time/380349905?i=380350246",
+          "looked": true
+        },
+        {
+          "name": "Hukum - Thalaivar Alappara",
+          "artist": "Anirudh Ravichander",
+          "plays": 2,
+          "url": "https://www.last.fm/music/Anirudh+Ravichander/_/Hukum+-+Thalaivar+Alappara",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/2c/df/14/2cdf140e-6d11-a98d-bfbf-bc5e30c3c4a1/197189528187.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/8e/92/8d/8e928d01-421f-b5fd-e550-6f78f65c0946/mzaf_12861274908972800573.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/hukum-thalaivar-alappara/1699735063?i=1699735327",
+          "looked": true
+        },
+        {
+          "name": "Jai Ho",
+          "artist": "A.R. Rahman",
+          "plays": 2,
+          "url": "https://www.last.fm/music/A.R.+Rahman/_/Jai+Ho",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/b0/28/2a/b0282a15-2f2c-e6f4-0be2-47d322dca5fd/00602537548699.rgb.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/c1/c7/8d/c1c78de1-aa35-2257-ac5f-958f3bc33235/mzaf_18006147976813345196.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/jai-ho-feat-sukhwinder-singh-tanvi-shah-mahalakshmi-iyer/1443884661?i=1443885535",
+          "looked": true
+        },
+        {
+          "name": "Can You Hear The Music",
+          "artist": "Ludwig Göransson",
+          "plays": 2,
+          "url": "https://www.last.fm/music/Ludwig+G%C3%B6ransson/_/Can+You+Hear+The+Music",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/27/fa/ca/27faca2e-7f7a-cf17-ae3e-647294d52713/697.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/0d/b0/b8/0db0b839-4fbc-2bb6-e280-3c9dc1302cf2/mzaf_12466660795519790459.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/can-you-hear-the-music/1697599270?i=1697599275",
+          "looked": true
+        }
+      ]
+    },
+    {
+      "key": "12month",
+      "artists": [
+        {
+          "name": "A.R. Rahman",
+          "plays": 412,
+          "url": "https://www.last.fm/music/A.R.+Rahman",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/bd34315ef977a62a9e28c1ab19bb8ac4/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Anirudh Ravichander",
+          "plays": 346,
+          "url": "https://www.last.fm/music/Anirudh+Ravichander",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/9da0a547b39e99bc35c6a9724aef91bf/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Hans Zimmer",
+          "plays": 291,
+          "url": "https://www.last.fm/music/Hans+Zimmer",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/1bd0b9f7a3cf12e01bdcc26fa69673f7/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Ilaiyaraaja",
+          "plays": 244,
+          "url": "https://www.last.fm/music/Ilaiyaraaja",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/aeeca2a4b9f808c8e8f5d281b1fb48d0/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Ludwig Göransson",
+          "plays": 205,
+          "url": "https://www.last.fm/music/Ludwig+G%C3%B6ransson",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/70c6fb0d92d44244caf1897cdfccd8c3/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Thaman S",
+          "plays": 172,
+          "url": "https://www.last.fm/music/Thaman+S",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/fe520c37ba48ea96638cf2f52f1bbc08/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Sid Sriram",
+          "plays": 145,
+          "url": "https://www.last.fm/music/Sid+Sriram",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/fbe3e1d17fc6958e047f011f74233f82/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Daft Punk",
+          "plays": 122,
+          "url": "https://www.last.fm/music/Daft+Punk",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/638e69b9caaf9f9f3f8826febea7b543/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Ennio Morricone",
+          "plays": 102,
+          "url": "https://www.last.fm/music/Ennio+Morricone",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/5c185197d4a6b59d44fa048dec47be24/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Justin Hurwitz",
+          "plays": 86,
+          "url": "https://www.last.fm/music/Justin+Hurwitz",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/6877edaf48102d5568c760b3eefb3819/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Santhosh Narayanan",
+          "plays": 72,
+          "url": "https://www.last.fm/music/Santhosh+Narayanan",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/74004fed94dddf9ae2d7c83084eaf1ad/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Devi Sri Prasad",
+          "plays": 61,
+          "url": "https://www.last.fm/music/Devi+Sri+Prasad",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/a904f8ee6cc4dcb472f75bd8ae1a21da/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Hildur Guðnadóttir",
+          "plays": 51,
+          "url": "https://www.last.fm/music/Hildur+Gu%C3%B0nad%C3%B3ttir",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/ced03473672472fee6d92570180644ad/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "M.M. Keeravaani",
+          "plays": 43,
+          "url": "https://www.last.fm/music/M.M.+Keeravaani",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/dda61305d6a8f2953a74e5a417605237/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        }
+      ],
+      "tracks": [
+        {
+          "name": "Time",
+          "artist": "Hans Zimmer",
+          "plays": 103,
+          "url": "https://www.last.fm/music/Hans+Zimmer/_/Time",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/2b/62/eb/2b62ebd7-aa99-988a-0fee-714162f6fbeb/093624965008.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/e0/1d/a4/e01da4a2-a75f-7ebf-9971-3d49e17efc57/mzaf_10500078769097048384.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/time/380349905?i=380350246",
+          "looked": true
+        },
+        {
+          "name": "Hukum - Thalaivar Alappara",
+          "artist": "Anirudh Ravichander",
+          "plays": 87,
+          "url": "https://www.last.fm/music/Anirudh+Ravichander/_/Hukum+-+Thalaivar+Alappara",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/2c/df/14/2cdf140e-6d11-a98d-bfbf-bc5e30c3c4a1/197189528187.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/8e/92/8d/8e928d01-421f-b5fd-e550-6f78f65c0946/mzaf_12861274908972800573.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/hukum-thalaivar-alappara/1699735063?i=1699735327",
+          "looked": true
+        },
+        {
+          "name": "Jai Ho",
+          "artist": "A.R. Rahman",
+          "plays": 73,
+          "url": "https://www.last.fm/music/A.R.+Rahman/_/Jai+Ho",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/b0/28/2a/b0282a15-2f2c-e6f4-0be2-47d322dca5fd/00602537548699.rgb.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/c1/c7/8d/c1c78de1-aa35-2257-ac5f-958f3bc33235/mzaf_18006147976813345196.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/jai-ho-feat-sukhwinder-singh-tanvi-shah-mahalakshmi-iyer/1443884661?i=1443885535",
+          "looked": true
+        },
+        {
+          "name": "Can You Hear The Music",
+          "artist": "Ludwig Göransson",
+          "plays": 61,
+          "url": "https://www.last.fm/music/Ludwig+G%C3%B6ransson/_/Can+You+Hear+The+Music",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/27/fa/ca/27faca2e-7f7a-cf17-ae3e-647294d52713/697.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/0d/b0/b8/0db0b839-4fbc-2bb6-e280-3c9dc1302cf2/mzaf_12466660795519790459.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/can-you-hear-the-music/1697599270?i=1697599275",
+          "looked": true
+        },
+        {
+          "name": "Samajavaragamana",
+          "artist": "Sid Sriram",
+          "plays": 51,
+          "url": "https://www.last.fm/music/Sid+Sriram/_/Samajavaragamana",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music123/v4/46/14/df/4614df1c-3f61-6bf5-5c3e-ee304895cfca/cover.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/ad/22/44/ad224483-fb25-67ae-71cd-d1da020127ae/mzaf_17415433725855260412.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/samajavaragamana/1493907854?i=1493907867",
+          "looked": true
+        },
+        {
+          "name": "Derezzed",
+          "artist": "Daft Punk",
+          "plays": 43,
+          "url": "https://www.last.fm/music/Daft+Punk/_/Derezzed",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music118/v4/f3/ff/7d/f3ff7d57-3d4c-4ca6-45df-11dcd1fcfe3a/00050087237196.rgb.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/b0/31/b2/b031b227-88da-3dee-05fe-520b96f30285/mzaf_8299314304356888270.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/derezzed/1440617583?i=1440617959",
+          "looked": true
+        },
+        {
+          "name": "Mia & Sebastian's Theme",
+          "artist": "Justin Hurwitz",
+          "plays": 36,
+          "url": "https://www.last.fm/music/Justin+Hurwitz/_/Mia+%26+Sebastian's+Theme",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/bb/47/a3/bb47a36e-57b8-9260-f9a4-d09851145c45/00602557100556.rgb.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/2f/71/b1/2f71b1e5-32d2-7af3-1fe9-f1ab9f4246a7/mzaf_8802631728964213098.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/mia-sebastians-theme/1440863506?i=1440863816",
+          "looked": true
+        },
+        {
+          "name": "The Ecstasy of Gold",
+          "artist": "Ennio Morricone",
+          "plays": 30,
+          "url": "https://www.last.fm/music/Ennio+Morricone/_/The+Ecstasy+of+Gold",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/4f/1b/0a/4f1b0a74-1951-bd22-3b1a-ad516eb0ec13/00724359862156.rgb.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/54/43/d6/5443d6d2-574c-1352-aa76-cd4d4c0540a7/mzaf_3946620439450132340.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/the-ecstasy-of-gold/715628596?i=715630264",
+          "looked": true
+        },
+        {
+          "name": "Cornfield Chase",
+          "artist": "Hans Zimmer",
+          "plays": 26,
+          "url": "https://www.last.fm/music/Hans+Zimmer/_/Cornfield+Chase",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/f4/5b/73/f45b735a-8d7a-9713-b217-0f8e1593c28b/794043201943.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/3a/ee/23/3aee2300-f6f7-a006-e20f-28092e814cbe/mzaf_1624587954644600228.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/cornfield-chase/1533983552?i=1533984393",
+          "looked": true
+        },
+        {
+          "name": "Naatu Naatu",
+          "artist": "Rahul Sipligunj & Kaala Bhairava",
+          "plays": 21,
+          "url": "https://www.last.fm/music/Rahul+Sipligunj+%26+Kaala+Bhairava/_/Naatu+Naatu",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/91/85/29/918529f8-5187-19c7-ac4f-983a9c7c5b78/8903431821683_cover.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/0f/08/19/0f0819a6-b68f-573d-0f3b-fc25ccd4bb54/mzaf_5031428267982532814.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/naatu-naatu/1619744666?i=1619744668",
+          "looked": true
+        },
+        {
+          "name": "Arabic Kuthu",
+          "artist": "Anirudh Ravichander",
+          "plays": 18,
+          "url": "https://www.last.fm/music/Anirudh+Ravichander/_/Arabic+Kuthu",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/e9/19/b9/e919b921-d5a8-9e9a-8508-3551da375aee/196626458629.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/58/ac/9a/58ac9a48-9e3e-15c9-5085-3a13a6187992/mzaf_12322264242631159198.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/arabic-kuthu-from-beast/1609970851?i=1609971105",
+          "looked": true
+        },
+        {
+          "name": "Srivalli",
+          "artist": "Sid Sriram",
+          "plays": 15,
+          "url": "https://www.last.fm/music/Sid+Sriram/_/Srivalli",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/ec/34/7b/ec347b9b-0add-c529-4746-799277a5e1c0/cover.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/9b/4a/e3/9b4ae3a2-43ee-dd7b-0474-3b7e914513cf/mzaf_10743675123561433132.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/srivalli/1602184415?i=1602184669",
+          "looked": true
+        },
+        {
+          "name": "Bathroom Dance",
+          "artist": "Hildur Guðnadóttir",
+          "plays": 13,
+          "url": "https://www.last.fm/music/Hildur+Gu%C3%B0nad%C3%B3ttir/_/Bathroom+Dance",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/bb/45/af/bb45afd7-eef7-84d5-40fc-943aef24a3c8/794043201745.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/6c/f9/69/6cf96973-586c-fe49-d7e9-4620f69effef/mzaf_17835458061250199713.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/bathroom-dance/1481598135?i=1481598347",
+          "looked": true
+        },
+        {
+          "name": "Kaathalae Kaathalae",
+          "artist": "Govind Vasantha",
+          "plays": 11,
+          "url": "https://www.last.fm/music/Govind+Vasantha/_/Kaathalae+Kaathalae",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/7e/47/2a/7e472a2a-1130-75e8-47e6-a24c7971df0c/1200214615888.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/1a/29/cf/1a29cf41-1493-2012-6855-c9407b8a6493/mzaf_328983497802766278.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/kaathalae-kaathalae/6791642078?i=6791642278",
+          "looked": true
+        }
+      ]
+    },
+    {
+      "key": "overall",
+      "artists": [
+        {
+          "name": "Hans Zimmer",
+          "plays": 1630,
+          "url": "https://www.last.fm/music/Hans+Zimmer",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/1bd0b9f7a3cf12e01bdcc26fa69673f7/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Ilaiyaraaja",
+          "plays": 1369,
+          "url": "https://www.last.fm/music/Ilaiyaraaja",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/aeeca2a4b9f808c8e8f5d281b1fb48d0/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Ludwig Göransson",
+          "plays": 1150,
+          "url": "https://www.last.fm/music/Ludwig+G%C3%B6ransson",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/70c6fb0d92d44244caf1897cdfccd8c3/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Thaman S",
+          "plays": 966,
+          "url": "https://www.last.fm/music/Thaman+S",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/fe520c37ba48ea96638cf2f52f1bbc08/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Sid Sriram",
+          "plays": 812,
+          "url": "https://www.last.fm/music/Sid+Sriram",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/fbe3e1d17fc6958e047f011f74233f82/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Daft Punk",
+          "plays": 682,
+          "url": "https://www.last.fm/music/Daft+Punk",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/638e69b9caaf9f9f3f8826febea7b543/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Ennio Morricone",
+          "plays": 573,
+          "url": "https://www.last.fm/music/Ennio+Morricone",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/5c185197d4a6b59d44fa048dec47be24/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Justin Hurwitz",
+          "plays": 481,
+          "url": "https://www.last.fm/music/Justin+Hurwitz",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/6877edaf48102d5568c760b3eefb3819/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Santhosh Narayanan",
+          "plays": 404,
+          "url": "https://www.last.fm/music/Santhosh+Narayanan",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/74004fed94dddf9ae2d7c83084eaf1ad/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Devi Sri Prasad",
+          "plays": 339,
+          "url": "https://www.last.fm/music/Devi+Sri+Prasad",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/a904f8ee6cc4dcb472f75bd8ae1a21da/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Hildur Guðnadóttir",
+          "plays": 285,
+          "url": "https://www.last.fm/music/Hildur+Gu%C3%B0nad%C3%B3ttir",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/ced03473672472fee6d92570180644ad/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "M.M. Keeravaani",
+          "plays": 239,
+          "url": "https://www.last.fm/music/M.M.+Keeravaani",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/dda61305d6a8f2953a74e5a417605237/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "A.R. Rahman",
+          "plays": 201,
+          "url": "https://www.last.fm/music/A.R.+Rahman",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/bd34315ef977a62a9e28c1ab19bb8ac4/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        },
+        {
+          "name": "Anirudh Ravichander",
+          "plays": 169,
+          "url": "https://www.last.fm/music/Anirudh+Ravichander",
+          "photo": "https://cdn-images.dzcdn.net/images/artist/9da0a547b39e99bc35c6a9724aef91bf/1000x1000-000000-80-0-0.jpg",
+          "looked": true
+        }
+      ],
+      "tracks": [
+        {
+          "name": "Jai Ho",
+          "artist": "A.R. Rahman",
+          "plays": 408,
+          "url": "https://www.last.fm/music/A.R.+Rahman/_/Jai+Ho",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/b0/28/2a/b0282a15-2f2c-e6f4-0be2-47d322dca5fd/00602537548699.rgb.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/c1/c7/8d/c1c78de1-aa35-2257-ac5f-958f3bc33235/mzaf_18006147976813345196.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/jai-ho-feat-sukhwinder-singh-tanvi-shah-mahalakshmi-iyer/1443884661?i=1443885535",
+          "looked": true
+        },
+        {
+          "name": "Can You Hear The Music",
+          "artist": "Ludwig Göransson",
+          "plays": 343,
+          "url": "https://www.last.fm/music/Ludwig+G%C3%B6ransson/_/Can+You+Hear+The+Music",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/27/fa/ca/27faca2e-7f7a-cf17-ae3e-647294d52713/697.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/0d/b0/b8/0db0b839-4fbc-2bb6-e280-3c9dc1302cf2/mzaf_12466660795519790459.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/can-you-hear-the-music/1697599270?i=1697599275",
+          "looked": true
+        },
+        {
+          "name": "Samajavaragamana",
+          "artist": "Sid Sriram",
+          "plays": 288,
+          "url": "https://www.last.fm/music/Sid+Sriram/_/Samajavaragamana",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music123/v4/46/14/df/4614df1c-3f61-6bf5-5c3e-ee304895cfca/cover.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/ad/22/44/ad224483-fb25-67ae-71cd-d1da020127ae/mzaf_17415433725855260412.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/samajavaragamana/1493907854?i=1493907867",
+          "looked": true
+        },
+        {
+          "name": "Derezzed",
+          "artist": "Daft Punk",
+          "plays": 242,
+          "url": "https://www.last.fm/music/Daft+Punk/_/Derezzed",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music118/v4/f3/ff/7d/f3ff7d57-3d4c-4ca6-45df-11dcd1fcfe3a/00050087237196.rgb.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/b0/31/b2/b031b227-88da-3dee-05fe-520b96f30285/mzaf_8299314304356888270.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/derezzed/1440617583?i=1440617959",
+          "looked": true
+        },
+        {
+          "name": "Mia & Sebastian's Theme",
+          "artist": "Justin Hurwitz",
+          "plays": 203,
+          "url": "https://www.last.fm/music/Justin+Hurwitz/_/Mia+%26+Sebastian's+Theme",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/bb/47/a3/bb47a36e-57b8-9260-f9a4-d09851145c45/00602557100556.rgb.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/2f/71/b1/2f71b1e5-32d2-7af3-1fe9-f1ab9f4246a7/mzaf_8802631728964213098.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/mia-sebastians-theme/1440863506?i=1440863816",
+          "looked": true
+        },
+        {
+          "name": "The Ecstasy of Gold",
+          "artist": "Ennio Morricone",
+          "plays": 171,
+          "url": "https://www.last.fm/music/Ennio+Morricone/_/The+Ecstasy+of+Gold",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/4f/1b/0a/4f1b0a74-1951-bd22-3b1a-ad516eb0ec13/00724359862156.rgb.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/54/43/d6/5443d6d2-574c-1352-aa76-cd4d4c0540a7/mzaf_3946620439450132340.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/the-ecstasy-of-gold/715628596?i=715630264",
+          "looked": true
+        },
+        {
+          "name": "Cornfield Chase",
+          "artist": "Hans Zimmer",
+          "plays": 143,
+          "url": "https://www.last.fm/music/Hans+Zimmer/_/Cornfield+Chase",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/f4/5b/73/f45b735a-8d7a-9713-b217-0f8e1593c28b/794043201943.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/3a/ee/23/3aee2300-f6f7-a006-e20f-28092e814cbe/mzaf_1624587954644600228.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/cornfield-chase/1533983552?i=1533984393",
+          "looked": true
+        },
+        {
+          "name": "Naatu Naatu",
+          "artist": "Rahul Sipligunj & Kaala Bhairava",
+          "plays": 120,
+          "url": "https://www.last.fm/music/Rahul+Sipligunj+%26+Kaala+Bhairava/_/Naatu+Naatu",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/91/85/29/918529f8-5187-19c7-ac4f-983a9c7c5b78/8903431821683_cover.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/0f/08/19/0f0819a6-b68f-573d-0f3b-fc25ccd4bb54/mzaf_5031428267982532814.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/naatu-naatu/1619744666?i=1619744668",
+          "looked": true
+        },
+        {
+          "name": "Arabic Kuthu",
+          "artist": "Anirudh Ravichander",
+          "plays": 101,
+          "url": "https://www.last.fm/music/Anirudh+Ravichander/_/Arabic+Kuthu",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/e9/19/b9/e919b921-d5a8-9e9a-8508-3551da375aee/196626458629.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/58/ac/9a/58ac9a48-9e3e-15c9-5085-3a13a6187992/mzaf_12322264242631159198.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/arabic-kuthu-from-beast/1609970851?i=1609971105",
+          "looked": true
+        },
+        {
+          "name": "Srivalli",
+          "artist": "Sid Sriram",
+          "plays": 85,
+          "url": "https://www.last.fm/music/Sid+Sriram/_/Srivalli",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/ec/34/7b/ec347b9b-0add-c529-4746-799277a5e1c0/cover.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/9b/4a/e3/9b4ae3a2-43ee-dd7b-0474-3b7e914513cf/mzaf_10743675123561433132.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/srivalli/1602184415?i=1602184669",
+          "looked": true
+        },
+        {
+          "name": "Bathroom Dance",
+          "artist": "Hildur Guðnadóttir",
+          "plays": 71,
+          "url": "https://www.last.fm/music/Hildur+Gu%C3%B0nad%C3%B3ttir/_/Bathroom+Dance",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/bb/45/af/bb45afd7-eef7-84d5-40fc-943aef24a3c8/794043201745.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/6c/f9/69/6cf96973-586c-fe49-d7e9-4620f69effef/mzaf_17835458061250199713.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/bathroom-dance/1481598135?i=1481598347",
+          "looked": true
+        },
+        {
+          "name": "Kaathalae Kaathalae",
+          "artist": "Govind Vasantha",
+          "plays": 60,
+          "url": "https://www.last.fm/music/Govind+Vasantha/_/Kaathalae+Kaathalae",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/7e/47/2a/7e472a2a-1130-75e8-47e6-a24c7971df0c/1200214615888.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/1a/29/cf/1a29cf41-1493-2012-6855-c9407b8a6493/mzaf_328983497802766278.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/kaathalae-kaathalae/6791642078?i=6791642278",
+          "looked": true
+        },
+        {
+          "name": "Time",
+          "artist": "Hans Zimmer",
+          "plays": 50,
+          "url": "https://www.last.fm/music/Hans+Zimmer/_/Time",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/2b/62/eb/2b62ebd7-aa99-988a-0fee-714162f6fbeb/093624965008.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/e0/1d/a4/e01da4a2-a75f-7ebf-9971-3d49e17efc57/mzaf_10500078769097048384.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/time/380349905?i=380350246",
+          "looked": true
+        },
+        {
+          "name": "Hukum - Thalaivar Alappara",
+          "artist": "Anirudh Ravichander",
+          "plays": 42,
+          "url": "https://www.last.fm/music/Anirudh+Ravichander/_/Hukum+-+Thalaivar+Alappara",
+          "art": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/2c/df/14/2cdf140e-6d11-a98d-bfbf-bc5e30c3c4a1/197189528187.jpg/100x100bb.jpg",
+          "preview": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/8e/92/8d/8e928d01-421f-b5fd-e550-6f78f65c0946/mzaf_12861274908972800573.plus.aac.p.m4a",
+          "apple": "https://music.apple.com/us/album/hukum-thalaivar-alappara/1699735063?i=1699735327",
+          "looked": true
+        }
+      ]
+    }
+  ]
+}

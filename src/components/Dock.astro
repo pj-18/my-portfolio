@@ -1,12 +1,15 @@
 ---
 import Icon from './Icon.astro';
 import type { IconName } from '../lib/icons';
+import { music } from '../lib/music';
 
-const items: { href: string; scene: string; label: string; icon: IconName; accent: string }[] = [
+type Item = { href: string; scene: string; label: string; icon: IconName; accent: string };
+const items: Item[] = [
   { href: '#top', scene: 'top', label: 'Intro', icon: 'play', accent: 'var(--paper)' },
-  { href: '#work', scene: 'work', label: 'Work', icon: 'code', accent: 'var(--green)' },
   { href: '#films', scene: 'films', label: 'Films', icon: 'clapper', accent: 'var(--amber)' },
+  ...(music ? [{ href: '#music', scene: 'music', label: 'Music', icon: 'note', accent: 'var(--cyan)' } as Item] : []),
   { href: '#darkroom', scene: 'darkroom', label: 'Photos', icon: 'aperture', accent: 'var(--red)' },
+  { href: '#work', scene: 'work', label: 'Work', icon: 'code', accent: 'var(--green)' },
   { href: '#credits', scene: 'credits', label: 'Contact', icon: 'mail', accent: 'var(--paper)' },
 ];
 ---
@@ -92,6 +95,22 @@ const items: { href: string; scene: string; label: string; icon: IconName; accen
     height: 4px;
     border-radius: 50%;
     background: var(--accent);
+  }
+
+  /* six stops on a small phone: tighten up so the dock never overflows */
+  @media (max-width: 26rem) {
+    .dock {
+      gap: 0;
+      padding: 5px;
+    }
+
+    a {
+      min-width: 0;
+      width: min(3.6rem, calc((100vw - 1.75rem) / 6));
+      padding-inline: 2px;
+      font-size: 0.56rem;
+      letter-spacing: 0.04em;
+    }
   }
 
   @media (min-width: 48rem) {

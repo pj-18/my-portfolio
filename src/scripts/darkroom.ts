@@ -28,7 +28,9 @@ if (section && roll && raw) {
   const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const pad = (n: number) => String(n).padStart(2, '0');
 
-  /* ---- strip / contact sheet ---- */
+  /* ---- strip / contact sheet ----
+     The contact sheet is the default (it's compact, so phones don't scroll past every frame);
+     a visitor's own choice is remembered. */
   const buttons = [...section.querySelectorAll<HTMLButtonElement>('[data-layout-btn]')];
   const setLayout = (layout: string) => {
     roll.dataset.layout = layout;
@@ -39,7 +41,7 @@ if (section && roll && raw) {
       /* storage blocked: the choice just isn't remembered */
     }
   };
-  for (const button of buttons) button.addEventListener('click', () => setLayout(button.dataset.layoutBtn ?? 'strip'));
+  for (const button of buttons) button.addEventListener('click', () => setLayout(button.dataset.layoutBtn ?? 'sheet'));
   try {
     const saved = localStorage.getItem('pj:darkroom');
     if (saved === 'sheet' || saved === 'strip') setLayout(saved);

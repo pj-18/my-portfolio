@@ -103,14 +103,41 @@ if (hanger && arm && ticket) {
   ticket.addEventListener('pointercancel', release);
 
   // ---- scroll nudges ----
+  // Scrolling only ever stirs it up to about the sway it has on load, so a long smooth scroll
+  // (like "Back to the top") can't pile up a wild swing.
+  const SCROLL_SWAY = 0.5;
   let lastScroll = window.scrollY;
+  let backToTop = false;
+  const settleLikeLoad = () => {
+    backToTop = false;
+    angle = 0.12;
+    velocity = 0;
+    wobble = 0;
+    wake();
+  };
+  document.addEventListener('click', (event) => {
+    if ((event.target as Element | null)?.closest('a[href="#top"]') && window.scrollY > 4) backToTop = true;
+  });
+  // if the visitor takes over mid-way, go back to ordinary scroll nudges
+  for (const type of ['wheel', 'touchstart', 'keydown'] as const) {
+    window.addEventListener(type, () => (backToTop = false), { passive: true });
+  }
   window.addEventListener(
     'scroll',
     () => {
       const delta = window.scrollY - lastScroll;
       lastScroll = window.scrollY;
+      // arriving at the top from "Back to the top": hang and sway just as it does when the page loads
+      if (backToTop) {
+        if (window.scrollY <= 4) settleLikeLoad();
+        return;
+      }
       if (!inView || dragging) return;
-      velocity += Math.max(-0.6, Math.min(0.6, delta * 0.004));
+      const push = Math.max(-0.6, Math.min(0.6, delta * 0.004));
+      // only push while it sways less than the cap, and never past it
+      if (Math.abs(velocity) < SCROLL_SWAY || Math.sign(push) !== Math.sign(velocity)) {
+        velocity = Math.max(-SCROLL_SWAY, Math.min(SCROLL_SWAY, velocity + push));
+      }
       wake();
     },
     { passive: true },

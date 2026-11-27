@@ -56,10 +56,10 @@ const data = photos.map((p) => ({
           </p>
           <div class="darkroom__tools reveal">
             <div class="layout-toggle" role="group" aria-label="Layout">
-              <button type="button" data-layout-btn="strip" aria-pressed="true">
+              <button type="button" data-layout-btn="strip" aria-pressed="false">
                 Strip
               </button>
-              <button type="button" data-layout-btn="sheet" aria-pressed="false">
+              <button type="button" data-layout-btn="sheet" aria-pressed="true">
                 Contact sheet
               </button>
             </div>
@@ -67,7 +67,7 @@ const data = photos.map((p) => ({
           </div>
         </div>
 
-        <div class="roll" data-roll data-layout="strip">
+        <div class="roll" data-roll data-layout="sheet">
           <ol class="roll__frames">
             {photos.map((photo, i) => (
               <li class="frame" style={`--ratio:${photo.ratio.toFixed(4)};--tone:${photo.tone}`}>
@@ -672,56 +672,69 @@ const data = photos.map((p) => ({
     }
   }
 
+  /* The strip runs sideways at every size, phones included: swipe along it instead of scrolling
+     past every frame in a long column. (The contact sheet is the compact grid.) */
+  .roll[data-layout='strip'] {
+    --frame-h: min(54svh, 26rem);
+    width: 100%;
+    background: linear-gradient(#170605, #1f0907 50%, #170605);
+  }
+
+  .roll[data-layout='strip']::before,
+  .roll[data-layout='strip']::after {
+    top: auto;
+    bottom: auto;
+    left: 0;
+    right: 0;
+    width: auto;
+    height: 12px;
+    background: var(--holes-h) 0 0 / 26px 12px repeat-x;
+  }
+
+  .roll[data-layout='strip']::before {
+    top: 8px;
+  }
+
+  .roll[data-layout='strip']::after {
+    bottom: 8px;
+  }
+
+  .roll[data-layout='strip'] .roll__frames {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    padding: 2.25rem max(var(--gutter), calc((100vw - var(--max)) / 2)) 2.25rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: thin;
+    scrollbar-color: rgb(255 90 60 / 0.5) transparent;
+  }
+
+  .roll[data-layout='strip'] .frame {
+    flex: none;
+    scroll-snap-align: center;
+  }
+
+  .roll[data-layout='strip'] .frame__btn {
+    width: auto;
+    height: var(--frame-h);
+  }
+
+  .roll[data-layout='strip'] .frame__cap {
+    max-width: calc(var(--frame-h) * var(--ratio));
+  }
+
   @media (min-width: 64rem) {
     .roll[data-layout='strip'] {
-      width: 100%;
-      background: linear-gradient(#170605, #1f0907 50%, #170605);
-    }
-
-    .roll[data-layout='strip']::before,
-    .roll[data-layout='strip']::after {
-      top: auto;
-      bottom: auto;
-      left: 0;
-      right: 0;
-      width: auto;
-      height: 12px;
-      background: var(--holes-h) 0 0 / 26px 12px repeat-x;
-    }
-
-    .roll[data-layout='strip']::before {
-      top: 8px;
-    }
-
-    .roll[data-layout='strip']::after {
-      bottom: 8px;
+      --frame-h: min(62svh, 34rem);
     }
 
     .roll[data-layout='strip'] .roll__frames {
-      position: relative;
-      display: flex;
-      align-items: flex-start;
       gap: 2rem;
-      padding: 2.75rem max(var(--gutter), calc((100vw - var(--max)) / 2)) 2.5rem;
-      overflow-x: auto;
-      overscroll-behavior-x: contain;
-      scroll-snap-type: x proximity;
-      scrollbar-width: thin;
-      scrollbar-color: rgb(255 90 60 / 0.5) transparent;
-    }
-
-    .roll[data-layout='strip'] .frame {
-      flex: none;
-      scroll-snap-align: center;
-    }
-
-    .roll[data-layout='strip'] .frame__btn {
-      width: auto;
-      height: min(62svh, 34rem);
-    }
-
-    .roll[data-layout='strip'] .frame__cap {
-      max-width: calc(min(62svh, 34rem) * var(--ratio));
+      padding-block: 2.75rem 2.5rem;
     }
 
     .vf__nav {

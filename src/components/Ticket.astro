@@ -2,7 +2,10 @@
 import { site } from '../site.config';
 
 // GoatCounter's public visitor total becomes the ticket's serial number (scripts/admits.ts).
-const admits = site.goatcounter ? `https://${site.goatcounter}.goatcounter.com/counter/TOTAL.json` : undefined;
+// The home page's own counter is the live fallback while the site-wide total is still rolling up.
+const counterBase = site.goatcounter ? `https://${site.goatcounter}.goatcounter.com/counter` : undefined;
+const admits = counterBase && `${counterBase}/TOTAL.json`;
+const admitsHome = counterBase && `${counterBase}//.json`;
 ---
 
 <div class="hanger" data-hanger aria-hidden="true">
@@ -20,7 +23,7 @@ const admits = site.goatcounter ? `https://${site.goatcounter}.goatcounter.com/c
         <div><dt>Seat</dt><dd>18</dd></div>
       </dl>
       <span class="ticket__code"></span>
-      <p class="ticket__no" data-admits={admits}>Nº 000718</p>
+      <p class="ticket__no" data-admits={admits} data-admits-home={admitsHome}>Nº 000718</p>
     </div>
   </div>
 </div>
@@ -194,6 +197,23 @@ const admits = site.goatcounter ? `https://${site.goatcounter}.goatcounter.com/c
     font-weight: 800;
     line-height: 0.95;
     letter-spacing: 0;
+  }
+
+  /* a live change in the total: the number pops once */
+  .ticket__no :global(.ticket__count.is-bumped) {
+    animation: count-bump 0.5s var(--ease-spring);
+  }
+
+  @keyframes count-bump {
+    40% {
+      transform: scale(1.18);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ticket__no :global(.ticket__count.is-bumped) {
+      animation: none;
+    }
   }
 
   @media (min-width: 48rem) {

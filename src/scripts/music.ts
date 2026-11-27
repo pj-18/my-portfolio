@@ -90,8 +90,11 @@ if (section) {
       blank.hidden = !!art;
     }
     if (link) {
-      link.href = href;
-      link.setAttribute('aria-label', `${name} on ${track.dataset.apple === 'true' ? 'Apple Music' : 'Last.fm'}`);
+      // only Apple Music links: a song without one gets no arrow
+      link.hidden = !href;
+      if (href) link.href = href;
+      else link.removeAttribute('href');
+      link.setAttribute('aria-label', `${name} on Apple Music`);
     }
     if (toggle) toggle.disabled = !track.dataset.preview;
     setState(track.dataset.preview ? 'Cued up' : 'No preview');

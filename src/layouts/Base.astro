@@ -15,6 +15,8 @@ interface Props {
 
 const { title = `${site.name} (${site.nickname})`, description = site.description } = Astro.props;
 const canonical = new URL(withBase(), Astro.site).href;
+// Only the live site counts visits: `npm run dev` and previews never do.
+const counter = import.meta.env.PROD && site.goatcounter ? `https://${site.goatcounter}.goatcounter.com/count` : null;
 ---
 
 <!doctype html>
@@ -45,6 +47,7 @@ const canonical = new URL(withBase(), Astro.site).href;
         } catch (e) {}
       })(document.documentElement);
     </script>
+    {counter && <script is:inline async data-goatcounter={counter} src="https://gc.zgo.at/count.js"></script>}
   </head>
   <body data-scene="top">
     <a class="skip" href="#films">Skip to content</a>

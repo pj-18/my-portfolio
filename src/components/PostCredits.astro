@@ -47,9 +47,9 @@ const reel = recommendations.map((e) => {
   .post {
     display: grid;
     justify-items: center;
-    gap: 1rem;
-    margin-block: clamp(1rem, 4vw, 2.5rem);
-    padding: 2rem 1.25rem;
+    gap: 0.7rem;
+    margin-block: clamp(0.75rem, 3vw, 2rem);
+    padding: 1.25rem 1rem;
     border: 1px dashed var(--line-2);
     border-radius: var(--radius);
     text-align: center;
@@ -70,7 +70,7 @@ const reel = recommendations.map((e) => {
 
   .post__title {
     font-family: var(--f-display);
-    font-size: clamp(2.2rem, 10vw, 3.6rem);
+    font-size: clamp(1.8rem, 8vw, 3rem);
     font-stretch: 62%;
     font-weight: 820;
     line-height: 0.92;
@@ -79,22 +79,23 @@ const reel = recommendations.map((e) => {
 
   .post__text {
     max-width: 34ch;
+    font-size: 0.92rem;
     color: var(--muted);
   }
 
   .spinner {
     display: grid;
     justify-items: center;
-    gap: 1.1rem;
+    gap: 0.8rem;
     width: 100%;
-    margin-block: 0.5rem 0.25rem;
+    margin-block: 0.25rem 0;
   }
 
   .spinner__gate {
     position: relative;
     display: grid;
     place-items: center;
-    width: 8.5rem;
+    width: 6.5rem;
     aspect-ratio: 2 / 3;
     overflow: hidden;
     border-radius: 8px;
@@ -157,7 +158,7 @@ const reel = recommendations.map((e) => {
 
   .spinner__leader {
     font-family: var(--f-display);
-    font-size: 4rem;
+    font-size: 3.2rem;
     font-stretch: 62%;
     font-weight: 850;
     color: var(--dim);
@@ -166,14 +167,13 @@ const reel = recommendations.map((e) => {
   .spinner__result {
     display: grid;
     gap: 0.35rem;
-    min-height: 5.5rem;
     max-width: 32ch;
   }
 
   .spinner__idle {
     color: var(--dim);
     font-family: var(--f-serif);
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-style: italic;
   }
 
@@ -203,7 +203,7 @@ const reel = recommendations.map((e) => {
 
   .spinner__result :global(.spin-take) {
     font-family: var(--f-serif);
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     font-style: italic;
     line-height: 1.2;
     color: var(--paper-dim);
@@ -223,9 +223,10 @@ const reel = recommendations.map((e) => {
     .post {
       grid-template-columns: auto minmax(0, 1fr);
       justify-items: start;
-      align-items: center;
-      gap: 1rem 2.5rem;
-      padding: 2.5rem;
+      align-content: center;
+      gap: 0.8rem 2.25rem;
+      width: min(100% - 2 * var(--gutter), 52rem);
+      padding: 1.75rem 2rem;
       text-align: left;
     }
 
@@ -233,10 +234,20 @@ const reel = recommendations.map((e) => {
       grid-column: 2;
     }
 
+    .post__text {
+      font-size: 1rem;
+    }
+
+    /* four rows of copy beside it: kicker, title, text, button */
     .spinner {
       grid-column: 1;
-      grid-row: 1 / span 5;
+      grid-row: 1 / span 4;
       justify-items: center;
+      margin: 0;
+    }
+
+    .spinner__gate {
+      width: 7.5rem;
     }
 
     .spinner__result :global(.spin-link) {

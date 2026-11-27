@@ -41,6 +41,8 @@ export const site = {
   name: 'Praveen Kumar',
   nickname: 'PJ',
   role: 'Senior Software Engineer',
+  /** The line under the name on the hanging ticket in the hero. Keep it short: the ticket is small. */
+  ticketTitle: 'Plot-hole detective',
   description:
     'Praveen Kumar (PJ) is a senior software engineer who builds web apps and the tests that keep them honest. Off the clock: a Letterboxd film diary and a darkroom of photographs.',
 
@@ -60,6 +62,13 @@ export const site = {
   /** Your Letterboxd username. `npm run films` pulls its public RSS feed. */
   letterboxd: 'pj_18',
 
+  /**
+   * Visitor count, from GoatCounter (free, no cookies, page views only). Sign up at
+   * goatcounter.com, put your code here ('pjportfolio' for pjportfolio.goatcounter.com), and turn on
+   * Settings → "Allow adding visitor counts on your website" so the footer can show the total.
+   * Empty = no counting and no count shown.
+   */
+  goatcounter: 'pj18',
 
   /**
    * "Up next": the shows you've booked. BookMyShow has no public API and your bookings sit behind
@@ -111,5 +120,5 @@ export const site = {
   ] satisfies TestCase[],
 
   /** Rolls past in the work section. Trim or extend freely. */
-  stack: ['React', 'JavaScript', 'Playwright', 'Cypress', 'SQL', 'Node.js', 'TypeScript', 'REST APIs', 'Git', 'CI/CD'],
+  stack: ['React', 'JavaScript', 'Playwright', 'Cypress', 'Postman', 'SQL', 'Node.js', 'TypeScript', 'REST APIs', 'Git', 'CI/CD'],
 };

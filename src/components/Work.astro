@@ -128,25 +128,32 @@ const stack = [...site.stack, ...site.stack].map((name) => ({ name, logo: logos[
     gap: clamp(2.5rem, 7vw, 4.5rem);
   }
 
+  /* A lighter, softer paragraph so the highlighted words and the serif italics carry the emphasis. */
   .about {
     font-size: clamp(1.5rem, 6.2vw, 3rem);
-    font-weight: 500;
-    line-height: 1.18;
-    letter-spacing: -0.012em;
+    font-weight: 380;
+    font-optical-sizing: auto;
+    line-height: 1.24;
+    letter-spacing: -0.022em;
+    color: var(--paper-dim);
     text-wrap: pretty;
+    hanging-punctuation: first;
   }
 
   .about__hl {
     color: var(--accent);
     font-weight: 700;
+    letter-spacing: -0.03em;
   }
 
   .about__em {
+    color: var(--paper);
     font-family: var(--f-serif);
-    font-size: 1.12em;
+    font-size: 1.18em;
     font-style: italic;
     font-weight: 400;
-    letter-spacing: 0;
+    line-height: 1;
+    letter-spacing: -0.005em;
   }
 
   /* ---- the test runner ---- */

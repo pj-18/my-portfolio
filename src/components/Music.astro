@@ -3,7 +3,7 @@ import ReelHead from './ReelHead.astro';
 import Icon from './Icon.astro';
 import { charts, firstChart, isSample, lastPlayed, music, sized, sizes } from '../lib/music';
 import { site } from '../site.config';
-import { dayMonthYear, pad } from '../lib/util';
+import { dayMonthYear } from '../lib/util';
 
 const count = new Intl.NumberFormat('en-GB');
 const since = music?.since ? new Date(music.since).getUTCFullYear() : null;
@@ -130,12 +130,12 @@ const spunProps = lastPlayed?.apple ? { href: lastPlayed.apple, target: '_blank'
                         )}
                       </div>
                       <figcaption class="spot__caption">
-                        <span class="spot__rank">No. {pad(act.rank)}</span>
                         <span class="spot__name">{act.name}</span>
-                        <span class="spot__meta">
-                          <span>{count.format(act.plays)} plays</span>
-                          {act.favourite && <span>on repeat: “{act.favourite.name}”</span>}
-                        </span>
+                        {act.favourite && (
+                          <span class="spot__meta">
+                            <span>on repeat: “{act.favourite.name}”</span>
+                          </span>
+                        )}
                       </figcaption>
                     </figure>
                   ))}
@@ -157,11 +157,7 @@ const spunProps = lastPlayed?.apple ? { href: lastPlayed.apple, target: '_blank'
                           aria-pressed={pressed(i === 0)}
                           style={`--len:${Math.max(4, act.name.length)}`}
                         >
-                          <span class="bill__no" aria-hidden="true">
-                            {pad(act.rank)}
-                          </span>
                           {act.name}
-                          <span class="sr-only">, {count.format(act.plays)} plays</span>
                         </button>
                       </li>
                     ))}
@@ -621,15 +617,6 @@ const spunProps = lastPlayed?.apple ? { href: lastPlayed.apple, target: '_blank'
     padding: 1rem;
   }
 
-  .spot__rank {
-    font-family: var(--f-mono);
-    font-size: 0.66rem;
-    font-weight: 600;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--cyan);
-  }
-
   .spot__name {
     font-family: var(--f-display);
     font-size: clamp(2rem, 9vw, 3rem);
@@ -702,16 +689,6 @@ const spunProps = lastPlayed?.apple ? { href: lastPlayed.apple, target: '_blank'
     color: var(--cyan);
   }
 
-  .bill__no {
-    margin-right: 0.18em;
-    font-family: var(--f-mono);
-    font-size: max(0.32em, 0.55rem);
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    vertical-align: 0.9em;
-    color: var(--muted);
-  }
-
   .tier-1 {
     font-stretch: 62%;
     font-weight: 900;
@@ -722,10 +699,6 @@ const spunProps = lastPlayed?.apple ? { href: lastPlayed.apple, target: '_blank'
   .tier-1 button {
     font-size: clamp(1.6rem, calc(100cqi / (var(--len) * 0.5 + 1.2)), 6.5rem);
     line-height: 0.92;
-  }
-
-  .tier-1 .bill__no {
-    vertical-align: 1.9em;
   }
 
   .tier-2 {

@@ -3,9 +3,12 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-  # Rebuild every morning so new Letterboxd diary entries and Last.fm charts show up on their own.
+  # Rebuild twice a day so new Letterboxd diary entries and Last.fm charts show up on their own.
+  # Cron runs in UTC: these are 4 AM and 4 PM India time (UTC+05:30).
   schedule:
-    - cron: '17 3 * * *'
+    - cron: '30 22 * * *' # 04:00 IST
+    - cron: '30 10 * * *' # 16:00 IST
+  # Actions tab → "Deploy to GitHub Pages" → Run workflow: refresh everything on demand.
   workflow_dispatch:
 
 permissions:
@@ -34,10 +37,18 @@ jobs:
 
       - run: npm ci
 
+      # music.json remembers the artwork/preview lookups so each run only searches for new songs.
+      # It is saved to the Actions cache after every run, so it doesn't need to be committed.
+      - uses: actions/cache@v4
+        with:
+          path: src/data/music.json
+          key: music-${{ github.run_id }}
+          restore-keys: music-
+
       # `npm run build` pulls the latest Letterboxd feed, Last.fm charts and booked shows
       # (open "Up next" issues) first, then builds.
       # LASTFM_API_KEY is a repository secret (Settings → Secrets and variables → Actions).
-      # Without it the build still passes; the soundtrack keeps its last committed data.
+      # Without it the build still passes; the soundtrack uses whatever music.json is saved (or is left out if there is none).
       - run: npm run build
         env:
           SITE_URL: ${{ steps.pages.outputs.origin }}

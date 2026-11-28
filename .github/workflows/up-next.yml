@@ -10,7 +10,7 @@ on:
     # and start two deploys. `check` labels the issue itself when it needs to.
     types: [opened, edited, closed, reopened, deleted, unlabeled]
   schedule:
-    - cron: '0 3 * * *' # 8:30 IST, just before the daily deploy
+    - cron: '0 22 * * *' # 3:30 IST, just before the 4 AM deploy
   workflow_dispatch:
 
 permissions:

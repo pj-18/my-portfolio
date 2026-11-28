@@ -40,11 +40,11 @@ export interface Booking {
 export const site = {
   name: 'Praveen Kumar',
   nickname: 'PJ',
-  role: 'Senior Software Engineer',
+  role: 'Quality Engineer',
   /** The line under the name on the hanging ticket in the hero. Keep it short: the ticket is small. */
   ticketTitle: 'Plot-hole detective',
   description:
-    'Praveen Kumar (PJ) is a senior software engineer who builds web apps and the tests that keep them honest. Off the clock: a Letterboxd film diary and a darkroom of photographs.',
+    'Praveen Kumar (PJ) is a software engineer who builds web apps and the tests that keep them honest. Off the clock: a Letterboxd film diary and a darkroom of photographs.',
 
   /**
    * Your email, in two halves on purpose: the whole address never appears in this repo or in the
@@ -56,7 +56,9 @@ export const site = {
     { label: 'GitHub', handle: 'pj-18', url: 'https://github.com/pj-18' },
     { label: 'LinkedIn', handle: 'praveenponduru', url: 'https://www.linkedin.com/in/praveenponduru/' },
     { label: 'Letterboxd', handle: 'pj_18', url: 'https://letterboxd.com/pj_18/' },
-    { label: 'Instagram', handle: 'frames.by.pj', url: 'https://www.instagram.com/frames.by.pj/' },
+    // Two Instagram accounts: `brand` picks the logo, `label` keeps them apart (tooltip, screen readers).
+    { label: 'Instagram (photography)', brand: 'Instagram', handle: 'frames.by.pj', url: 'https://www.instagram.com/frames.by.pj/' },
+    { label: 'Instagram (personal)', brand: 'Instagram', handle: 'urstruly.pj', url: 'https://www.instagram.com/urstruly.pj/' },
   ],
 
   /** Your Letterboxd username. `npm run films` pulls its public RSS feed. */
@@ -103,6 +105,8 @@ export const site = {
     period: '12month',
     /** Artists or song titles to leave off the page (case doesn't matter). */
     hide: [] as string[],
+    /** Artist names that really contain "&" or a comma and must not be split into two artists. */
+    keepTogether: ['Simon & Garfunkel', 'Earth, Wind & Fire', 'Tyler, The Creator', 'Mumford & Sons', 'Hall & Oates', 'Crosby, Stills & Nash'] as string[],
   },
 
   about:

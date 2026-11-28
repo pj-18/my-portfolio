@@ -4,6 +4,9 @@ import Icon from './Icon.astro';
 import { loadPhotos } from '../lib/photos';
 import { music } from '../lib/music';
 import { pad, safeJson } from '../lib/util';
+import { site } from '../site.config';
+
+const photoGram = site.links.find((l) => l.label === 'Instagram (photography)');
 
 const photos = await loadPhotos();
 const total = photos.length;
@@ -38,7 +41,24 @@ const data = photos.map((p) => ({
     variant="safelight"
     speed={46}
   >
-    <p slot="aside" class="eyebrow safelight"><span class="safelight__bulb"></span>Safelight on</p>
+    {
+      photoGram ? (
+        <a
+          slot="aside"
+          class="eyebrow safelight"
+          href={photoGram.url}
+          target="_blank"
+          rel="me noopener noreferrer"
+          aria-label={`${photoGram.label} on Instagram`}
+        >
+          <span class="safelight__bulb" />@{photoGram.handle} ↗
+        </a>
+      ) : (
+        <p slot="aside" class="eyebrow safelight">
+          <span class="safelight__bulb" />Safelight on
+        </p>
+      )
+    }
   </ReelHead>
 
   {
@@ -178,6 +198,14 @@ const data = photos.map((p) => ({
     align-items: center;
     gap: 0.5rem;
     color: #ff9c86;
+  }
+
+  a.safelight {
+    text-decoration: none;
+  }
+
+  a.safelight:hover {
+    color: #ffc2b3;
   }
 
   .safelight__bulb {

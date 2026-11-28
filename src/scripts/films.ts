@@ -203,6 +203,142 @@ if (section) {
     const block = section.querySelector<HTMLElement>('[data-upnext]');
     const note = block?.querySelector<HTMLElement>('[data-upnext-note]');
     const time = (value?: string) => (value ? Number(value) : null);
+
+    /* ---- list or stack: in the stack the tickets overlap and the top one is swiped up to bring up the next ---- */
+    const list = block?.querySelector<HTMLElement>('.upnext__list');
+    const switcher = block?.querySelector<HTMLElement>('[data-upnext-views]');
+    const bar = block?.querySelector<HTMLElement>('[data-upnext-bar]');
+    const position = bar?.querySelector<HTMLElement>('[data-upnext-position]');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const KEY = 'upnext-view';
+    let view: 'list' | 'stack' = 'stack'; // the stack is the default; the choice is remembered
+    try {
+      if (localStorage.getItem(KEY) === 'list') view = 'list';
+    } catch {
+      // storage can be blocked: the stack is the default anyway
+    }
+    let top = 0; // which of the live tickets is on top
+    let busy = false;
+    const live = () => passes.filter((pass) => !pass.hidden);
+
+    const layout = () => {
+      if (!list) return;
+      const cards = live();
+      const n = cards.length;
+      const stacked = view === 'stack' && n > 1;
+      top = n ? ((top % n) + n) % n : 0;
+      list.dataset.view = stacked ? 'stack' : 'list';
+      if (switcher) switcher.hidden = n < 2;
+      if (bar) bar.hidden = !stacked;
+      for (const button of switcher?.querySelectorAll<HTMLButtonElement>('[data-upnext-view]') ?? []) {
+        button.setAttribute('aria-pressed', String(button.dataset.upnextView === view));
+      }
+      cards.forEach((card, i) => {
+        const depth = (i - top + n) % n;
+        if (stacked) {
+          card.style.setProperty('--depth', String(depth));
+          card.dataset.depth = String(depth);
+          card.toggleAttribute('inert', depth > 0); // the tickets underneath can't be tabbed to
+        } else {
+          card.style.removeProperty('--depth');
+          delete card.dataset.depth;
+          card.removeAttribute('inert');
+        }
+      });
+      if (position) position.textContent = `Ticket ${top + 1} of ${n}`;
+    };
+
+    /**
+     * dir 1: the top ticket goes to the back and the next one comes up, the old one leaving the way it was
+     * thrown (`exit` -1 is up, 1 is down). dir -1: the last one comes back on top.
+     */
+    const step = (dir: 1 | -1, exit: 1 | -1 = -1) => {
+      const cards = live();
+      if (busy || cards.length < 2 || list?.dataset.view !== 'stack') return;
+      const card = cards[top];
+      const settle = () => {
+        card.classList.remove('is-dragging');
+        card.style.transition = 'none'; // it goes to the back without sliding through the others
+        card.style.transform = '';
+        card.style.opacity = '';
+        top += dir;
+        layout();
+        void card.offsetHeight;
+        card.style.transition = '';
+        busy = false;
+      };
+      if (dir === -1) {
+        card.classList.remove('is-dragging');
+        card.style.transform = '';
+        top -= 1;
+        layout();
+        return;
+      }
+      if (reduced.matches) return settle();
+      busy = true;
+      card.classList.remove('is-dragging');
+      card.style.transition = 'transform 0.28s ease-in, opacity 0.28s ease-in';
+      card.style.transform = `translateY(${exit * 130}%) rotate(${exit * 3}deg)`;
+      card.style.opacity = '0';
+      window.setTimeout(settle, 280);
+    };
+
+    for (const button of switcher?.querySelectorAll<HTMLButtonElement>('[data-upnext-view]') ?? []) {
+      button.addEventListener('click', () => {
+        view = button.dataset.upnextView === 'stack' ? 'stack' : 'list';
+        try {
+          localStorage.setItem(KEY, view);
+        } catch {
+          // fine: it just won't be remembered
+        }
+        layout();
+      });
+    }
+    bar?.querySelector('[data-upnext-next]')?.addEventListener('click', () => step(1));
+    bar?.querySelector('[data-upnext-prev]')?.addEventListener('click', () => step(-1));
+
+    /* dragging the top ticket up or down (or a quick flick either way) brings up the next one */
+    let drag: { id: number; y: number; at: number; card: HTMLElement; dy: number } | null = null;
+    let dragged = false;
+    list?.addEventListener('pointerdown', (event) => {
+      const card = (event.target as Element).closest<HTMLElement>('.pass');
+      if (list.dataset.view !== 'stack' || !event.isPrimary || busy || !card || card.dataset.depth !== '0') return;
+      drag = { id: event.pointerId, y: event.clientY, at: performance.now(), card, dy: 0 };
+      card.setPointerCapture(event.pointerId);
+    });
+    list?.addEventListener('pointermove', (event) => {
+      if (!drag || event.pointerId !== drag.id) return;
+      drag.dy = event.clientY - drag.y;
+      if (Math.abs(drag.dy) < 4) return;
+      drag.card.classList.add('is-dragging');
+      drag.card.style.transform = `translateY(${drag.dy}px) rotate(${drag.dy * 0.03}deg)`;
+    });
+    const release = (event: PointerEvent) => {
+      if (!drag || event.pointerId !== drag.id) return;
+      const { dy, at, card } = drag;
+      drag = null;
+      dragged = Math.abs(dy) > 6;
+      if (dragged) window.setTimeout(() => (dragged = false), 60); // the click that follows a drag isn't a tap
+      const flick = Math.abs(dy) / Math.max(1, performance.now() - at) > 0.5; // px per ms
+      if (dy < -48 || (dy < -16 && flick)) step(1, -1);
+      else if (dy > 48 || (dy > 16 && flick)) step(1, 1);
+      else {
+        card.classList.remove('is-dragging');
+        card.style.transform = '';
+      }
+    };
+    list?.addEventListener('pointerup', release);
+    list?.addEventListener('pointercancel', release);
+    list?.addEventListener(
+      'click',
+      (event) => {
+        if (!dragged) return;
+        event.preventDefault(); // dragging the ticket shouldn't open its film page
+        event.stopPropagation();
+      },
+      true,
+    );
+
     const update = () => {
       const now = Date.now();
       for (const pass of passes) {
@@ -224,8 +360,10 @@ if (section) {
         if (unit && unit.textContent !== ticket.unit) unit.textContent = ticket.unit;
       }
       const left = passes.filter((pass) => !pass.hidden).length;
-      if (!left) block?.setAttribute('hidden', ''); // every booked show is over
-      else if (note) note.textContent = left === 1 ? 'Ticket in the pocket' : `${left} tickets in the pocket`;
+      if (note) note.textContent = !left ? 'No tickets in the pocket' : left === 1 ? 'Ticket in the pocket' : `${left} tickets in the pocket`;
+      // every booked show is over: the blank ticket takes over
+      if (!left) block?.querySelector<HTMLElement>('[data-upnext-empty]')?.removeAttribute('hidden');
+      layout();
       return left;
     };
     // a ticket changes on the minute (lights down, credits, gone): check once a minute while any remain

@@ -1,15 +1,21 @@
 name: Deploy to GitHub Pages
 
+# Every push to main deploys. The scheduled refreshes live in their own workflows
+# (refresh-films.yml once a day, refresh-music.yml at 4 AM and 4 PM IST) and start this one.
 on:
   push:
     branches: [main]
-  # Rebuild twice a day so new Letterboxd diary entries and Last.fm charts show up on their own.
-  # Cron runs in UTC: these are 4 AM and 4 PM India time (UTC+05:30).
-  schedule:
-    - cron: '30 22 * * *' # 04:00 IST
-    - cron: '30 10 * * *' # 16:00 IST
-  # Actions tab → "Deploy to GitHub Pages" → Run workflow: refresh everything on demand.
+  # Actions tab → "Deploy to GitHub Pages" → Run workflow: refresh on demand.
   workflow_dispatch:
+    inputs:
+      films:
+        description: 'Fetch the latest Letterboxd diary'
+        type: boolean
+        default: true
+      music:
+        description: 'Fetch the latest Last.fm charts'
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -37,24 +43,48 @@ jobs:
 
       - run: npm ci
 
-      # music.json remembers the artwork/preview lookups so each run only searches for new songs.
-      # It is saved to the Actions cache after every run, so it doesn't need to be committed.
+      # The saved data is kept in the Actions cache (after every run), so nothing has to be committed
+      # and a run that doesn't refresh a source still deploys its last fetch.
+      # music.json also remembers the artwork/preview lookups, so each refresh only searches for new songs.
+      - uses: actions/cache@v4
+        with:
+          path: src/data/letterboxd.json
+          key: films-${{ github.run_id }}
+          restore-keys: films-
+
       - uses: actions/cache@v4
         with:
           path: src/data/music.json
           key: music-${{ github.run_id }}
           restore-keys: music-
 
-      # `npm run build` pulls the latest Letterboxd feed, Last.fm charts and booked shows
-      # (open "Up next" issues) first, then builds.
+      # Pushes and manual runs with the boxes ticked fetch fresh data; the other sources only
+      # fetch when there is nothing saved yet. A failed fetch falls back to the saved copy.
+      - name: Letterboxd diary
+        env:
+          REFRESH: ${{ github.event_name != 'workflow_dispatch' || inputs.films }}
+        run: |
+          if [ "$REFRESH" = "true" ]; then node scripts/sync-letterboxd.ts; else node scripts/sync-letterboxd.ts --if-missing; fi
+
       # LASTFM_API_KEY is a repository secret (Settings → Secrets and variables → Actions).
       # Without it the build still passes; the soundtrack uses whatever music.json is saved (or is left out if there is none).
-      - run: npm run build
+      - name: Last.fm charts
+        env:
+          REFRESH: ${{ github.event_name != 'workflow_dispatch' || inputs.music }}
+          LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
+        run: |
+          if [ "$REFRESH" = "true" ]; then node scripts/sync-music.ts; else node scripts/sync-music.ts --if-missing; fi
+
+      # Booked shows (open "Up next" issues) are read on every build.
+      - name: Booked shows
+        run: node scripts/sync-up-next.ts
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - run: npm run build:offline
         env:
           SITE_URL: ${{ steps.pages.outputs.origin }}
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
-          LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
-          GITHUB_TOKEN: ${{ github.token }}
 
       - uses: actions/upload-pages-artifact@v4
         with:

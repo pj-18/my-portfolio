@@ -3,7 +3,22 @@ import ReelHead from './ReelHead.astro';
 import { site } from '../site.config';
 import { stats } from '../lib/films';
 import { music } from '../lib/music';
-import { siCypress, siGit, siJavascript, siNodedotjs, siPostman, siReact, siTypescript } from 'simple-icons';
+import {
+  siCss,
+  siCucumber,
+  siCursor,
+  siCypress,
+  siGit,
+  siGithubactions,
+  siHtml5,
+  siJavascript,
+  siJira,
+  siNodedotjs,
+  siPostman,
+  siReact,
+  siSelenium,
+  siTypescript,
+} from 'simple-icons';
 import { rich } from '../lib/util';
 
 const about = rich(site.about);
@@ -12,8 +27,8 @@ const tests = site.tests.map((t) => ({
   name: t.name.replace('{films}', String(stats.logged)).replace('{reviews}', String(stats.reviews)),
 }));
 /* ---- a logo for each tool in the ticker ----
-   Brand marks come from Simple Icons (CC0). Playwright isn't in it any more, and SQL, REST and
-   CI/CD have no brand mark, so those get a small drawn glyph in the section's green instead. */
+   Brand marks come from Simple Icons (CC0). Playwright and VS Code aren't in it any more, so
+   those are drawn by hand; SQL, REST and CI/CD have no brand mark, so those get a small glyph in the section's green. */
 type Logo = { color: string; body: string; stroke?: boolean };
 const brand = (icon: { hex: string; path: string }): Logo => ({ color: `#${icon.hex}`, body: `<path d="${icon.path}"/>` });
 const drawn = (body: string): Logo => ({ color: 'var(--green)', body, stroke: true });
@@ -25,6 +40,19 @@ const logos: Record<string, Logo> = {
   postman: brand(siPostman),
   'node.js': brand(siNodedotjs),
   git: brand(siGit),
+  selenium: brand(siSelenium),
+  cucumber: brand(siCucumber),
+  html: brand(siHtml5),
+  css: brand(siCss),
+  'github actions': brand(siGithubactions),
+  jira: brand(siJira),
+  // Cursor's mark is black: on this dark scene it takes the paper colour
+  cursor: { ...brand(siCursor), color: 'var(--paper)' },
+  // VS Code's mark: the blue ribbon (Simple Icons no longer carries it)
+  'vs code': {
+    color: '#007ACC',
+    body: '<path d="M23.15 2.587L18.21.21a1.494 1.494 0 0 0-1.705.29l-9.46 8.63-4.12-3.128a.999.999 0 0 0-1.276.057L.327 7.261A1 1 0 0 0 .326 8.74L3.899 12 .326 15.26a1 1 0 0 0 .001 1.479L1.65 17.94a.999.999 0 0 0 1.276.057l4.12-3.128 9.46 8.63a1.492 1.492 0 0 0 1.704.29l4.942-2.377A1.5 1.5 0 0 0 24 20.06V3.939a1.5 1.5 0 0 0-.85-1.352zm-5.146 14.861L10.826 12l7.178-5.448v10.896z"/>',
+  },
   // Playwright's mark: two theatre masks, red behind green
   playwright: {
     color: '#2EAD33',

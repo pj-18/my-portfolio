@@ -61,6 +61,9 @@ const booked = (upNextData?.shows ?? [])
   })
   .filter((show) => Number.isFinite(show.times.gone) && show.status.state !== 'gone')
   .sort((a, b) => (a.times.start ?? a.times.day) - (b.times.start ?? b.times.day));
+const NUMBERS = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+/** The tickets are numbered in the order of the shows: "Admit one", "Admit two", and so on. */
+const admit = (n: number) => NUMBERS[n - 1] ?? String(n);
 const whenText = (date: string) =>
   new Date(`${date}T00:00:00Z`).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
 
@@ -225,58 +228,92 @@ const laurels = laurel(false) + laurel(true);
         </div>
 
         {/* ---- booked shows ---- */}
-        {booked.length > 0 && (
-          <div class="upnext" data-upnext>
-            <div class="wrap upnext__head">
-              <h3 class="sub reveal">Up next</h3>
+        {/* with nothing booked, one blank ticket says so (the page also swaps it in once the last show is over) */}
+        <div class="upnext" data-upnext>
+          <div class="wrap upnext__head">
+            <h3 class="sub reveal">Up next</h3>
+            <div class="upnext__tools">
               <p class="upnext__note" data-upnext-note>
-                {booked.length === 1 ? 'Ticket in the pocket' : `${booked.length} tickets in the pocket`}
+                {booked.length === 0
+                  ? 'No tickets in the pocket'
+                  : booked.length === 1
+                    ? 'Ticket in the pocket'
+                    : `${booked.length} tickets in the pocket`}
               </p>
+              {/* shown by the page's script once there are two or more tickets */}
+              <div class="upnext__views" role="group" aria-label="How to show the tickets" data-upnext-views hidden>
+                <button type="button" class="upnext__view" data-upnext-view="stack" aria-pressed="true">Stack</button>
+                <button type="button" class="upnext__view" data-upnext-view="list" aria-pressed="false">List</button>
+              </div>
             </div>
-            <ul class="wrap upnext__list" data-utc-offset={offset}>
-              {booked.map((show) => {
-                const art = show.art;
-                const left = show.status;
-                return (
-                  <li
-                    class="pass reveal"
-                    data-state={left.state}
-                    data-show-day={show.times.day}
-                    data-show-start={show.times.start ?? undefined}
-                    data-show-wraps={show.times.wraps ?? undefined}
-                    data-show-gone={show.times.gone}
-                  >
-                    <span class="pass__poster" aria-hidden="true">
-                      {art ? <img src={art} alt="" loading="lazy" decoding="async" /> : <span class="pass__mono">{show.title.charAt(0)}</span>}
-                    </span>
-                    <div class="pass__body">
-                      <p class="pass__kicker">Admit one{show.tag ? ` · ${show.tag}` : ''}</p>
-                      <h4 class="pass__title">
-                        {show.link ? (
-                          <a class="pass__link" href={show.link} target="_blank" rel="noopener">
-                            {show.title}
-                            <span class="sr-only"> on Letterboxd (opens in a new tab)</span>
-                          </a>
-                        ) : (
-                          show.title
-                        )}
-                      </h4>
-                      <p class="pass__when">
-                        {whenText(show.date)}
-                        {show.time ? ` · ${show.time}` : ''}
-                      </p>
-                      {show.where && <p class="pass__where">{show.where}</p>}
-                    </div>
-                    <p class="pass__count">
-                      <span class="pass__num" data-count-num>{left.num}</span>
-                      <span class="pass__unit" data-count-unit>{left.unit}</span>
-                    </p>
-                  </li>
-                );
-              })}
-            </ul>
           </div>
-        )}
+          <ul class="wrap upnext__list" data-utc-offset={offset}>
+            <li class="pass pass--empty reveal" data-upnext-empty hidden={booked.length > 0}>
+              <span class="pass__poster" aria-hidden="true">
+                <span class="pass__mono">?</span>
+              </span>
+              <div class="pass__body">
+                <p class="pass__kicker">Admit one · date TBA</p>
+                <h4 class="pass__title">Nothing booked yet</h4>
+                <p class="pass__when">The screen's dark, for now</p>
+                <p class="pass__where">The next ticket lands here the moment it's booked.</p>
+              </div>
+              <p class="pass__count">
+                <span class="pass__num">TBA</span>
+                <span class="pass__unit">stay tuned</span>
+              </p>
+            </li>
+            {booked.map((show, i) => {
+              const art = show.art;
+              const left = show.status;
+              return (
+                <li
+                  class="pass reveal"
+                  data-state={left.state}
+                  data-show-day={show.times.day}
+                  data-show-start={show.times.start ?? undefined}
+                  data-show-wraps={show.times.wraps ?? undefined}
+                  data-show-gone={show.times.gone}
+                >
+                  <span class="pass__poster" aria-hidden="true">
+                    {art ? <img src={art} alt="" loading="lazy" decoding="async" /> : <span class="pass__mono">{show.title.charAt(0)}</span>}
+                  </span>
+                  <div class="pass__body">
+                    <p class="pass__kicker">Admit {admit(i + 1)}{show.tag ? ` · ${show.tag}` : ''}</p>
+                    <h4 class="pass__title">
+                      {show.link ? (
+                        <a class="pass__link" href={show.link} target="_blank" rel="noopener">
+                          {show.title}
+                          <span class="sr-only"> on Letterboxd (opens in a new tab)</span>
+                        </a>
+                      ) : (
+                        show.title
+                      )}
+                    </h4>
+                    <p class="pass__when">
+                      {whenText(show.date)}
+                      {show.time ? ` · ${show.time}` : ''}
+                    </p>
+                    {show.where && <p class="pass__where">{show.where}</p>}
+                  </div>
+                  <p class="pass__count">
+                    <span class="pass__num" data-count-num>{left.num}</span>
+                    <span class="pass__unit" data-count-unit>{left.unit}</span>
+                  </p>
+                </li>
+              );
+            })}
+          </ul>
+          {/* stack view: swipe the top ticket up or down (or use these) to bring up the next one */}
+          <div class="wrap upnext__bar" data-upnext-bar hidden>
+            <button type="button" class="pill" data-upnext-prev aria-label="Previous ticket">↓ Back</button>
+            <p class="upnext__count" aria-live="polite">
+              <span data-upnext-position></span>
+              <span class="upnext__hint">Swipe up or down for the next ticket</span>
+            </p>
+            <button type="button" class="pill" data-upnext-next aria-label="Next ticket">Next ↑</button>
+          </div>
+        </div>
 
         {/* ---- the diary strip ---- */}
         <div class="diary-block">
@@ -909,12 +946,133 @@ const laurels = laurel(false) + laurel(true);
     margin-bottom: 1.25rem;
   }
 
+  .upnext__tools {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 2.25rem;
+  }
+
   .upnext__note {
     font-family: var(--f-mono);
     font-size: 0.7rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--muted);
+  }
+
+  /* List / Stack switch */
+  .upnext__views {
+    display: inline-flex;
+    flex: none;
+    padding: 3px;
+    border: 1px solid var(--line-2);
+    border-radius: 999px;
+  }
+
+  .upnext__views[hidden],
+  .upnext__bar[hidden] {
+    display: none;
+  }
+
+  .upnext__view {
+    min-height: 32px;
+    padding: 0 0.95em;
+    border-radius: 999px;
+    font-family: var(--f-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    transition:
+      background 0.2s,
+      color 0.2s;
+  }
+
+  .upnext__view[aria-pressed='true'] {
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  /* ---- stack view: the tickets sit on top of each other, the top one is yours to swipe ---- */
+
+  :global(.js) .upnext__list[data-view='stack'] {
+    --peek: 1.7rem;
+    grid-template-columns: minmax(0, 34rem);
+    justify-content: center;
+    gap: 0;
+    padding-bottom: calc(var(--peek) * 2);
+  }
+
+  :global(.js) .upnext__list[data-view='stack'] > .pass {
+    grid-area: 1 / 1;
+    z-index: calc(10 - var(--depth, 0));
+    transform-origin: 50% 0;
+    transform: translateY(calc(var(--depth, 0) * var(--peek))) scale(calc(1 - var(--depth, 0) * 0.04));
+    transition:
+      transform 0.45s var(--ease-out),
+      opacity 0.9s var(--ease-out),
+      filter 0.45s;
+    /* only the first three show; the rest wait behind them */
+    visibility: visible;
+  }
+
+  :global(.js) .upnext__list[data-view='stack'] > .pass:not([data-depth='0']) {
+    filter: brightness(calc(1 - var(--depth, 0) * 0.1));
+  }
+
+  :global(.js) .upnext__list[data-view='stack'] > .pass[data-depth]:not([data-depth='0']):not([data-depth='1']):not([data-depth='2']) {
+    visibility: hidden;
+  }
+
+  :global(.js) .upnext__list[data-view='stack'] > .pass[data-depth='0'] {
+    cursor: grab;
+    touch-action: none; /* the finger moves the ticket, not the page */
+    user-select: none;
+  }
+
+  :global(.js) .upnext__list[data-view='stack'] > .pass.is-dragging {
+    cursor: grabbing;
+    transition: none;
+  }
+
+  .upnext__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    max-width: 34rem;
+    margin-top: 1.1rem;
+  }
+
+  .upnext__count {
+    display: grid;
+    justify-items: center;
+    gap: 0.2rem;
+    text-align: center;
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .upnext__hint {
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+  }
+
+  @media (hover: hover) {
+    .upnext__hint {
+      display: none; /* with a mouse, the buttons do the talking */
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.js) .upnext__list[data-view='stack'] > .pass {
+      transition: none;
+    }
   }
 
   .upnext__list {
@@ -924,6 +1082,30 @@ const laurels = laurel(false) + laurel(true);
 
   .upnext__list > .pass[hidden] {
     display: none;
+  }
+
+  /* nothing booked: a blank ticket, a little faded, with a dashed outline like an unclaimed seat */
+  .pass--empty {
+    background: color-mix(in srgb, var(--ticket) 88%, transparent);
+  }
+
+  .pass--empty .pass__poster {
+    background: transparent;
+    box-shadow: inset 0 0 0 2px rgb(35 28 19 / 0.28);
+    border-radius: 6px;
+  }
+
+  .pass--empty .pass__mono {
+    color: rgb(35 28 19 / 0.4);
+  }
+
+  .pass--empty .pass__title {
+    color: rgb(35 28 19 / 0.82);
+  }
+
+  .pass--empty .pass__num {
+    font-size: 1.6rem;
+    color: rgb(35 28 19 / 0.55);
   }
 
   .pass {
@@ -960,6 +1142,10 @@ const laurels = laurel(false) + laurel(true);
     width: 100%;
     height: 100%;
     object-fit: cover;
+    /* the poster is part of the ticket: dragging from it swipes the ticket, it doesn't pick the picture up */
+    pointer-events: none;
+    -webkit-user-drag: none;
+    user-select: none;
   }
 
   .pass__mono {

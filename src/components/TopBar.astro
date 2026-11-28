@@ -63,7 +63,15 @@ import { site } from '../site.config';
     width: 0;
     height: 0;
     border-block: 5px solid transparent;
-    border-left: 8px solid var(--amber);
+    border-left: 8px solid var(--magenta);
+  }
+
+  /* pause: two bars, drawn in the same 8x10 box as the play triangle */
+  .topbar__play.is-scrolling {
+    width: 8px;
+    height: 10px;
+    border: 0;
+    background: linear-gradient(90deg, var(--magenta) 0 37%, transparent 37% 63%, var(--magenta) 63%);
   }
 
   .topbar__progress {
@@ -76,7 +84,7 @@ import { site } from '../site.config';
   .topbar__progress i {
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, var(--amber), var(--red));
+    background: linear-gradient(90deg, var(--magenta), var(--violet), var(--cyan), var(--red), var(--green), var(--cobalt));
     transform: scaleX(0);
     transform-origin: 0 50%;
   }

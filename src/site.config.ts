@@ -2,15 +2,15 @@
  * Everything personal lives in this file. Edit it and the page rebuilds around it.
  *
  * Rich text mini-markup (used by `about`):
- *   [word|green]  [word|amber]  [word|red]   → highlighted keyword
- *   *words*                                   → serif italic
+ *   [word|green]  [word|violet]  [word|cobalt]  [word|cyan]  [word|red]  → highlighted keyword
+ *   *words*                                                                  → serif italic
  *
  * Entries marked `placeholder: true` are shown in `npm run dev` (with a dashed
  * outline so you can spot them) but are left out of production builds until
  * you replace them with the real thing.
  */
 
-export type Accent = 'green' | 'amber' | 'red';
+export type Accent = 'green' | 'red' | 'cyan' | 'violet' | 'cobalt' | 'magenta' | 'mint' | 'coral' | 'orchid';
 
 export interface TestCase {
   /** `{films}` and `{reviews}` are swapped for live Letterboxd numbers. */
@@ -106,7 +106,7 @@ export const site = {
   },
 
   about:
-    "I'm Praveen Kumar, [PJ|amber] to most. For seven years I've been building web apps and the automated tests that keep them honest. Most of my work sits where product code meets test code: [React|green] up front, [SQL|amber] underneath, and [Playwright|red] and [Cypress|green] suites that tell a team within minutes whether a change is *safe to ship*. When the laptop closes, the lights go down.",
+    "I'm Praveen Kumar, [PJ|violet] to most. For seven years I've been building web apps and the automated tests that keep them honest. Most of my work sits where product code meets test code: [React|cyan] up front, [SQL|cobalt] underneath, and [Playwright|red] and [Cypress|green] suites that tell a team within minutes whether a change is *safe to ship*. When the laptop closes, the lights go down.",
 
   /** The terminal in "The Day Job" runs these as passing tests. */
   tests: [

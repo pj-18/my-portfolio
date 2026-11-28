@@ -6,7 +6,9 @@ name: Up next
 # Nothing is committed: the deploy reads the open issues when it builds.
 on:
   issues:
-    types: [opened, edited, closed, reopened, deleted, labeled, unlabeled]
+    # Not `labeled`: the issue form adds its label a moment after `opened`, which would run this twice
+    # and start two deploys. `check` labels the issue itself when it needs to.
+    types: [opened, edited, closed, reopened, deleted, unlabeled]
   schedule:
     - cron: '0 3 * * *' # 8:30 IST, just before the daily deploy
   workflow_dispatch:

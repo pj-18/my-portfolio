@@ -35,7 +35,7 @@ const reel = recommendations.map((e) => {
           <p class="spinner__idle">The projector is loaded. Press the button.</p>
         </div>
       </div>
-      <button type="button" class="pill pill--solid accent-amber post__spin" data-spin>
+      <button type="button" class="pill pill--solid accent-violet post__spin" data-spin>
         <Icon name="shuffle" /> Spin the reel
       </button>
       <script type="application/json" id="reel-data" is:inline set:html={safeJson(reel)} />
@@ -50,8 +50,9 @@ const reel = recommendations.map((e) => {
     gap: 0.7rem;
     margin-block: clamp(0.75rem, 3vw, 2rem);
     padding: 1.25rem 1rem;
-    border: 1px dashed var(--line-2);
+    border: 1px dashed rgb(167 139 250 / 0.35);
     border-radius: var(--radius);
+    background: radial-gradient(110% 70% at 50% 0%, rgb(167 139 250 / 0.05), transparent 70%);
     text-align: center;
   }
 
@@ -65,7 +66,7 @@ const reel = recommendations.map((e) => {
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: var(--amber);
+    background: var(--violet);
   }
 
   .post__title {
@@ -192,7 +193,7 @@ const reel = recommendations.map((e) => {
   }
 
   .spinner__result :global(.spin-stars) {
-    color: var(--amber);
+    color: var(--violet);
     line-height: 1;
   }
 
@@ -216,7 +217,7 @@ const reel = recommendations.map((e) => {
     font-size: 0.68rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--amber);
+    color: var(--violet);
   }
 
   @media (min-width: 48rem) {

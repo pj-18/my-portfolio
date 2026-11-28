@@ -25,12 +25,12 @@ const handle = diary.username || site.letterboxd;
 const profile = diary.profile;
 const pickPoster = pick ? poster(pick.poster) : null;
 const latestPoster = latest ? poster(latest.poster) : null;
-/* Each rating gets its own colour: red at ½★, through amber, to green at 5★. */
+/* Each rating gets its own colour: red at ½★, through violet, to green at 5★. */
 function ratingTone(rating: number) {
   const t = (rating - 0.5) / 4.5;
   return t <= 0.5
-    ? `color-mix(in oklch, var(--amber) ${Math.round(t * 200)}%, var(--red))`
-    : `color-mix(in oklch, var(--green) ${Math.round((t - 0.5) * 200)}%, var(--amber))`;
+    ? `color-mix(in oklch, var(--violet) ${Math.round(t * 200)}%, var(--red))`
+    : `color-mix(in oklch, var(--green) ${Math.round((t - 0.5) * 200)}%, var(--violet))`;
 }
 
 /* "Up next": shows booked as GitHub issues (saved by scripts/sync-up-next.ts). Each ticket counts down,
@@ -107,7 +107,7 @@ const laurels = laurel(false) + laurel(true);
     number="01"
     title="The film diary"
     kicker="Letterboxd"
-    accent="amber"
+    accent="magenta"
     symbol="★"
     variant="sign"
     dir="rtl"
@@ -122,7 +122,7 @@ const laurels = laurel(false) + laurel(true);
     entries.length === 0 ? (
       <div class="wrap films__empty">
         <p class="lede">The projector is warming up. Until the diary syncs, the reviews live on Letterboxd.</p>
-        <a class="pill pill--solid accent-amber" href={profile} target="_blank" rel="noopener noreferrer">
+        <a class="pill pill--solid accent-magenta" href={profile} target="_blank" rel="noopener noreferrer">
           Open the diary <Icon name="arrow" />
         </a>
       </div>
@@ -417,7 +417,7 @@ const laurels = laurel(false) + laurel(true);
                   )}
                 </div>
                 <footer class="entry__links">
-                  <a class="pill pill--solid accent-amber" href={entry.url} target="_blank" rel="noopener noreferrer">
+                  <a class="pill pill--solid accent-cobalt" href={entry.url} target="_blank" rel="noopener noreferrer">
                     On Letterboxd <Icon name="arrow" />
                   </a>
                   <a class="pill" href={filmUrl(entry)} target="_blank" rel="noopener noreferrer">
@@ -517,7 +517,7 @@ const laurels = laurel(false) + laurel(true);
           <div class="programmes">
             <div class="wrap">
               <h3 class="sub reveal">
-                Programmes <span>{diary.lists.length} lists</span>
+                Marquee Lists <span>{diary.lists.length} lists</span>
               </h3>
             </div>
             <ol class="programmes__list">
@@ -525,7 +525,7 @@ const laurels = laurel(false) + laurel(true);
                 <li class="programme reveal" style={`--delay:${(i % 3) * 0.08}s`}>
                   <a href={list.url} target="_blank" rel="noopener noreferrer">
                     <p class="programme__no">
-                      Programme {pad(i + 1)} · {list.total} {list.total === 1 ? 'film' : 'films'}
+                      List {pad(i + 1)} ·{list.total} {list.total === 1 ? 'film' : 'films'}
                       {list.ranked ? ' · ranked' : ''}
                     </p>
                     <h4 class="programme__title">{list.title}</h4>
@@ -549,7 +549,7 @@ const laurels = laurel(false) + laurel(true);
         )}
 
         <div class="wrap films__cta reveal">
-          <a class="pill pill--solid accent-amber" href={profile} target="_blank" rel="noopener noreferrer">
+          <a class="pill pill--solid accent-magenta" href={profile} target="_blank" rel="noopener noreferrer">
             Follow @{handle} on Letterboxd <Icon name="arrow" />
           </a>
         </div>
@@ -577,7 +577,7 @@ const laurels = laurel(false) + laurel(true);
   }
 
   .films__handle {
-    color: var(--amber);
+    color: var(--magenta);
     text-decoration: none;
   }
 
@@ -632,10 +632,10 @@ const laurels = laurel(false) + laurel(true);
     gap: 1.75rem;
     margin-top: 2.5rem;
     padding: 1.25rem;
-    border: 1px solid rgb(255 182 39 / 0.18);
+    border: 1px solid rgb(255 77 141 / 0.22);
     border-radius: var(--radius);
     background:
-      radial-gradient(120% 90% at 0% 0%, rgb(255 182 39 / 0.07), transparent 60%),
+      radial-gradient(120% 90% at 0% 0%, rgb(255 77 141 / 0.08), transparent 60%),
       var(--ink-2);
   }
 
@@ -669,7 +669,7 @@ const laurels = laurel(false) + laurel(true);
     font-stretch: 62%;
     font-weight: 820;
     line-height: 0.85;
-    color: var(--amber);
+    color: var(--magenta);
     font-variant-numeric: tabular-nums;
   }
 
@@ -733,7 +733,7 @@ const laurels = laurel(false) + laurel(true);
   }
 
   .now:hover {
-    border-color: rgb(255 182 39 / 0.5);
+    border-color: rgb(255 77 141 / 0.5);
   }
 
   .now__poster {
@@ -767,17 +767,17 @@ const laurels = laurel(false) + laurel(true);
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--amber);
-    box-shadow: 0 0 0 0 rgb(255 182 39 / 0.6);
+    background: var(--magenta);
+    box-shadow: 0 0 0 0 rgb(255 77 141 / 0.6);
     animation: ping 2s infinite;
   }
 
   @keyframes ping {
     70% {
-      box-shadow: 0 0 0 7px rgb(255 182 39 / 0);
+      box-shadow: 0 0 0 7px rgb(255 77 141 / 0);
     }
     100% {
-      box-shadow: 0 0 0 0 rgb(255 182 39 / 0);
+      box-shadow: 0 0 0 0 rgb(255 77 141 / 0);
     }
   }
 
@@ -825,7 +825,7 @@ const laurels = laurel(false) + laurel(true);
     height: calc(var(--h) * (100% - 1.2rem));
     min-height: 3px;
     border-radius: 3px 3px 1px 1px;
-    background: linear-gradient(var(--tone, var(--amber)), color-mix(in oklch, var(--tone, var(--amber)) 80%, transparent));
+    background: linear-gradient(var(--tone, var(--violet)), color-mix(in oklch, var(--tone, var(--violet)) 80%, transparent));
     transition:
       background 0.25s,
       opacity 0.25s,
@@ -857,7 +857,7 @@ const laurels = laurel(false) + laurel(true);
   }
 
   .bar[aria-pressed='true'] .bar__fill {
-    background: linear-gradient(var(--paper), var(--tone, var(--amber)));
+    background: linear-gradient(var(--paper), var(--tone, var(--violet)));
   }
 
   .bar[aria-pressed='true'] .bar__count {
@@ -872,7 +872,7 @@ const laurels = laurel(false) + laurel(true);
     display: flex;
     justify-content: space-between;
     gap: 1rem;
-    color: var(--amber);
+    color: var(--violet);
     font-size: 0.8rem;
   }
 
@@ -969,7 +969,7 @@ const laurels = laurel(false) + laurel(true);
     font-weight: 850;
     line-height: 1;
     text-transform: uppercase;
-    color: var(--amber);
+    color: var(--violet);
   }
 
   .pass__body {
@@ -984,7 +984,7 @@ const laurels = laurel(false) + laurel(true);
     font-size: 0.6rem;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: #b0560f;
+    color: #9e1c4b;
   }
 
   .pass__title {
@@ -1028,7 +1028,7 @@ const laurels = laurel(false) + laurel(true);
     font-stretch: 62%;
     font-weight: 850;
     line-height: 0.95;
-    color: #b0560f;
+    color: #9e1c4b;
   }
 
   .pass__unit {
@@ -1056,7 +1056,7 @@ const laurels = laurel(false) + laurel(true);
   }
 
   .pass:has(.pass__link:focus-visible) {
-    outline: 2px solid var(--amber);
+    outline: 2px solid var(--cobalt);
     outline-offset: 3px;
   }
 
@@ -1235,13 +1235,13 @@ const laurels = laurel(false) + laurel(true);
 
   .diary-block__clear {
     padding: 0.5rem 0.9rem;
-    border: 1px solid rgb(255 182 39 / 0.5);
+    border: 1px solid rgb(91 155 255 / 0.5);
     border-radius: 999px;
     font-family: var(--f-mono);
     font-size: 0.66rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--amber);
+    color: var(--cobalt);
   }
 
   /* Scrollers are positioned so hidden screen-reader labels inside them
@@ -1352,7 +1352,7 @@ const laurels = laurel(false) + laurel(true);
     font-size: 1.35rem;
     line-height: 1;
     padding-top: 0.45rem;
-    color: var(--amber);
+    color: var(--cobalt);
   }
 
   .stub__ticket {
@@ -1398,10 +1398,10 @@ const laurels = laurel(false) + laurel(true);
     text-transform: uppercase;
   }
 
-  /* one deep amber: reads clearly on the cream ticket */
+  /* deep cobalt: reads clearly on the cool ivory ticket */
   .stub__stars {
     flex: none;
-    color: #b0560f;
+    color: #234ea8;
     font-size: 0.95rem;
     line-height: 1;
   }
@@ -1629,7 +1629,7 @@ const laurels = laurel(false) + laurel(true);
     gap: 0.5rem;
     max-width: 19rem;
     padding: 1rem 1.15rem 0.95rem;
-    border: 1px solid var(--line);
+    border: 1px solid rgb(167 139 250 / 0.22);
     border-radius: 14px;
     background: var(--ink-2);
   }
@@ -1658,7 +1658,7 @@ const laurels = laurel(false) + laurel(true);
 
   .quote__stars {
     flex: none;
-    color: var(--amber);
+    color: var(--violet);
     font-size: 0.8rem;
     line-height: 1;
   }
@@ -1675,7 +1675,7 @@ const laurels = laurel(false) + laurel(true);
     position: relative;
     width: min(76vw, 24rem);
     margin-inline: auto;
-    color: #ffd27a;
+    color: var(--mint);
   }
 
   .pick__poster img {
@@ -1685,7 +1685,7 @@ const laurels = laurel(false) + laurel(true);
     border-radius: 10px;
     box-shadow:
       0 40px 70px -30px rgb(0 0 0 / 0.95),
-      0 0 0 1px rgb(255 182 39 / 0.25);
+      0 0 0 1px rgb(126 240 212 / 0.28);
   }
 
   .pick__poster::before {
@@ -1765,6 +1765,10 @@ const laurels = laurel(false) + laurel(true);
     font-size: 1.25rem;
   }
 
+  .pick__sign :global(.stars) {
+    color: var(--mint);
+  }
+
   .pick__sign span {
     font-family: var(--f-serif);
     font-style: italic;
@@ -1809,7 +1813,7 @@ const laurels = laurel(false) + laurel(true);
     height: 100%;
     padding: 1.25rem 1.2rem 1.1rem;
     border: 1px solid var(--line);
-    border-top: 3px solid var(--amber);
+    border-top: 3px solid var(--coral);
     border-radius: 6px 6px 14px 14px;
     background:
       repeating-linear-gradient(0deg, transparent 0 27px, rgb(243 234 216 / 0.025) 27px 28px),
@@ -1822,7 +1826,7 @@ const laurels = laurel(false) + laurel(true);
 
   .programme a:hover {
     transform: translateY(-4px);
-    border-color: rgb(255 182 39 / 0.5);
+    border-color: rgb(255 122 89 / 0.55);
   }
 
   .programme__no {
@@ -1830,7 +1834,7 @@ const laurels = laurel(false) + laurel(true);
     font-size: 0.62rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--amber);
+    color: var(--coral);
   }
 
   .programme__title {
@@ -1881,7 +1885,7 @@ const laurels = laurel(false) + laurel(true);
     font-stretch: 75%;
     font-weight: 800;
     line-height: 1.1;
-    color: var(--amber);
+    color: var(--coral);
   }
 
   .programme__film {

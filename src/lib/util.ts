@@ -26,7 +26,7 @@ export type Segment = { kind: 'text' | 'em' | 'hl'; text: string; accent?: strin
 /** Mini-markup from site.config.ts: [word|green] → highlighted keyword, *words* → serif italic. */
 export function rich(source: string): Segment[] {
   const out: Segment[] = [];
-  const pattern = /\[([^\]|]+)\|(green|amber|red)\]|\*([^*]+)\*/g;
+  const pattern = /\[([^\]|]+)\|(green|red|cyan|violet|cobalt|magenta|mint|coral|orchid)\]|\*([^*]+)\*/g;
   let last = 0;
   for (const match of source.matchAll(pattern)) {
     if (match.index > last) out.push({ kind: 'text', text: source.slice(last, match.index) });

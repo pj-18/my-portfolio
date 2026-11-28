@@ -29,22 +29,16 @@ if (section && roll && raw) {
   const pad = (n: number) => String(n).padStart(2, '0');
 
   /* ---- strip / contact sheet ----
-     The contact sheet is the default (it's compact, so phones don't scroll past every frame);
-     a visitor's own choice is remembered. */
+     The contact sheet is always what a visitor lands on (it's compact, so phones don't scroll
+     past every frame); switching to the strip only lasts until the page is reloaded. */
   const buttons = [...section.querySelectorAll<HTMLButtonElement>('[data-layout-btn]')];
   const setLayout = (layout: string) => {
     roll.dataset.layout = layout;
     for (const button of buttons) button.setAttribute('aria-pressed', String(button.dataset.layoutBtn === layout));
-    try {
-      localStorage.setItem('pj:darkroom', layout);
-    } catch {
-      /* storage blocked: the choice just isn't remembered */
-    }
   };
   for (const button of buttons) button.addEventListener('click', () => setLayout(button.dataset.layoutBtn ?? 'sheet'));
   try {
-    const saved = localStorage.getItem('pj:darkroom');
-    if (saved === 'sheet' || saved === 'strip') setLayout(saved);
+    localStorage.removeItem('pj:darkroom'); // drop the choice older versions of the page saved
   } catch {
     /* ignore */
   }

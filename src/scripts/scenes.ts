@@ -65,6 +65,15 @@ window.addEventListener('scroll', onScroll, { passive: true });
 window.addEventListener('resize', queue);
 tick();
 
+/* ---- "back to the top" links scroll up without leaving #top in the address bar ----
+   The links keep their href, so they still work with scripting off. */
+document.addEventListener('click', (event) => {
+  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  if (!(event.target as Element | null)?.closest('a[href="#top"]')) return;
+  event.preventDefault();
+  window.scrollTo({ top: 0, behavior: calm ? 'auto' : 'smooth' });
+});
+
 /* ---- reveal on scroll ---- */
 const reveals = [...document.querySelectorAll<HTMLElement>('.reveal')];
 if (calm || !('IntersectionObserver' in window)) {

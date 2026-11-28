@@ -1,0 +1,21 @@
+name: Refresh music
+
+# Twice a day: fetch the latest Last.fm charts and redeploy. Cron runs in UTC: these are
+# 4 AM and 4 PM India time (UTC+05:30).
+# Actions tab → "Refresh music" → Run workflow does the same on demand.
+on:
+  schedule:
+    - cron: '30 22 * * *' # 04:00 IST
+    - cron: '30 10 * * *' # 16:00 IST
+  workflow_dispatch:
+
+permissions:
+  actions: write # start the deploy
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - run: gh workflow run deploy.yml --repo "$GITHUB_REPOSITORY" --ref main -f films=false -f music=true
+        env:
+          GH_TOKEN: ${{ github.token }}

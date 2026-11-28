@@ -1,0 +1,19 @@
+name: Refresh films
+
+# Once a day: fetch the latest Letterboxd diary and redeploy. Cron runs in UTC: 04:30 IST (UTC+05:30).
+# Actions tab → "Refresh films" → Run workflow does the same on demand.
+on:
+  schedule:
+    - cron: '0 23 * * *' # 04:30 IST
+  workflow_dispatch:
+
+permissions:
+  actions: write # start the deploy
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - run: gh workflow run deploy.yml --repo "$GITHUB_REPOSITORY" --ref main -f films=true -f music=false
+        env:
+          GH_TOKEN: ${{ github.token }}

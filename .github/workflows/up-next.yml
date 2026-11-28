@@ -40,7 +40,7 @@ jobs:
 
       # Changes made with this workflow's token don't start other workflows by themselves.
       - if: steps.check.outputs.deploy == 'true'
-        run: gh workflow run deploy.yml --repo "$GITHUB_REPOSITORY" --ref main
+        run: gh workflow run deploy.yml --repo "$GITHUB_REPOSITORY" --ref main -f films=false -f music=false
         env:
           GH_TOKEN: ${{ github.token }}
 

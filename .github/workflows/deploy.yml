@@ -19,7 +19,6 @@ on:
 
 permissions:
   contents: read
-  issues: read # "Up next" bookings are issues
   pages: write
   id-token: write
 
@@ -75,11 +74,11 @@ jobs:
         run: |
           if [ "$REFRESH" = "true" ]; then node scripts/sync-music.ts; else node scripts/sync-music.ts --if-missing; fi
 
-      # Booked shows (open "Up next" issues) are read on every build.
+      # Booked shows live in the UP_NEXT_SHOWS repository variable (the "Add a show" workflow writes it).
       - name: Booked shows
         run: node scripts/sync-up-next.ts
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          UP_NEXT_SHOWS: ${{ vars.UP_NEXT_SHOWS }}
 
       - run: npm run build:offline
         env:

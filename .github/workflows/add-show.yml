@@ -1,0 +1,71 @@
+name: Add a show
+
+# Actions tab → "Add a show" → Run workflow (works from the GitHub mobile app too).
+# The show is saved in the UP_NEXT_SHOWS repository variable, not in the repo, and the site redeploys.
+# Only people with write access can run it, and the first step stops anyone but the owner.
+on:
+  workflow_dispatch:
+    inputs:
+      film:
+        description: "Film: its title, or its Letterboxd link (surest; the app's Share link works)"
+        required: true
+      date:
+        description: 'Date: 2026-12-18, 18/12, or 18 Dec'
+        required: true
+      time:
+        description: 'Time: 24-hour, like 20:50 (optional)'
+      cinema:
+        description: Cinema
+        type: choice
+        # Your regular cinemas, named the way BookMyShow does; the ticket shows the name as written here.
+        # Add, rename or reorder them freely (keep "Another cinema" last).
+        options:
+          - 'AMB Cinemas: Gachibowli'
+          - 'Allu Cinemas: Kokapet'
+          - 'Prasads Multiplex: Hyderabad'
+          - 'PVR: Nexus Mall, Kukatpally'
+          - 'PVR: Irrum Manzil, Hyderabad'
+          - 'PVR Inorbit: Cyberabad'
+          - Another cinema (type it below)
+      other_cinema:
+        description: Another cinema (only if it isn't in the list above)
+      tag:
+        description: 'Format or language: IMAX, Telugu, 4DX (optional)'
+
+permissions:
+  contents: read
+  actions: write # start the deploy
+
+# Two runs at once would overwrite each other's list.
+concurrency:
+  group: up-next-shows
+  cancel-in-progress: false
+
+jobs:
+  add:
+    if: github.actor == github.repository_owner
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+
+      - id: add
+        run: node scripts/up-next-shows.ts add
+        env:
+          # UP_NEXT_TOKEN: a fine-grained token with Variables read/write on this repo (see the README)
+          UP_NEXT_TOKEN: ${{ secrets.UP_NEXT_TOKEN }}
+          FILM: ${{ inputs.film }}
+          DATE: ${{ inputs.date }}
+          TIME: ${{ inputs.time }}
+          CINEMA: ${{ inputs.cinema }}
+          OTHER_CINEMA: ${{ inputs.other_cinema }}
+          TAG: ${{ inputs.tag }}
+
+      # Changes made with this workflow's token don't start other workflows by themselves.
+      - if: steps.add.outputs.deploy == 'true'
+        run: gh workflow run deploy.yml --repo "$GITHUB_REPOSITORY" --ref main -f films=false -f music=false
+        env:
+          GH_TOKEN: ${{ github.token }}

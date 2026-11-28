@@ -1,33 +1,24 @@
 /**
- * Shared by the "Up next" scripts: reading booked shows out of GitHub issues
- * (opened with the form in .github/ISSUE_TEMPLATE/up-next.yml), and looking films up on Letterboxd.
+ * Shared by the "Up next" scripts: reading a booked show (typed into the "Add a show" workflow),
+ * keeping the list of shows in a repository variable, and looking films up on Letterboxd.
  */
 import { site, type Booking } from '../src/site.config.ts';
 import { filmSlug, type LetterboxdFilm } from '../src/lib/up-next.ts';
 
-/* ---------- where the booking issues live ---------- */
+/* ---------- where the shows live ---------- */
 
-export const REPO = process.env.GITHUB_REPOSITORY || site.upNextIssues.repo;
-/** Only issues the repository's owner opened count: anyone can open an issue on a public repo. */
-export const OWNER = REPO.split('/')[0];
-export const LABEL = site.upNextIssues.label;
+export const REPO = process.env.GITHUB_REPOSITORY || site.upNext.repo;
+/** The repository variable holding the booked shows, as JSON. Deploys read it; the show workflows write it. */
+export const VARIABLE = 'UP_NEXT_SHOWS';
 
 export const todayUtc = () => new Date().toISOString().slice(0, 10);
 
-export interface Issue {
-  number: number;
-  title: string;
-  body: string | null;
-  state: string;
-  html_url: string;
-  user: { login: string };
-  labels: (string | { name?: string })[];
-  pull_request?: unknown;
-}
-
-/** A GitHub REST call. Uses GITHUB_TOKEN when there is one (always, in Actions); public reads work without. */
-export async function github<T = unknown>(path: string, init: { method?: string; body?: unknown } = {}): Promise<T> {
-  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+/** A GitHub REST call. `token` defaults to GITHUB_TOKEN; reading and writing the variable needs UP_NEXT_TOKEN (see the README). */
+export async function github<T = unknown>(
+  path: string,
+  init: { method?: string; body?: unknown; token?: string } = {},
+): Promise<T> {
+  const token = init.token || process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
   const response = await fetch(`https://api.github.com${path}`, {
     method: init.method ?? 'GET',
     headers: {
@@ -44,42 +35,55 @@ export async function github<T = unknown>(path: string, init: { method?: string;
   return (response.status === 204 ? null : await response.json()) as T;
 }
 
-/** The owner's open booking issues. */
-export async function openShowIssues(): Promise<Issue[]> {
-  const issues = await github<Issue[]>(
-    `/repos/${REPO}/issues?state=open&labels=${encodeURIComponent(LABEL)}&creator=${OWNER}&per_page=100`,
-  );
-  return issues.filter((issue) => !issue.pull_request);
+/* ---------- the saved list ---------- */
+
+/** The variable's text as shows; anything that isn't a show is dropped. */
+export function parseShows(text: string | undefined): Booking[] {
+  if (!text?.trim()) return [];
+  const list: unknown = JSON.parse(text);
+  if (!Array.isArray(list)) throw new Error(`${VARIABLE} isn't a list`);
+  return list.filter((show): show is Booking => !!show && typeof show.date === 'string' && !!(show.film || show.title));
 }
 
-/* ---------- reading the form ---------- */
+export const sortShows = (shows: Booking[]) =>
+  [...shows].sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? '').localeCompare(b.time ?? ''));
 
-/** The form's questions, as their headings appear in the issue (keep in step with the template). */
-const FIELDS = {
-  film: 'film',
-  date: 'date',
-  time: 'time',
-  cinema: 'cinema',
-  otherCinema: 'another cinema',
-  tag: 'format or language',
-} as const;
-
-/** An issue form's body is "### Film\n\nDune\n\n### Date\n\n…"; unanswered questions say "_No response_". */
-export function formAnswers(body: string | null): Record<string, string> {
-  const answers: Record<string, string> = {};
-  for (const part of (body ?? '').replace(/\r\n?/g, '\n').split(/^###[ \t]+/m).slice(1)) {
-    const end = part.indexOf('\n');
-    const heading = (end < 0 ? part : part.slice(0, end)).trim().toLowerCase();
-    const value = end < 0 ? '' : part.slice(end + 1).trim().replace(/\s+/g, ' ');
-    answers[heading] = value === '_No response_' ? '' : value;
+/** The shows in the repository variable (none if it isn't set yet). */
+export async function savedShows(): Promise<Booking[]> {
+  try {
+    const { value } = await github<{ value: string }>(`/repos/${REPO}/actions/variables/${VARIABLE}`, {
+      token: process.env.UP_NEXT_TOKEN,
+    });
+    return parseShows(value);
+  } catch (error) {
+    if ((error as Error).message.includes(' 404 ')) return [];
+    throw error;
   }
-  return answers;
 }
 
-export const looksLikeShow = (body: string | null) => {
-  const answers = formAnswers(body);
-  return FIELDS.film in answers && FIELDS.date in answers;
-};
+export async function saveShows(shows: Booking[]) {
+  const value = JSON.stringify(sortShows(shows));
+  const token = process.env.UP_NEXT_TOKEN;
+  try {
+    await github(`/repos/${REPO}/actions/variables/${VARIABLE}`, { method: 'PATCH', token, body: { name: VARIABLE, value } });
+  } catch (error) {
+    if (!(error as Error).message.includes(' 404 ')) throw error;
+    await github(`/repos/${REPO}/actions/variables`, { method: 'POST', token, body: { name: VARIABLE, value } });
+  }
+}
+
+/* ---------- reading what was typed ---------- */
+
+/** What the "Add a show" form asks for. Empty strings are unanswered. */
+export interface ShowInput {
+  film: string;
+  date: string;
+  time: string;
+  /** The dropdown's pick; "Another cinema…" defers to `otherCinema`. */
+  cinema: string;
+  otherCinema: string;
+  tag: string;
+}
 
 const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
@@ -142,17 +146,16 @@ async function letterboxdFilm(link: string): Promise<string | null> {
   return slug ? `https://letterboxd.com/film/${slug.toLowerCase()}/` : null;
 }
 
-/** An issue's answers as a booking, or what's wrong with them. */
-export async function readShow(body: string | null, today = todayUtc()) {
-  const answers = formAnswers(body);
+/** The form's answers as a booking, or what's wrong with them. */
+export async function readShow(input: ShowInput, today = todayUtc()) {
   const problems: string[] = [];
-  const film = answers[FIELDS.film] ?? '';
-  const dateText = answers[FIELDS.date] ?? '';
-  const timeText = answers[FIELDS.time] ?? '';
+  const film = input.film.trim().replace(/\s+/g, ' ');
+  const dateText = input.date.trim();
+  const timeText = input.time.trim();
 
   let link: string | null = null;
   const linkText = film.match(/(?:https?:\/\/)?(?:www\.)?(?:letterboxd\.com|boxd\.it)\/\S+/i)?.[0];
-  if (!film) problems.push('**Film** is empty: give its title, or its Letterboxd link.');
+  if (!film) problems.push('Film is empty: give its title, or its Letterboxd link.');
   else if (linkText) {
     try {
       link = await letterboxdFilm(linkText);
@@ -163,15 +166,15 @@ export async function readShow(body: string | null, today = todayUtc()) {
   }
 
   const date = readDate(dateText, today);
-  if (!date) problems.push(`**Date** "${dateText}" isn't a date I can read. Try \`2026-12-18\` or \`18 Dec\`.`);
+  if (!date) problems.push(`Date "${dateText}" isn't a date I can read. Try 2026-12-18 or 18 Dec.`);
   const time = timeText ? readTime(timeText) : undefined;
-  if (time === null) problems.push(`**Time** "${timeText}" isn't a 24-hour time. Write it like \`20:50\`.`);
+  if (time === null) problems.push(`Time "${timeText}" isn't a 24-hour time. Write it like 20:50.`);
 
-  const picked = answers[FIELDS.cinema] ?? '';
-  const cinema = answers[FIELDS.otherCinema] || (/^another cinema/i.test(picked) ? '' : picked);
-  const tag = answers[FIELDS.tag] || undefined;
+  const picked = input.cinema.trim();
+  const cinema = input.otherCinema.trim() || (/^another cinema/i.test(picked) ? '' : picked);
+  const tag = input.tag.trim() || undefined;
 
-  if (problems.length || !date) return { booking: null, problems };
+  if (problems.length || !date) return { booking: null, problems, slug: undefined };
   const booking: Booking = {
     ...(link ? { film: link } : { title: film }),
     date,
@@ -208,7 +211,7 @@ export async function lookUp(slug: string): Promise<LetterboxdFilm | null> {
     info.releasedEvent?.[0]?.startDate?.slice(0, 4) || html.match(/\/films\/year\/(\d{4})\//)?.[1],
   );
   // the running time sits in the page footer: "150&nbsp;mins"
-  const runtime = Number(html.match(/(\d{2,3})\s*(?:&nbsp;| )mins/)?.[1]);
+  const runtime = Number(html.match(/(\d{2,3})\s*(?:&nbsp;| )mins/)?.[1]);
   return {
     slug,
     title: info.name ?? slug,

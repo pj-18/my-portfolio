@@ -77,13 +77,16 @@ The film diary comes from your public Letterboxd RSS feed (`letterboxd` in `site
 
 ### Up next: booked shows
 
-Tickets you've booked show above the diary as "Up next", with a countdown, and each drops off by itself once the show is over. BookMyShow has no public API (and bookings sit behind your login), so when you book, you open a GitHub issue for the show. Nothing is committed: the site reads your open booking issues each time it builds.
+Tickets you've booked show above the diary as "Up next", with a countdown, and each drops off by itself once the show is over. BookMyShow has no public API (and bookings sit behind your login), so when you book, you run a workflow. Nothing is committed: the shows are kept in a repository variable (`UP_NEXT_SHOWS`, under Settings → Secrets and variables → Actions → Variables) that each build reads.
 
-**Issues → New issue → "Up next, a show I've booked"** (works from your phone or the GitHub app), and fill in the form: the film (its title, or better, its Letterboxd link; a `boxd.it` link from the app's Share button works too), the date (`2026-12-18`, `18/12` or `18 Dec`), and optionally the time (24-hour, like `20:50`), cinema and format. Then:
+**Actions → Add a show → Run workflow** (works from the GitHub mobile app too), and fill in the film (its title, or better, its Letterboxd link; a `boxd.it` link from the app's Share button works too), the date (`2026-12-18`, `18/12` or `18 Dec`), and optionally the time (24-hour, like `20:50`), cinema and format. Then:
 
-- the `Up next` workflow reads it, names the issue after the show, and replies with the film it found on Letterboxd (or what it couldn't read), then redeploys the site; the ticket is live a couple of minutes later
-- **edit** the issue to change the show, **close** it to cancel
-- the morning after the show the issue is closed for you
+- the run checks what you typed (a date it can't read, or one that's passed, fails the run and says why), saves the show, and redeploys the site; the ticket is live a couple of minutes later
+- the run's summary shows the film it found on Letterboxd, and every show booked so far
+- **Actions → Remove a show** cancels one: part of the film's title, plus the date if you have two shows of one film. If nothing matches, the run fails and its summary lists what's booked
+- a show drops off the site the morning after it, and is cleared from the variable the next time you add or remove one
+
+**One-time setup.** The built-in workflow token can't write repository variables, so make a [fine-grained personal access token](https://github.com/settings/personal-access-tokens/new) limited to this repository with **Variables: Read and write**, and save it under Settings → Secrets and variables → Actions → Secrets as `UP_NEXT_TOKEN`. The workflows must be on `main` to show up in the Actions tab.
 
 On the night, the ticket follows the show, using the film's running time from Letterboxd (150 minutes if it doesn't have one yet). For a 21:00 show of a 120-minute film:
 
@@ -98,10 +101,10 @@ The page keeps this current by itself, minute by minute, without a rebuild. Show
 
 Good to know:
 
-- Each film's poster, title and link are fetched from Letterboxd once and saved in `src/data/up-next.json`. If the title leads to no page, or the wrong film, the issue's comment says so: edit it and paste the film's Letterboxd link.
-- The cinema dropdown (your regular cinemas, named the way BookMyShow does) lives in `.github/ISSUE_TEMPLATE/up-next.yml`: edit it there to add or rename one. The ticket shows the name exactly as picked; the list itself isn't shown on the site. "Another cinema" takes any name.
-- Only issues opened by the repository's owner count, so nobody else can put a show on your site. The repository and label are `upNextIssues` in `site.config.ts`.
-- Issues are public, like the site: never put seat numbers or booking IDs in them.
+- Each film's poster, title and link are fetched from Letterboxd once and saved in `src/data/up-next.json`. If the title leads to no page, or the wrong film, the run's summary says so: remove the show and add it again with the film's Letterboxd link.
+- The cinema dropdown (your regular cinemas, named the way BookMyShow does) lives in `.github/workflows/add-show.yml`: edit it there to add or rename one. The ticket shows the name exactly as picked; the list itself isn't shown on the site. "Another cinema" takes any name.
+- Only people with write access to the repository can run the workflows, and they do nothing for anyone but the owner. The repository is `upNext` in `site.config.ts`.
+- The variable is visible to anyone with access to the repository settings, but the site is public: never put seat numbers or booking IDs in a show.
 
 ### Music: Apple Music, via Last.fm
 

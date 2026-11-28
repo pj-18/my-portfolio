@@ -1,0 +1,42 @@
+name: Remove a show
+
+# Actions tab → "Remove a show" → Run workflow. Cancels a booked show (or several) and redeploys.
+# If nothing matches, the run fails and its summary lists the booked shows.
+on:
+  workflow_dispatch:
+    inputs:
+      film:
+        description: "Film: part of its title, like 'dune'"
+      date:
+        description: 'Date, to tell two shows of one film apart: 2026-12-18, 18/12, or 18 Dec'
+
+permissions:
+  contents: read
+  actions: write # start the deploy
+
+concurrency:
+  group: up-next-shows
+  cancel-in-progress: false
+
+jobs:
+  remove:
+    if: github.actor == github.repository_owner
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+
+      - id: remove
+        run: node scripts/up-next-shows.ts remove
+        env:
+          UP_NEXT_TOKEN: ${{ secrets.UP_NEXT_TOKEN }}
+          FILM: ${{ inputs.film }}
+          DATE: ${{ inputs.date }}
+
+      - if: steps.remove.outputs.deploy == 'true'
+        run: gh workflow run deploy.yml --repo "$GITHUB_REPOSITORY" --ref main -f films=false -f music=false
+        env:
+          GH_TOKEN: ${{ github.token }}

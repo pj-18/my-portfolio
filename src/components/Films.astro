@@ -1142,6 +1142,10 @@ const laurels = laurel(false) + laurel(true);
     width: 100%;
     height: 100%;
     object-fit: cover;
+    /* the poster is part of the ticket: dragging from it swipes the ticket, it doesn't pick the picture up */
+    pointer-events: none;
+    -webkit-user-drag: none;
+    user-select: none;
   }
 
   .pass__mono {

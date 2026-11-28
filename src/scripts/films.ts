@@ -329,6 +329,10 @@ if (section) {
     bar?.querySelector('[data-upnext-prev]')?.addEventListener('click', () => step(-1));
 
     /* dragging the top ticket up or down (or a quick flick either way) brings up the next one */
+    // the browser's own drag-and-drop (a poster, a link) would take over the gesture
+    list?.addEventListener('dragstart', (event) => {
+      if (list.dataset.view === 'stack') event.preventDefault();
+    });
     let drag: { id: number; y: number; at: number; card: HTMLElement; dy: number } | null = null;
     let dragged = false;
     list?.addEventListener('pointerdown', (event) => {

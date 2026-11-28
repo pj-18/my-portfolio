@@ -1,16 +1,16 @@
 /**
- * Gathers the shows you've booked from your open "Up next" GitHub issues, looks their films
+ * Gathers the shows you've booked (kept in the UP_NEXT_SHOWS repository variable), looks their films
  * up on Letterboxd, and saves both in src/data/up-next.json.
  *
  *   npm run up-next
  *
- * Each film is fetched from Letterboxd once, then cached. It never fails a build: if GitHub
- * can't be reached the last saved shows are kept, and a film it can't find just shows without
+ * Each film is fetched from Letterboxd once, then cached. It never fails a build: if the variable
+ * isn't set (a local run) the last saved shows are kept, and a film it can't find just shows without
  * a poster (or with the `poster` you set yourself).
  */
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { filmSlug, type UpNextData } from '../src/lib/up-next.ts';
-import { lookUp, openShowIssues, readShow, REPO, todayUtc } from './up-next-shared.ts';
+import { lookUp, parseShows, sortShows, todayUtc, VARIABLE } from './up-next-shared.ts';
 
 const OUT = new URL('../src/data/up-next.json', import.meta.url);
 const RETRY_MISSES_AFTER = 24 * 3_600_000;
@@ -28,28 +28,26 @@ async function load(): Promise<UpNextData> {
   }
 }
 
-/** Shows booked as issues. Ones that don't read cleanly are skipped (the issue itself says why). */
-async function syncIssues(data: UpNextData) {
+/**
+ * Shows booked with the "Add a show" workflow arrive in the UP_NEXT_SHOWS variable (the deploy passes
+ * it in). Without it (a local run) the last saved shows are kept, minus the ones that are over.
+ */
+function syncShows(data: UpNextData) {
+  const text = process.env[VARIABLE];
   try {
-    const issues = await openShowIssues();
-    const shows = [];
-    for (const issue of issues) {
-      const { booking } = await readShow(issue.body, today);
-      if (booking && booking.date >= today) shows.push(booking);
-      else if (!booking) log(`issue #${issue.number} doesn't read as a show yet; skipped`);
-    }
-    data.shows = shows.sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? '').localeCompare(b.time ?? ''));
-    log(`${shows.length} ${shows.length === 1 ? 'show' : 'shows'} booked in ${REPO}'s issues`);
+    if (text === undefined) throw new Error(`${VARIABLE} isn't set`);
+    data.shows = sortShows(parseShows(text).filter((show) => show.date >= today));
+    log(`${data.shows.length} ${data.shows.length === 1 ? 'show' : 'shows'} booked`);
   } catch (error) {
     data.shows = data.shows.filter((show) => show.date >= today);
-    log(`couldn't read the booking issues (${(error as Error).message}); keeping the last ${data.shows.length} saved`);
+    log(`couldn't read the booked shows (${(error as Error).message}); keeping the last ${data.shows.length} saved`);
   }
 }
 
 async function main() {
   const data = await load();
   const before = JSON.stringify({ ...data, fetchedAt: null });
-  await syncIssues(data);
+  syncShows(data);
 
   const slugs = [...new Set(data.shows.map(filmSlug).filter((slug): slug is string => !!slug))];
   const now = Date.now();

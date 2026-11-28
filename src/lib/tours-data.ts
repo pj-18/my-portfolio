@@ -8,4 +8,4 @@ const files = import.meta.glob<Trip>('../data/tours/*.json', { eager: true, impo
 export const tours: Trip[] = Object.values(files).sort((a, b) => a.startDate.localeCompare(b.startDate));
 
 /** Trip dates are India time, like the show times in "Up next". */
-export const tourOffset = offsetMinutes(site.upNextIssues.utcOffset);
+export const tourOffset = offsetMinutes(site.upNext.utcOffset);

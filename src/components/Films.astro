@@ -35,7 +35,7 @@ function ratingTone(rating: number) {
 
 /* "Up next": shows booked as GitHub issues (saved by scripts/sync-up-next.ts). Each ticket counts down,
    then reads "Rolling" and "Wrapped", then leaves the page (see src/lib/up-next.ts; the browser keeps it current). */
-const { utcOffset } = site.upNextIssues;
+const { utcOffset } = site.upNext;
 const offset = offsetMinutes(utcOffset);
 const builtAt = Date.now();
 const upNextData = Object.values(

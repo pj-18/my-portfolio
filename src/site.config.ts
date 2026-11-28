@@ -74,14 +74,12 @@ export const site = {
 
   /**
    * "Up next": the shows you've booked. BookMyShow has no public API and your bookings sit behind
-   * your login, so when you book, open an issue on this repository with the "Up next" form
-   * (edit it to change the show, close it to cancel). Each one drops off by itself once it's over;
-   * posters come from Letterboxd. Issues are public: never put seat numbers or booking IDs in them.
-   * Only issues the repository's owner opens are read.
+   * your login, so when you book, run the "Add a show" workflow (Actions tab or the GitHub app);
+   * "Remove a show" cancels one. Each drops off by itself once it's over; posters come from
+   * Letterboxd. The shows are kept in the UP_NEXT_SHOWS repository variable, not in the repo.
    */
-  upNextIssues: {
+  upNext: {
     repo: 'pj-18/my-portfolio',
-    label: 'up-next',
     /** Show times are the cinema's local time: its UTC offset ('+05:30' is India). */
     utcOffset: '+05:30',
   },

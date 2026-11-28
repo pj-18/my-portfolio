@@ -51,7 +51,17 @@ const queue = () => {
   queued = true;
   requestAnimationFrame(tick);
 };
-window.addEventListener('scroll', queue, { passive: true });
+/* the transport icon shows pause while the page is moving, play once it rests */
+const transport = document.querySelector<HTMLElement>('.topbar__play');
+let settle = 0;
+const onScroll = () => {
+  queue();
+  if (!transport) return;
+  transport.classList.add('is-scrolling');
+  window.clearTimeout(settle);
+  settle = window.setTimeout(() => transport.classList.remove('is-scrolling'), 500);
+};
+window.addEventListener('scroll', onScroll, { passive: true });
 window.addEventListener('resize', queue);
 tick();
 

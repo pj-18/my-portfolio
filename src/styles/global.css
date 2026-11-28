@@ -16,13 +16,19 @@
   --dim: #7a7264;
 
   --amber: #ffb627;
+  --magenta: #ff4d8d;
+  --violet: #a78bfa;
+  --cobalt: #5b9bff;
+  --mint: #7ef0d4;
+  --coral: #ff7a59;
+  --orchid: #e07bff;
   --red: #ff5a3c;
   --green: #5fdc8f;
   /* the cyan dye of a 35mm print's soundtrack */
   --cyan: #56d2ee;
 
-  --ticket: #f2e4c6;
-  --ticket-ink: #231c13;
+  --ticket: #ebe6df;
+  --ticket-ink: #1b191c;
 
   --f-display: 'Archivo Variable', 'Archivo', 'Arial Narrow', system-ui, sans-serif;
   --f-serif: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
@@ -118,13 +124,13 @@ button {
 }
 
 :focus-visible {
-  outline: 2px solid var(--amber);
+  outline: 2px solid var(--cyan);
   outline-offset: 3px;
   border-radius: 6px;
 }
 
 ::selection {
-  background: var(--amber);
+  background: var(--violet);
   color: var(--ink);
 }
 
@@ -177,7 +183,7 @@ button {
   z-index: 200;
   padding: 0.7rem 1.1rem;
   border-radius: 999px;
-  background: var(--amber);
+  background: var(--paper);
   color: var(--ink);
   font-weight: 700;
   text-decoration: none;
@@ -219,6 +225,24 @@ button {
 }
 .accent-amber {
   --accent: var(--amber);
+}
+.accent-magenta {
+  --accent: var(--magenta);
+}
+.accent-violet {
+  --accent: var(--violet);
+}
+.accent-cobalt {
+  --accent: var(--cobalt);
+}
+.accent-mint {
+  --accent: var(--mint);
+}
+.accent-coral {
+  --accent: var(--coral);
+}
+.accent-orchid {
+  --accent: var(--orchid);
 }
 .accent-red {
   --accent: var(--red);
@@ -266,7 +290,7 @@ button {
 
 .pill--solid {
   border-color: transparent;
-  background: var(--accent, var(--amber));
+  background: var(--accent, var(--paper));
   color: var(--ink);
   font-weight: 700;
 }
@@ -293,7 +317,7 @@ button {
 
 /* `npm run dev` only: entries still marked as placeholders in site.config.ts. */
 .is-placeholder {
-  outline: 1px dashed rgb(255 182 39 / 0.55);
+  outline: 1px dashed rgb(167 139 250 / 0.55);
   outline-offset: 8px;
   border-radius: 4px;
 }
@@ -335,8 +359,8 @@ button {
 
 .ambient .a-top {
   background:
-    radial-gradient(110% 60% at 50% -12%, rgb(255 182 39 / 0.16), transparent 62%),
-    radial-gradient(60% 40% at 100% 100%, rgb(255 90 60 / 0.05), transparent 70%);
+    radial-gradient(110% 60% at 50% -12%, rgb(91 155 255 / 0.14), transparent 62%),
+    radial-gradient(60% 40% at 100% 100%, rgb(255 90 60 / 0.06), transparent 70%);
 }
 
 .ambient .a-work {
@@ -345,8 +369,8 @@ button {
 
 .ambient .a-films {
   background:
-    radial-gradient(110% 55% at 50% 0%, rgb(255 182 39 / 0.13), transparent 64%),
-    radial-gradient(70% 40% at 100% 100%, rgb(255 90 60 / 0.06), transparent 70%);
+    radial-gradient(110% 55% at 50% 0%, rgb(255 77 141 / 0.13), transparent 64%),
+    radial-gradient(70% 40% at 100% 100%, rgb(167 139 250 / 0.07), transparent 70%);
 }
 
 .ambient .a-music {
@@ -362,7 +386,7 @@ button {
 }
 
 .ambient .a-credits {
-  background: radial-gradient(100% 60% at 50% 100%, rgb(255 182 39 / 0.1), transparent 65%);
+  background: radial-gradient(100% 60% at 50% 100%, rgb(91 155 255 / 0.14), transparent 65%);
 }
 
 body[data-scene='top'] .a-top,
@@ -471,8 +495,8 @@ body[data-scene='credits'] .a-credits {
 
 /* the films reel: a marquee sign with chasing bulbs instead of sprockets */
 .filmband--sign {
-  background: linear-gradient(#1b1309, #120d07);
-  border-color: rgb(255 182 39 / 0.25);
+  background: linear-gradient(#1b0912, #12060c);
+  border-color: rgb(255 77 141 / 0.28);
 }
 
 .filmband--sign .filmband__track::before,
@@ -488,8 +512,8 @@ body[data-scene='credits'] .a-credits {
   right: 0;
   height: 14px;
   background:
-    radial-gradient(circle at 8px 50%, #ffe2a3 0 2.6px, rgb(255 182 39 / 0.55) 3.6px, transparent 6.5px),
-    radial-gradient(circle at 24px 50%, rgb(255 182 39 / 0.3) 0 2.4px, transparent 3.4px);
+    radial-gradient(circle at 8px 50%, #ffc8dc 0 2.6px, rgb(255 77 141 / 0.65) 3.6px, transparent 6.5px),
+    radial-gradient(circle at 24px 50%, rgb(255 77 141 / 0.3) 0 2.4px, transparent 3.4px);
   background-size: 32px 14px;
   animation: chase 0.9s infinite;
 }

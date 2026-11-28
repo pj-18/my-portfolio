@@ -249,6 +249,34 @@ if (section) {
     };
 
     /**
+     * Runs `change` (which re-lays the tickets out) and eases from the old layout to the new one:
+     * the block grows or shrinks smoothly, so what's below it glides, and each ticket slides from
+     * where it was to where it is now.
+     */
+    const morph = (change: () => void) => {
+      if (!block || reduced.matches || typeof block.animate !== 'function') return change();
+      const cards = live();
+      const first = block.getBoundingClientRect().height;
+      const before = cards.map((card) => card.getBoundingClientRect());
+      const timing = { duration: 700, easing: 'cubic-bezier(0.45, 0, 0.2, 1)' };
+      // the list has no stacking order of its own: keep the stack's (top ticket in front) while they slide,
+      // so the second ticket never jumps in front of the first on the way to or from the stack
+      cards.forEach((card, i) => (card.style.zIndex = String(10 - ((i - top + cards.length) % cards.length))));
+      window.setTimeout(() => cards.forEach((card) => (card.style.zIndex = '')), timing.duration);
+      change();
+      const last = block.getBoundingClientRect().height;
+      cards.forEach((card, i) => {
+        const now = card.getBoundingClientRect();
+        const dx = before[i].left - now.left;
+        const dy = before[i].top - now.top;
+        if (dx || dy) card.animate([{ translate: `${dx}px ${dy}px` }, { translate: '0 0' }], timing);
+      });
+      // no clipping: while it grows, the tickets underneath (and the bar) are already in place and show whole
+      if (Math.abs(first - last) > 1) block.animate([{ height: `${first}px` }, { height: `${last}px` }], timing);
+      if (bar && !bar.hidden) bar.animate([{ opacity: 0 }, { opacity: 1 }], timing);
+    };
+
+    /**
      * dir 1: the top ticket goes to the back and the next one comes up, the old one leaving the way it was
      * thrown (`exit` -1 is up, 1 is down). dir -1: the last one comes back on top.
      */
@@ -285,13 +313,16 @@ if (section) {
 
     for (const button of switcher?.querySelectorAll<HTMLButtonElement>('[data-upnext-view]') ?? []) {
       button.addEventListener('click', () => {
-        view = button.dataset.upnextView === 'stack' ? 'stack' : 'list';
+        const next = button.dataset.upnextView === 'stack' ? 'stack' : 'list';
+        if (next === view) return;
+        view = next;
+        if (view === 'stack') top = 0; // however it was shuffled before, the stack starts with the soonest show on top
         try {
           localStorage.setItem(KEY, view);
         } catch {
           // fine: it just won't be remembered
         }
-        layout();
+        morph(layout);
       });
     }
     bar?.querySelector('[data-upnext-next]')?.addEventListener('click', () => step(1));

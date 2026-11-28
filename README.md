@@ -107,8 +107,8 @@ Apple Music has no public "top artists / top songs" for your account (its API on
 1. **Scrobble Apple Music to Last.fm.** Apple Music can't do it by itself. On iPhone, use a scrobbler app, for example QuietScrob (scrobbles in the background) or an Apple Music player with scrobbling built in, such as Marvis Pro. On a Mac, Last.fm's own desktop Scrobbler picks up the Music app. Charts fill in as you listen; Last.fm can't see plays from before you connect.
 2. **Get a Last.fm API key** (free, instant) at <https://www.last.fm/api/account/create>. Only the application name is required.
 3. **Tell the site.** Copy `.env.example` to `.env` and paste the key into `LASTFM_API_KEY`, then set `music.lastfm` in `src/site.config.ts` to your Last.fm username.
-4. **Run `npm run music`.** The first run looks up cover art, 30-second previews and Apple Music links for each song (Apple allows about 20 searches a minute, so allow ~3 seconds per song) and a photo for each artist. Lookups are saved in `src/data/music.json` and never repeated, so later runs take a second or two. Commit that file: the daily build uses it as its starting point.
-5. **For the deployed site**, add the same key as a repository secret named `LASTFM_API_KEY` (**Settings → Secrets and variables → Actions**). The daily build then refreshes the charts too.
+4. **Run `npm run music`.** The first run looks up cover art, 30-second previews and Apple Music links for each song (Apple allows about 20 searches a minute, so allow ~3 seconds per song) and a photo for each artist. Lookups are saved in `src/data/music.json` and never repeated, so later runs take a second or two. You don't need to commit that file: the deploy workflow keeps its own copy in the Actions cache between runs, so only new songs are looked up.
+5. **For the deployed site**, add the same key as a repository secret named `LASTFM_API_KEY` (**Settings → Secrets and variables → Actions**). Every scheduled build then refreshes the charts too.
 
 Until `src/data/music.json` has data, the section appears only in `npm run dev`, filled with clearly marked sample data, and production builds leave it (and its dock button) out.
 
@@ -126,8 +126,8 @@ Only artist and song names are sent to Apple's and Deezer's public catalog searc
 The included workflow, `.github/workflows/deploy.yml`, publishes to GitHub Pages:
 
 1. Push to GitHub, then go to **Settings → Pages → Build and deployment** and set **Source** to **GitHub Actions**.
-2. Add your Last.fm key as the repository secret `LASTFM_API_KEY` (optional: without it the soundtrack keeps its last committed data).
-3. Every push to `main` deploys. The workflow also rebuilds every morning (03:17 UTC) so new diary entries and chart changes appear without a commit.
+2. Add your Last.fm key as the repository secret `LASTFM_API_KEY` (without it the deployed site has no soundtrack, because `src/data/music.json` isn't committed).
+3. Every push to `main` deploys. The workflow also rebuilds twice a day, at 4 AM and 4 PM India time (22:30 and 10:30 UTC), so new diary entries and chart changes appear without a commit. To refresh on demand (say, to update the music stats right now), open the repository's **Actions** tab, pick **Deploy to GitHub Pages** and press **Run workflow**. GitHub can start scheduled runs a few minutes late. To change the times, edit the `cron` lines in `.github/workflows/deploy.yml` (they are in UTC).
 
 The project site path (`/my-portfolio/`) and a custom domain are both handled automatically. Any other static host works too: run `npm run build` and serve `dist/`, setting `SITE_URL` (and `BASE_PATH` if it isn't served from the root).
 

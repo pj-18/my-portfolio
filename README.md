@@ -117,6 +117,7 @@ Options in `site.config.ts` → `music`:
 - `period`: the chart the page opens on (`'1month'`, `'12month'` or `'overall'`); visitors can switch.
 - `storefront`: the Apple Music country (two letters, e.g. `'in'`) used to find previews and links.
 - `hide`: artists or song titles to keep off the page.
+- `keepTogether`: artists whose name contains "&" or a comma (e.g. `'Simon & Garfunkel'`). Every other collab credit ("A & B") is split so each artist gets their own place in the line-up, with the plays added up; songs keep their full credit.
 
 Only artist and song names are sent to Apple's and Deezer's public catalog search to find artwork; the API key never leaves the build machine and is never printed.
 

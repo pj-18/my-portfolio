@@ -149,14 +149,41 @@ async function lastfm(method: string, params: Record<string, string> = {}) {
   return body;
 }
 
+/**
+ * Apple Music credits a collab as one artist ("A & B"). For the artist chart each person gets their own
+ * entry, so this splits on "&", commas, "feat." and a spaced "x". Names in site.config.ts → music.keepTogether
+ * ("Simon & Garfunkel") stay whole. Songs keep their full credit.
+ */
+const keepTogether = new Set(site.music.keepTogether.map((name) => lower(name)));
+const COLLAB = /\s*(?:,|&|\+|;|\/\/|\bfeat\.?\s|\bft\.?\s|\bfeaturing\b|\svs\.?\s|\sx\s)\s*/i;
+const people = (credit: string) =>
+  keepTogether.has(lower(credit)) ? [credit] : credit.split(COLLAB).map((part) => part.trim()).filter(Boolean);
+
+const artistPage = (name: string) =>
+  `https://www.last.fm/user/${encodeURIComponent(user)}/library/music/${encodeURIComponent(name).replace(/%20/g, '+')}`;
+
 async function charts(period: PeriodKey): Promise<MusicPeriod> {
+  // Ask for more artists than we keep: splitting collabs reshuffles the ranking.
   const [top, songs] = await Promise.all([
-    lastfm('user.gettopartists', { period, limit: String(LIMIT) }),
+    lastfm('user.gettopartists', { period, limit: '60' }),
     lastfm('user.gettoptracks', { period, limit: String(LIMIT) }),
   ]);
-  const artists = asList<any>(top.topartists?.artist).map(
-    (artist): MusicArtist => ({ name: artist.name, plays: plays(artist.playcount), url: library(artist.url), photo: null }),
-  );
+  const byName = new Map<string, MusicArtist>();
+  for (const credit of asList<any>(top.topartists?.artist)) {
+    const names = people(credit.name);
+    for (const name of names) {
+      const existing = byName.get(norm(name));
+      if (existing) existing.plays += plays(credit.playcount);
+      else
+        byName.set(norm(name), {
+          name,
+          plays: plays(credit.playcount),
+          url: names.length === 1 ? library(credit.url) : artistPage(name),
+          photo: null,
+        });
+    }
+  }
+  const artists = [...byName.values()].sort((a, b) => b.plays - a.plays).slice(0, LIMIT);
   const tracks = asList<any>(songs.toptracks?.track).map(
     (track): MusicTrack => ({
       name: track.name,

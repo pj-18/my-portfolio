@@ -105,6 +105,8 @@ export const site = {
     period: '12month',
     /** Artists or song titles to leave off the page (case doesn't matter). */
     hide: [] as string[],
+    /** Artist names that really contain "&" or a comma and must not be split into two artists. */
+    keepTogether: ['Simon & Garfunkel', 'Earth, Wind & Fire', 'Tyler, The Creator', 'Mumford & Sons', 'Hall & Oates', 'Crosby, Stills & Nash'] as string[],
   },
 
   about:

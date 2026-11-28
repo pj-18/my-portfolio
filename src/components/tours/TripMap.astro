@@ -1,0 +1,395 @@
+---
+/**
+ * The map that stays put while the days scroll past (src/scripts/trip.ts drives it).
+ * It is extra: every place and time is also in the day cards, so without scripting or
+ * WebGL the map simply isn't shown.
+ */
+import Icon from '../Icon.astro';
+import { mapData, type Trip } from '../../lib/tours';
+import { safeJson } from '../../lib/util';
+
+interface Props {
+  trip: Trip;
+}
+
+const { trip } = Astro.props;
+---
+
+<div class="trip__map" data-trip-map>
+  <div class="trip__canvas" data-map-canvas aria-hidden="true"></div>
+
+  <p class="trip__mapnote" data-map-note>Loading the map…</p>
+
+  <p class="ride" data-ride hidden aria-hidden="true">
+    <span class="ride__icon"><Icon name="train" /></span>
+    <span class="ride__no" data-ride-no></span>
+    <span class="ride__clock" data-ride-clock></span>
+    <span class="ride__at" data-ride-at></span>
+  </p>
+
+  <nav class="rail" aria-label="Days of the trip">
+    <a href="#trip-cover" data-rail="cover" aria-label="The whole route">
+      <Icon name="pin" />
+    </a>
+    {
+      trip.days.map((day) => (
+        <a href={`#day-${day.n}`} data-rail={String(day.n)} class={`accent-${day.accent}`} aria-label={`Day ${day.n}: ${day.title}`}>
+          {day.n}
+        </a>
+      ))
+    }
+  </nav>
+
+  <template data-train-marker>
+    <span class="train"><Icon name="train" /></span>
+  </template>
+
+  <script type="application/json" data-trip-data is:inline set:html={safeJson(mapData(trip))} />
+</div>
+
+<style>
+  .trip__map {
+    --accent: var(--mint);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    height: 48svh;
+    overflow: hidden;
+    background: var(--ink-2);
+    border-bottom: 1px solid var(--line);
+  }
+
+  /* On a phone the day rail gets its own strip under the map, so it never covers a pin. */
+  .trip__canvas {
+    position: absolute;
+    inset: 0 0 3.3rem;
+  }
+
+  /* fades in once the tiles are drawn */
+  .trip__canvas {
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+
+  .trip__map.is-ready .trip__canvas {
+    opacity: 1;
+  }
+
+  .trip__mapnote {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: var(--gutter);
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--dim);
+    pointer-events: none;
+  }
+
+  .trip__map.is-ready .trip__mapnote {
+    display: none;
+  }
+
+  /* ---- the train's clock, top left ---- */
+
+  .ride {
+    position: absolute;
+    top: calc(3.6rem + env(safe-area-inset-top));
+    left: var(--gutter);
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    max-width: calc(100% - 2 * var(--gutter));
+    padding: 0.45rem 0.8rem 0.45rem 0.5rem;
+    border: 1px solid var(--line-2);
+    border-radius: 999px;
+    background: rgb(13 12 10 / 0.82);
+    backdrop-filter: blur(6px);
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.06em;
+    color: var(--paper-dim);
+    white-space: nowrap;
+  }
+
+  .ride[hidden] {
+    display: none;
+  }
+
+  .ride__icon {
+    display: grid;
+    place-items: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--ink);
+    font-size: 0.95rem;
+  }
+
+  .ride__no {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .ride__no:empty,
+  .ride__clock:empty {
+    display: none;
+  }
+
+  .ride__clock {
+    color: var(--paper);
+    font-weight: 600;
+  }
+
+  .ride__at {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--muted);
+  }
+
+  /* ---- the day rail: along the bottom on a phone, down the right on a big screen ---- */
+
+  .rail {
+    position: absolute;
+    left: 50%;
+    bottom: 0.4rem;
+    z-index: 3;
+    display: flex;
+    gap: 0.3rem;
+    padding: 0.3rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgb(13 12 10 / 0.8);
+    backdrop-filter: blur(6px);
+    transform: translateX(-50%);
+  }
+
+  .rail a {
+    --accent: var(--paper);
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+    transition:
+      background-color 0.3s,
+      color 0.3s,
+      transform 0.3s var(--ease-spring);
+  }
+
+  .rail a:hover {
+    color: var(--paper);
+  }
+
+  .rail a[aria-current] {
+    background: var(--accent);
+    color: var(--ink);
+    transform: scale(1.08);
+  }
+
+  @media (min-width: 64rem) {
+    .trip__map {
+      height: 100svh;
+      border-bottom: 0;
+      border-left: 1px solid var(--line);
+    }
+
+    .trip__canvas {
+      inset: 0;
+    }
+
+    .ride {
+      top: calc(4.5rem + env(safe-area-inset-top));
+      left: 1.5rem;
+      font-size: 0.74rem;
+    }
+
+    .rail {
+      left: auto;
+      right: 1.25rem;
+      bottom: auto;
+      top: 50%;
+      flex-direction: column;
+      transform: translateY(-50%);
+    }
+
+    .rail a {
+      width: 2.3rem;
+      height: 2.3rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .trip__canvas,
+    .rail a {
+      transition: none;
+    }
+  }
+</style>
+
+<style is:global>
+  /* Markers are made by the script, so their styles can't be scoped. */
+  /* (MapLibre positions the marker itself, absolutely: no `position` here) */
+  .trip__map .pin {
+    --size: 10px;
+    width: var(--size);
+    height: var(--size);
+    pointer-events: none;
+  }
+
+  .trip__map .pin__dot {
+    position: absolute;
+    inset: 0;
+    border: 1.5px solid var(--paper-dim);
+    border-radius: 50%;
+    background: var(--ink);
+    opacity: 0.55;
+    transition:
+      opacity 0.4s,
+      transform 0.4s var(--ease-spring),
+      background-color 0.4s,
+      border-color 0.4s;
+  }
+
+  .trip__map .pin__label {
+    position: absolute;
+    top: 50%;
+    left: calc(100% + 0.5rem);
+    padding: 0.2rem 0.45rem;
+    border-radius: 6px;
+    background: rgb(13 12 10 / 0.78);
+    font-family: var(--f-mono);
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--paper);
+    opacity: 0;
+    transform: translate(-4px, -50%);
+    transition:
+      opacity 0.4s,
+      transform 0.4s var(--ease-out);
+  }
+
+  .trip__map .pin[data-side='left'] .pin__label {
+    left: auto;
+    right: calc(100% + 0.5rem);
+    transform: translate(4px, -50%);
+  }
+
+  .trip__map .pin[data-on] {
+    z-index: 2;
+  }
+
+  .trip__map .pin[data-on] .pin__dot {
+    border-color: var(--ink);
+    background: var(--accent);
+    opacity: 1;
+    transform: scale(1.5);
+  }
+
+  .trip__map .pin[data-on] .pin__dot::after {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    border: 1.5px solid var(--accent);
+    border-radius: 50%;
+    animation: pin-ping 2.2s var(--ease-out) infinite;
+  }
+
+  .trip__map .pin[data-on] .pin__label {
+    opacity: 1;
+    transform: translate(0, -50%);
+  }
+
+  /* too close to another lit label at this zoom */
+  .trip__map .pin[data-on][data-quiet] .pin__label {
+    opacity: 0;
+  }
+
+  @keyframes pin-ping {
+    from {
+      opacity: 0.9;
+      transform: scale(0.6);
+    }
+    to {
+      opacity: 0;
+      transform: scale(2);
+    }
+  }
+
+  .trip__map .train {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--ink);
+    font-size: 1.05rem;
+    box-shadow: 0 0 0 6px rgb(13 12 10 / 0.35), 0 0 22px var(--accent);
+    pointer-events: none;
+  }
+
+  /* MapLibre's own bits, in the site's type */
+  .trip__map .maplibregl-ctrl-attrib {
+    background: rgb(13 12 10 / 0.7);
+    font-family: var(--f-mono);
+    font-size: 0.58rem;
+    color: var(--muted);
+  }
+
+  .trip__map .maplibregl-ctrl-attrib a {
+    color: var(--paper-dim);
+  }
+
+  .trip__map .maplibregl-ctrl-group {
+    border: 1px solid var(--line-2);
+    background: rgb(13 12 10 / 0.85);
+  }
+
+  .trip__map .maplibregl-ctrl-group button + button {
+    border-top-color: var(--line);
+  }
+
+  .trip__map .maplibregl-ctrl-icon {
+    filter: invert(0.92);
+  }
+
+  /* On a phone the map is only a picture: touches on it scroll the page. Its credits stay tappable. */
+  @media (max-width: 63.99rem) {
+    .trip__map .trip__canvas {
+      pointer-events: none;
+    }
+
+    .trip__map .maplibregl-ctrl-attrib {
+      pointer-events: auto;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .trip__map .pin__dot,
+    .trip__map .pin__label {
+      transition: none;
+    }
+
+    .trip__map .pin[data-on] .pin__dot::after {
+      animation: none;
+      opacity: 0;
+    }
+  }
+</style>

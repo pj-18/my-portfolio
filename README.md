@@ -14,6 +14,8 @@ It's one page staged like a night at the cinema:
 | 04 · The day job | About, a Playwright-style test run of your career, and the stack. |
 | Fin. | Contact, rolling credits and a post-credits "spin the reel" film picker. |
 
+Off the reel, `/tours/` lists trips, and each trip gets a page per day (`/tours/<slug>/`) with a map that follows along. See [Tours](#tours-trips-day-by-day).
+
 It is built mobile first with [Astro](https://astro.build) and a little vanilla TypeScript, with no UI framework.
 It respects `prefers-reduced-motion` and works without JavaScript (minus the toys).
 
@@ -38,6 +40,7 @@ npm run dev        # http://localhost:4321
 | `npm run preview` | Serves `dist/` locally. |
 | `npm run check` | Type-checks everything. |
 | `npm run photos:placeholders` | Repaints the placeholder photos (never overwrites existing files). |
+| `npm run tours:roads` | Looks up the driving route for each trip day that has none yet (`-- --all` redoes every day). |
 
 ## Make it yours
 
@@ -121,6 +124,19 @@ Options in `site.config.ts` → `music`:
 
 Only artist and song names are sent to Apple's and Deezer's public catalog search to find artwork; the API key never leaves the build machine and is never printed.
 
+### Tours: trips, day by day
+
+Each trip is one JSON file in `src/data/tours/` (copy `gokarna-dandeli.json` to start one). The file name doesn't matter; `slug` sets the address. On the trip's page every day is a page of its own: as it scrolls in, the map flies to that day's places and draws its route, and train days run a little train along the line with its clock. The map sits on top on a phone and on the right on a big screen. Without JavaScript or WebGL the days read as a plain list.
+
+- `startDate` is Day 0, in India time. The status ("Leaving in 12 days", "On the road · Day 2", "Back home") keeps itself current.
+- `places` are the pins, as `[longitude, latitude]`. `town` is the label on the whole-trip map, where places close together share one (the Gokarna temple shows as "Gokarna"). `label: "left"` puts a label on the pin's left, out to sea for coastal places. `overview` picks which places are labelled on that whole-trip map.
+- A day has either `train` (`"out"` or `"back"`) or `road`. A train is drawn through its `stations`; leave the way back's `stations` empty to use the outbound line reversed, and leave `number` and times as `null` until you know them, because they're printed. A road is drawn through `via`: run `npm run tours:roads` to swap the straight lines for real roads (it asks the public OSRM router once per day and saves the result in the file, so commit it).
+- `legs` splits a day into camera moves, for places too close to see at one zoom: the map frames each leg's places in turn, drawing the route as it goes.
+
+The map is [MapLibre](https://maplibre.org) with [OpenFreeMap](https://openfreemap.org)'s dark style: no API key, no account and no view limits. It loads only on trip pages, after the page is up. To use another style, change `MAP_STYLE` at the top of `src/scripts/trip.ts`.
+
+Trip pages are public, like the rest of the site, and say when you'll be away.
+
 ## Deploy
 
 The included workflow, `.github/workflows/deploy.yml`, publishes to GitHub Pages:
@@ -145,14 +161,17 @@ src/
   data/music.json       saved Last.fm charts + artwork lookups (written by `npm run music`)
   data/music.sample.json  made-up charts for designing in dev
   data/up-next.json     Letterboxd posters for booked shows (written by `npm run up-next`)
-  components/           one component per reel, plus the ticket, dock, icons…
-  scripts/              the small client-side scripts (ticket physics, viewfinder, turntable…)
-  lib/                  build-time data: films, music, photos (EXIF), helpers
+  data/tours/           one JSON file per trip
+  pages/tours/          the tours list and the day-by-day trip pages
+  components/           one component per reel, plus the ticket, dock, icons… (tours/ for the trip pages)
+  scripts/              the small client-side scripts (ticket physics, viewfinder, turntable, trip map…)
+  lib/                  build-time data: films, music, photos (EXIF), tours, helpers
   styles/global.css     tokens, grain, scene lighting, film-strip titles
 scripts/
   sync-letterboxd.ts    RSS → JSON
   sync-music.ts         Last.fm → JSON, with Apple artwork/previews and Deezer photos
   sync-up-next.ts       booked films → Letterboxd posters
+  fetch-tour-roads.ts   trip days → driving routes (OSRM)
   make-placeholder-photos.ts
 ```
 

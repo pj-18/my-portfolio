@@ -29,6 +29,9 @@ export const icons = {
   left: '<path d="M15 5l-7 7 7 7"/>',
   right: '<path d="M9 5l7 7-7 7"/>',
   pause: '<path d="M9 5v14M15 5v14"/>',
+  train:
+    '<rect x="5" y="3" width="14" height="14" rx="3.5"/><path d="M5 10.5h14M12 3v7.5"/><circle cx="8.6" cy="13.8" r="0.9"/><circle cx="15.4" cy="13.8" r="0.9"/><path d="M8 17l-2.5 4M16 17l2.5 4"/>',
+  pin: '<path d="M12 21s-6.5-6.2-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 14.8 12 21 12 21z"/><circle cx="12" cy="9.8" r="2.3"/>',
   shuffle:
     '<path d="M3 7h3.5c4.5 0 6.5 10 11 10H21M3 17h3.5c1.8 0 3-1.6 4-3.4M21 7h-3.5c-1.8 0-3 1.6-4 3.4M18.5 4.5L21 7l-2.5 2.5M18.5 14.5L21 17l-2.5 2.5"/>',
 } as const;

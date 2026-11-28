@@ -1,0 +1,217 @@
+---
+/** One day of a trip: a page of its own, which turns the map to that day's places. */
+import Icon from '../Icon.astro';
+import { dayDate, dayLabel, type Day, type Trip } from '../../lib/tours';
+
+interface Props {
+  trip: Trip;
+  day: Day;
+}
+
+const { trip, day } = Astro.props;
+const date = dayDate(trip, day.n);
+const train = day.train ? trip.trains[day.train] : null;
+const stops = day.stops.map((id) => trip.places[id]);
+const id = `day-${day.n}`;
+---
+
+<section class:list={['step', 'day', `accent-${day.accent}`]} id={id} data-step={String(day.n)} data-rail={String(day.n)} aria-labelledby={`${id}-title`}>
+  <article class="step__card">
+    <p class="day__when reveal">
+      <span class="day__n">Day {day.n}</span>
+      <time datetime={date}>{dayLabel(date)}</time>
+    </p>
+    <h2 class="day__title reveal" id={`${id}-title`}>{day.title}</h2>
+
+    {
+      train && (
+        <p class="day__train reveal">
+          <Icon name="train" />
+          <span>
+            {train.number && <b>{train.number}</b>}
+            {train.name}
+            {train.departs && train.arrives && (
+              <span class="day__times">
+                {' '}
+                · {train.departs} → {train.arrives}
+              </span>
+            )}
+          </span>
+        </p>
+      )
+    }
+
+    <p class="day__body reveal">{day.body}</p>
+
+    {
+      day.activities && (
+        <ul class="day__chips reveal" aria-label="What's on">
+          {day.activities.map((activity) => (
+            <li>{activity}</li>
+          ))}
+        </ul>
+      )
+    }
+
+    {
+      (day.meals || day.stay) && (
+        <dl class="day__facts reveal">
+          {day.meals && (
+            <div>
+              <dt>Food</dt>
+              <dd>{day.meals}</dd>
+            </div>
+          )}
+          {day.stay && (
+            <div>
+              <dt>Night</dt>
+              <dd>{day.stay}</dd>
+            </div>
+          )}
+        </dl>
+      )
+    }
+
+    <ul class="day__stops reveal" aria-label="Places">
+      {
+        stops.map((place) => (
+          <li>
+            <Icon name="pin" />
+            {place.name}
+          </li>
+        ))
+      }
+    </ul>
+  </article>
+</section>
+
+<style>
+  .day__when {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    font-family: var(--f-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .day__n {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .day__title {
+    margin-top: 0.6rem;
+    font-family: var(--f-display);
+    font-size: clamp(2.2rem, 9vw, 3.3rem);
+    font-stretch: 62%;
+    font-weight: 820;
+    line-height: 0.92;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+
+  .day__train {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-top: 1rem;
+    font-family: var(--f-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.04em;
+    color: var(--paper-dim);
+  }
+
+  .day__train :global(svg) {
+    flex: none;
+    font-size: 1.15rem;
+    color: var(--accent);
+  }
+
+  .day__train b {
+    margin-right: 0.5em;
+    color: var(--accent);
+  }
+
+  .day__times {
+    color: var(--muted);
+  }
+
+  .day__body {
+    margin-top: 1rem;
+    max-width: 40ch;
+    font-family: var(--f-serif);
+    font-size: clamp(1.2rem, 4.4vw, 1.4rem);
+    line-height: 1.35;
+    color: var(--paper);
+  }
+
+  .day__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 1.2rem;
+  }
+
+  .day__chips li {
+    padding: 0.35rem 0.65rem;
+    border: 1px solid var(--line-2);
+    border-radius: 999px;
+    font-family: var(--f-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--paper-dim);
+  }
+
+  .day__facts {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 1.2rem;
+  }
+
+  .day__facts div {
+    display: grid;
+    grid-template-columns: 4.2rem 1fr;
+    gap: 0.75rem;
+    align-items: baseline;
+  }
+
+  .day__facts dt {
+    font-family: var(--f-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .day__facts dd {
+    font-size: 0.98rem;
+  }
+
+  .day__stops {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1rem;
+    margin-top: 1.4rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--line-2);
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .day__stops li {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .day__stops :global(svg) {
+    color: var(--accent);
+  }
+</style>

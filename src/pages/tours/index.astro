@@ -1,0 +1,338 @@
+---
+/** /tours: every trip, soonest first, each one a ticket into its day-by-day page. */
+import Base from '../../layouts/Base.astro';
+import TourBar from '../../components/tours/TourBar.astro';
+import Icon from '../../components/Icon.astro';
+import { site } from '../../site.config';
+import { tours, tourOffset } from '../../lib/tours-data';
+import { count, tripRange, tripStatus } from '../../lib/tours';
+import { pad, withBase } from '../../lib/util';
+
+const now = Date.now();
+---
+
+<Base
+  title={`Tours · ${site.nickname}`}
+  description={`Trips ${site.name} is taking, day by day, on a map.`}
+  intro={false}
+  skip="#main"
+  scene="tours"
+>
+  <TourBar />
+  <main id="main" class="wrap tours">
+    <header class="tours__head">
+      <p class="eyebrow reveal">Off the reel</p>
+      <h1 class="tours__title reveal">On the road</h1>
+      <p class="tours__lede reveal">Trips I'm taking, a page per day, with the map following along.</p>
+    </header>
+
+    {
+      tours.length ? (
+        <ol class="tours__list">
+          {tours.map((trip, i) => {
+            const status = tripStatus(trip.startDate, trip.days.length, now, tourOffset);
+            const trains = trip.days.filter((day) => day.train).length;
+            return (
+              <li class="reveal" style={`--delay: ${i * 0.08}s`}>
+                <a class={`card accent-${trip.accent}`} href={withBase(`tours/${trip.slug}/`)}>
+                  <div class="card__main">
+                    <p class="card__no">Tour Nº {pad(i + 1)}</p>
+                    <h2 class="card__title">{trip.title}</h2>
+                    <p class="card__kicker">{trip.kicker}</p>
+                    <ol class="card__route" aria-label="Route">
+                      {trip.route.map((town) => (
+                        <li>{town}</li>
+                      ))}
+                    </ol>
+                  </div>
+                  <span class="card__perf" aria-hidden="true" />
+                  <div class="card__stub">
+                    <p class="card__dates">{tripRange(trip)}</p>
+                    <p class="card__count">
+                      {count(trip.days.length, 'day')} · {count(trains, 'night train').toLowerCase()}
+                    </p>
+                    <p
+                      class="card__status"
+                      data-trip-status
+                      data-start={trip.startDate}
+                      data-days={trip.days.length}
+                      data-offset={tourOffset}
+                      data-state={status.state}
+                    >
+                      {status.label}
+                    </p>
+                    <span class="card__go" aria-hidden="true">
+                      <Icon name="arrow" />
+                    </span>
+                  </div>
+                </a>
+              </li>
+            );
+          })}
+        </ol>
+      ) : (
+        <p class="tours__empty">Nothing booked yet.</p>
+      )
+    }
+  </main>
+</Base>
+
+<script>
+  import '../../scripts/scenes';
+  import '../../scripts/tours';
+</script>
+
+<style>
+  .tours {
+    padding-block: calc(5.5rem + env(safe-area-inset-top)) 4rem;
+  }
+
+  .tours__title {
+    margin-top: 0.75rem;
+    font-family: var(--f-display);
+    font-size: clamp(3.6rem, 18vw, 8rem);
+    font-stretch: 62%;
+    font-weight: 850;
+    line-height: 0.84;
+    text-transform: uppercase;
+  }
+
+  .tours__lede {
+    margin-top: 1rem;
+    max-width: 34ch;
+    font-family: var(--f-serif);
+    font-size: clamp(1.25rem, 4.6vw, 1.6rem);
+    line-height: 1.3;
+    color: var(--paper-dim);
+  }
+
+  .tours__list {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: clamp(2.5rem, 8vw, 4rem);
+  }
+
+  .tours__empty {
+    margin-top: 3rem;
+    color: var(--muted);
+  }
+
+  /* ---- a trip as a train ticket ---- */
+
+  .card {
+    display: grid;
+    border-radius: 14px;
+    background: var(--ticket);
+    color: var(--ticket-ink);
+    text-decoration: none;
+    box-shadow: 0 18px 50px rgb(0 0 0 / 0.4);
+    transition:
+      transform 0.35s var(--ease-spring),
+      box-shadow 0.35s;
+  }
+
+  .card:hover {
+    transform: translateY(-3px) rotate(-0.4deg);
+    box-shadow: 0 26px 60px rgb(0 0 0 / 0.5);
+  }
+
+  .card:focus-visible {
+    outline-offset: 5px;
+  }
+
+  .card__main {
+    position: relative;
+    padding: 1.4rem 1.4rem 1.2rem;
+    border-top: 6px solid var(--accent);
+    border-radius: 14px 14px 0 0;
+  }
+
+  .card__no {
+    font-family: var(--f-mono);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgb(27 25 28 / 0.6);
+  }
+
+  .card__title {
+    margin-top: 0.4rem;
+    font-family: var(--f-display);
+    font-size: clamp(2.4rem, 11vw, 3.8rem);
+    font-stretch: 62%;
+    font-weight: 850;
+    line-height: 0.88;
+    text-transform: uppercase;
+  }
+
+  .card__kicker {
+    margin-top: 0.45rem;
+    font-family: var(--f-serif);
+    font-size: 1.15rem;
+    font-style: italic;
+  }
+
+  .card__route {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.45rem;
+    margin-top: 1rem;
+    font-family: var(--f-mono);
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .card__route li + li::before {
+    content: '→';
+    margin-right: 0.45rem;
+    color: rgb(27 25 28 / 0.45);
+  }
+
+  /* the tear line, with a notch bitten out of each end */
+  .card__perf {
+    position: relative;
+    display: block;
+    margin-inline: 1rem;
+    border-top: 2px dashed rgb(27 25 28 / 0.28);
+  }
+
+  .card__perf::before,
+  .card__perf::after {
+    content: '';
+    position: absolute;
+    top: -11px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--ink);
+  }
+
+  .card__perf::before {
+    left: -27px;
+  }
+
+  .card__perf::after {
+    right: -27px;
+  }
+
+  .card__stub {
+    position: relative;
+    display: grid;
+    gap: 0.3rem;
+    padding: 1.1rem 4.5rem 1.3rem 1.4rem;
+  }
+
+  .card__dates {
+    font-family: var(--f-display);
+    font-size: 1.5rem;
+    font-stretch: 75%;
+    font-weight: 750;
+    line-height: 1.1;
+  }
+
+  .card__count {
+    font-family: var(--f-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgb(27 25 28 / 0.65);
+  }
+
+  .card__status {
+    justify-self: start;
+    margin-top: 0.4rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+    background: var(--ticket-ink);
+    color: var(--ticket);
+    font-family: var(--f-mono);
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .card__status[data-state='away'] {
+    background: var(--accent);
+    color: var(--ink);
+  }
+
+  .card__status[data-state='home'] {
+    background: transparent;
+    box-shadow: inset 0 0 0 1px rgb(27 25 28 / 0.35);
+    color: rgb(27 25 28 / 0.7);
+  }
+
+  .card__go {
+    position: absolute;
+    right: 1.3rem;
+    bottom: 1.3rem;
+    display: grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 50%;
+    background: var(--ticket-ink);
+    color: var(--ticket);
+    font-size: 1.15rem;
+    transition: transform 0.35s var(--ease-spring);
+  }
+
+  .card:hover .card__go {
+    transform: translate(2px, -2px);
+  }
+
+  /* Wide: the stub tears off to the right. */
+  @media (min-width: 48rem) {
+    .card {
+      grid-template-columns: 1fr auto 17rem;
+    }
+
+    .card__main {
+      padding: 1.8rem 2rem;
+      border-top: 0;
+      border-left: 8px solid var(--accent);
+      border-radius: 14px 0 0 14px;
+    }
+
+    .card__perf {
+      margin: 1rem 0;
+      border-top: 0;
+      border-left: 2px dashed rgb(27 25 28 / 0.28);
+    }
+
+    .card__perf::before,
+    .card__perf::after {
+      left: -11px;
+      right: auto;
+    }
+
+    .card__perf::before {
+      top: -27px;
+    }
+
+    .card__perf::after {
+      top: auto;
+      bottom: -27px;
+    }
+
+    .card__stub {
+      align-content: center;
+      padding: 1.6rem 1.6rem 4.5rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card,
+    .card__go {
+      transition: none;
+    }
+
+    .card:hover {
+      transform: none;
+    }
+  }
+</style>

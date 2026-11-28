@@ -389,12 +389,20 @@ button {
   background: radial-gradient(100% 60% at 50% 100%, rgb(91 155 255 / 0.14), transparent 65%);
 }
 
+/* the tours pages: dusk over the Ghats, sea light at the bottom */
+.ambient .a-tours {
+  background:
+    radial-gradient(100% 55% at 0% 0%, rgb(126 240 212 / 0.1), transparent 62%),
+    radial-gradient(80% 45% at 100% 100%, rgb(91 155 255 / 0.1), transparent 70%);
+}
+
 body[data-scene='top'] .a-top,
 body[data-scene='work'] .a-work,
 body[data-scene='films'] .a-films,
 body[data-scene='music'] .a-music,
 body[data-scene='darkroom'] .a-darkroom,
-body[data-scene='credits'] .a-credits {
+body[data-scene='credits'] .a-credits,
+body[data-scene='tours'] .a-tours {
   opacity: 1;
 }
 

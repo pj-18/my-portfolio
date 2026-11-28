@@ -4,7 +4,8 @@ import { site } from '../site.config';
 import { brands, brandFills } from '../lib/brands';
 import { diary } from '../lib/films';
 import { headliners, music } from '../lib/music';
-import { dayMonthYear } from '../lib/util';
+import { dayMonthYear, withBase } from '../lib/util';
+import { tours } from '../lib/tours-data';
 
 const year = new Date().getFullYear();
 const link = (label: string) => site.links.find((l) => l.label === label);
@@ -13,10 +14,12 @@ const github = link('GitHub');
 const instagram = link('Instagram (photography)');
 const instagramPersonal = link('Instagram (personal)');
 
-const credits: { role: string; name: string; href?: string }[] = [
+// `here` links stay on this site, so they open in the same tab.
+const credits: { role: string; name: string; href?: string; here?: boolean }[] = [
   { role: 'Written & directed by', name: site.name },
   { role: 'Also known as', name: site.nickname },
   { role: 'Day job', name: site.role },
+  ...(tours.length ? [{ role: 'On location', name: 'Tours, day by day', href: withBase('tours/'), here: true }] : []),
   { role: 'Film critic', name: `@${site.letterboxd} on Letterboxd`, href: letterboxd?.url },
   ...(music && headliners() ? [{ role: 'Music by', name: `${headliners()}, on repeat`, href: music.profile }] : []),
   { role: 'Cinematography', name: '@frames.by.pj on Instagram', href: instagram?.url },
@@ -105,7 +108,9 @@ const contacts: { label: string; brand: string; url: string; mail?: boolean }[] 
         <div class="rolling__row reveal">
           <dt>{credit.role}</dt>
           <dd>
-            {credit.href ? (
+            {credit.href && credit.here ? (
+              <a href={credit.href}>{credit.name} →</a>
+            ) : credit.href ? (
               <a href={credit.href} target="_blank" rel="noopener noreferrer">
                 {credit.name}
               </a>

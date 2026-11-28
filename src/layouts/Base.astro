@@ -11,16 +11,28 @@ import { withBase } from '../lib/util';
 interface Props {
   title?: string;
   description?: string;
+  /** Whether the 3·2·1 countdown can play. Only the home page has one; other pages must say false. */
+  intro?: boolean;
+  /** Where "Skip to content" jumps to. */
+  skip?: string;
+  /** The scene lighting the page starts in (global.css → .ambient). */
+  scene?: string;
 }
 
-const { title = `${site.name} (${site.nickname})`, description = site.description } = Astro.props;
-const canonical = new URL(withBase(), Astro.site).href;
+const {
+  title = `${site.name} (${site.nickname})`,
+  description = site.description,
+  intro = true,
+  skip = '#films',
+  scene = 'top',
+} = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
 // Only the live site counts visits: `npm run dev` and previews never do.
 const counter = import.meta.env.PROD && site.goatcounter ? `https://${site.goatcounter}.goatcounter.com/count` : null;
 ---
 
 <!doctype html>
-<html lang="en" class="no-js">
+<html lang="en" class="no-js" data-intro={intro ? 'play' : 'skip'}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -38,21 +50,22 @@ const counter = import.meta.env.PROD && site.goatcounter ? `https://${site.goatc
     <meta name="twitter:card" content="summary" />
     <script is:inline>
       // Runs before first paint: mark JS as available and decide whether the countdown plays.
+      // Pages without the countdown skip it, or their header and dock would stay hidden.
       (function (root) {
         root.classList.remove('no-js');
         root.classList.add('js');
         try {
           var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-          if (!calm && !sessionStorage.getItem('pj:intro')) root.classList.add('intro');
+          if (root.dataset.intro === 'play' && !calm && !sessionStorage.getItem('pj:intro')) root.classList.add('intro');
         } catch (e) {}
       })(document.documentElement);
     </script>
     {counter && <script is:inline async data-goatcounter={counter} src="https://gc.zgo.at/count.js"></script>}
   </head>
-  <body data-scene="top">
-    <a class="skip" href="#films">Skip to content</a>
+  <body data-scene={scene}>
+    <a class="skip" href={skip}>Skip to content</a>
     <div class="ambient" aria-hidden="true">
-      <i class="a-top"></i><i class="a-work"></i><i class="a-films"></i><i class="a-music"></i><i class="a-darkroom"></i><i class="a-credits"></i>
+      <i class="a-top"></i><i class="a-work"></i><i class="a-films"></i><i class="a-music"></i><i class="a-darkroom"></i><i class="a-credits"></i><i class="a-tours"></i>
     </div>
     <slot />
     <div class="grain" aria-hidden="true"></div>

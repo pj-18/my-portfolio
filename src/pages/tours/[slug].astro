@@ -1,0 +1,325 @@
+---
+/**
+ * One trip, a page per day. The map stays on screen (on top on a phone, on the right on a big
+ * screen) and turns to each day's places as that day scrolls in: src/scripts/trip.ts.
+ */
+import 'maplibre-gl/dist/maplibre-gl.css';
+import Base from '../../layouts/Base.astro';
+import TourBar from '../../components/tours/TourBar.astro';
+import TripMap from '../../components/tours/TripMap.astro';
+import DayPage from '../../components/tours/DayPage.astro';
+import Covered from '../../components/tours/Covered.astro';
+import Icon from '../../components/Icon.astro';
+import { site } from '../../site.config';
+import { tours, tourOffset } from '../../lib/tours-data';
+import { tripRange, tripStatus, type Trip } from '../../lib/tours';
+
+export function getStaticPaths() {
+  return tours.map((trip) => ({ params: { slug: trip.slug }, props: { trip } }));
+}
+
+interface Props {
+  trip: Trip;
+}
+
+const { trip } = Astro.props;
+const status = tripStatus(trip.startDate, trip.days.length, Date.now(), tourOffset);
+const trains = trip.days.filter((day) => day.train).length;
+const nights = trip.days.length - 1;
+---
+
+<Base
+  title={`${trip.title} · Tours · ${site.nickname}`}
+  description={trip.summary}
+  intro={false}
+  skip="#trip-cover"
+  scene="tours"
+>
+  <TourBar trip={trip.title} />
+  <main id="main" class="trip" data-trip>
+    <TripMap trip={trip} />
+
+    <div class="trip__steps">
+      <section class={`step cover accent-${trip.accent}`} id="trip-cover" data-step="all" data-rail="cover" aria-labelledby="trip-title">
+        <div class="cover__body">
+          <p class="cover__meta reveal">
+            <span
+              class="cover__status"
+              data-trip-status
+              data-start={trip.startDate}
+              data-days={trip.days.length}
+              data-offset={tourOffset}
+              data-state={status.state}>{status.label}</span
+            >
+            <span>{tripRange(trip)}</span>
+          </p>
+          <h1 class="cover__title reveal" id="trip-title">{trip.title}</h1>
+          <p class="cover__kicker reveal">{trip.kicker}</p>
+          <p class="cover__summary reveal">{trip.summary}</p>
+          <ol class="cover__route reveal" aria-label="The route">
+            {trip.route.map((town) => <li>{town}</li>)}
+          </ol>
+          <dl class="cover__facts reveal">
+            <div><dt>Days</dt><dd>{trip.days.length}</dd></div>
+            <div><dt>Nights</dt><dd>{nights}</dd></div>
+            <div><dt>{trains === 1 ? 'Train' : 'Trains'}</dt><dd>{trains}</dd></div>
+          </dl>
+          <a class="cover__next reveal" href="#day-0">
+            <Icon name="down" />
+            <span>Scroll through the days</span>
+          </a>
+        </div>
+      </section>
+
+      {trip.days.map((day) => <DayPage trip={trip} day={day} />)}
+
+      <Covered trip={trip} />
+    </div>
+  </main>
+</Base>
+
+<script>
+  import '../../scripts/scenes';
+  import '../../scripts/tours';
+  import '../../scripts/trip';
+</script>
+
+<style>
+  /* Each day is a page: scrolling settles on the next one. On a phone the map covers the top
+     48% of the screen (TripMap.astro), so pages start below it. */
+  :global(html.js:has(.trip:not(.trip--nomap))) {
+    scroll-snap-type: y proximity;
+    scroll-padding-top: 48svh;
+  }
+
+  .trip {
+    position: relative;
+  }
+
+  :global(.no-js) .trip :global(.trip__map),
+  .trip.trip--nomap :global(.trip__map) {
+    display: none;
+  }
+
+  /* The pages come from DayPage and Covered too, so these rules reach into them (:global). */
+  .trip :global(.step) {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-height: 52svh;
+    padding: 1.5rem var(--gutter) 2.5rem;
+    scroll-snap-align: start;
+  }
+
+  /* Without the map there's nothing to keep on screen: the pages just run down the screen. */
+  :global(.no-js) .trip :global(.step),
+  .trip--nomap :global(.step) {
+    min-height: 0;
+    padding-block: 2.5rem;
+  }
+
+  :global(.no-js) .cover,
+  .trip--nomap .cover {
+    padding-top: 5.5rem;
+  }
+
+  .trip :global(.step__card) {
+    position: relative;
+    max-width: 36rem;
+    padding: 1.4rem 1.3rem 1.5rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: rgb(22 20 15 / 0.82);
+    box-shadow: inset 0 3px 0 var(--accent, var(--paper));
+  }
+
+  /* The page you're on is lit, the others wait in the dark. */
+  :global(.js) .trip[data-live] :global(.step) {
+    transition: opacity 0.6s ease;
+  }
+
+  :global(.js) .trip[data-live] :global(.step:not([data-active])) {
+    opacity: 0.38;
+  }
+
+  /* ---- the cover ---- */
+
+  .cover__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.9rem;
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .cover__status {
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .cover__status[data-state='home'] {
+    background: var(--ink-4);
+    color: var(--paper-dim);
+  }
+
+  .cover__title {
+    margin-top: 0.9rem;
+    font-family: var(--f-display);
+    font-size: clamp(3.2rem, 15vw, 5.6rem);
+    font-stretch: 62%;
+    font-weight: 850;
+    line-height: 0.84;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+
+  .cover__kicker {
+    margin-top: 0.7rem;
+    font-family: var(--f-serif);
+    font-size: clamp(1.25rem, 4.8vw, 1.6rem);
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .cover__summary {
+    margin-top: 1rem;
+    max-width: 38ch;
+    color: var(--paper-dim);
+  }
+
+  .cover__route {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 0.5rem;
+    margin-top: 1.3rem;
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--paper);
+  }
+
+  .cover__route li + li::before {
+    content: '→';
+    margin-right: 0.5rem;
+    color: var(--accent);
+  }
+
+  .cover__facts {
+    display: flex;
+    gap: 1.75rem;
+    margin-top: 1.4rem;
+  }
+
+  .cover__facts div {
+    display: grid;
+    gap: 0.1rem;
+  }
+
+  .cover__facts dt {
+    order: 2;
+    font-family: var(--f-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .cover__facts dd {
+    font-family: var(--f-display);
+    font-size: 2.2rem;
+    font-stretch: 62%;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .cover__next {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    align-self: flex-start;
+    margin-top: 1.6rem;
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .cover__next:hover {
+    color: var(--paper);
+  }
+
+  .cover__next :global(svg) {
+    color: var(--accent);
+    animation: nudge 2.4s ease-in-out infinite;
+  }
+
+  @keyframes nudge {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(4px);
+    }
+  }
+
+  :global(.no-js) .cover__next {
+    display: none;
+  }
+
+  /* ---- big screens: the days on the left, the map on the right ---- */
+
+  @media (min-width: 64rem) {
+    /* proximity, not mandatory: a short scroll must never be pulled back onto the same page */
+    :global(html.js:has(.trip:not(.trip--nomap))) {
+      scroll-padding-top: 0;
+    }
+
+    .trip:not(.trip--nomap) {
+      display: grid;
+      grid-template-columns: minmax(24rem, 36rem) 1fr;
+    }
+
+    .trip :global(.trip__map) {
+      grid-column: 2;
+      grid-row: 1;
+      align-self: start;
+    }
+
+    .trip__steps {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    :global(.js) .trip:not(.trip--nomap) :global(.step) {
+      justify-content: center;
+      min-height: 100svh;
+      padding: 5rem 2.25rem 3rem var(--gutter);
+    }
+
+    .trip--nomap .trip__steps {
+      width: min(100% - 2 * var(--gutter), 40rem);
+      margin-inline: auto;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.js) .trip[data-live] :global(.step) {
+      transition: none;
+    }
+
+    .cover__next :global(svg) {
+      animation: none;
+    }
+  }
+</style>

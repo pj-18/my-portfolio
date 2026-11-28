@@ -1,0 +1,126 @@
+---
+/**
+ * The header on the tours pages: the PJ mark back to the home page, and where you are.
+ * It looks like the home page's top bar, without the runtime counter (that belongs to the reel).
+ */
+import Logo from '../Logo.astro';
+import { site } from '../../site.config';
+import { withBase } from '../../lib/util';
+
+interface Props {
+  /** The current trip's name, after "Tours". Leave out on the tours list itself. */
+  trip?: string;
+}
+
+const { trip } = Astro.props;
+---
+
+<header class="tourbar">
+  <a class="tourbar__brand" href={withBase()} aria-label={`${site.nickname}, home`}>
+    <Logo />
+  </a>
+  <nav class="tourbar__crumbs" aria-label="Breadcrumb">
+    <ol>
+      <li><a href={withBase()}>Home</a></li>
+      <li>
+        {trip ? <a href={withBase('tours/')}>Tours</a> : <span aria-current="page">Tours</span>}
+      </li>
+      {trip && <li><span aria-current="page">{trip}</span></li>}
+    </ol>
+  </nav>
+</header>
+
+<style>
+  /* No dock on these pages, so no room kept for it. */
+  :global(body) {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .tourbar {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    height: 3.5rem;
+    padding: env(safe-area-inset-top) var(--gutter) 0;
+    background: linear-gradient(rgb(13 12 10 / 0.9), rgb(13 12 10 / 0));
+    pointer-events: none;
+  }
+
+  .tourbar > * {
+    pointer-events: auto;
+  }
+
+  .tourbar__brand {
+    display: block;
+    flex: none;
+    height: 1.9rem;
+    transform: rotate(-6deg);
+    transition: transform 0.35s var(--ease-spring);
+  }
+
+  .tourbar__brand:hover {
+    transform: rotate(0deg) scale(1.06);
+  }
+
+  .tourbar__crumbs ol {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .tourbar__crumbs li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  .tourbar__crumbs li + li::before {
+    content: '/';
+    color: var(--dim);
+  }
+
+  /* On a phone the trail is just "Tours / Trip". */
+  .tourbar__crumbs li:first-child {
+    display: none;
+  }
+
+  .tourbar__crumbs li:first-child + li::before {
+    display: none;
+  }
+
+  .tourbar__crumbs a {
+    text-decoration: none;
+  }
+
+  .tourbar__crumbs a:hover {
+    color: var(--paper);
+  }
+
+  .tourbar__crumbs [aria-current] {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--paper);
+  }
+
+  @media (min-width: 40rem) {
+    .tourbar__crumbs li:first-child {
+      display: flex;
+    }
+
+    .tourbar__crumbs li:first-child + li::before {
+      display: inline;
+    }
+  }
+</style>

@@ -10,4 +10,7 @@ export default defineConfig({
   // Classic HTML whitespace collapsing is what this markup is written for.
   compressHTML: true,
   devToolbar: { enabled: false },
+  // MapLibre (the tours map) is one ~1.1 MB chunk. It only loads on trip pages, after the page
+  // is up, so the default 500 kB warning would just be noise on every build.
+  vite: { build: { chunkSizeWarningLimit: 1200 } },
 });

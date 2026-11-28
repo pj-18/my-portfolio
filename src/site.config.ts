@@ -56,7 +56,9 @@ export const site = {
     { label: 'GitHub', handle: 'pj-18', url: 'https://github.com/pj-18' },
     { label: 'LinkedIn', handle: 'praveenponduru', url: 'https://www.linkedin.com/in/praveenponduru/' },
     { label: 'Letterboxd', handle: 'pj_18', url: 'https://letterboxd.com/pj_18/' },
-    { label: 'Instagram', handle: 'frames.by.pj', url: 'https://www.instagram.com/frames.by.pj/' },
+    // Two Instagram accounts: `brand` picks the logo, `label` keeps them apart (tooltip, screen readers).
+    { label: 'Instagram (photography)', brand: 'Instagram', handle: 'frames.by.pj', url: 'https://www.instagram.com/frames.by.pj/' },
+    { label: 'Instagram (personal)', brand: 'Instagram', handle: 'urstruly.pj', url: 'https://www.instagram.com/urstruly.pj/' },
   ],
 
   /** Your Letterboxd username. `npm run films` pulls its public RSS feed. */

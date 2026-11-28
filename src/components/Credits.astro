@@ -1,6 +1,7 @@
 ---
 import Icon from './Icon.astro';
 import { site } from '../site.config';
+import { brands, brandFills } from '../lib/brands';
 import { diary } from '../lib/films';
 import { headliners, music } from '../lib/music';
 import { dayMonthYear } from '../lib/util';
@@ -9,7 +10,8 @@ const year = new Date().getFullYear();
 const link = (label: string) => site.links.find((l) => l.label === label);
 const letterboxd = link('Letterboxd');
 const github = link('GitHub');
-const instagram = link('Instagram');
+const instagram = link('Instagram (photography)');
+const instagramPersonal = link('Instagram (personal)');
 
 const credits: { role: string; name: string; href?: string }[] = [
   { role: 'Written & directed by', name: site.name },
@@ -18,14 +20,26 @@ const credits: { role: string; name: string; href?: string }[] = [
   { role: 'Film critic', name: `@${site.letterboxd} on Letterboxd`, href: letterboxd?.url },
   ...(music && headliners() ? [{ role: 'Music by', name: `${headliners()}, on repeat`, href: music.profile }] : []),
   { role: 'Cinematography', name: '@frames.by.pj on Instagram', href: instagram?.url },
+  { role: 'Behind the scenes', name: '@urstruly.pj on Instagram', href: instagramPersonal?.url },
   { role: 'Source code', name: github ? `github.com/${github.handle}` : 'GitHub', href: github?.url },
   { role: 'Typefaces', name: 'Archivo, Instrument Serif, JetBrains Mono' },
   { role: 'Built with', name: 'Astro and a little vanilla JS' },
 ];
-const mail = Array.from({ length: 4 });
-// The address is only put together in the browser (scripts/credits.ts); this is the no-JS spelling.
+// The address is only put together in the browser (scripts/credits.ts), so it's never in the HTML.
 const { user, domain } = site.email;
-const spelled = `${user} [at] ${domain}`;
+
+// Mail first, then the socials in this order (anything not listed follows).
+const order = ['Instagram', 'Letterboxd', 'LinkedIn', 'GitHub'];
+const rank = (brand: string) => (order.includes(brand) ? order.indexOf(brand) : order.length);
+// `brand` (logo key) defaults to the label; it differs when one service has several accounts.
+// The sort is stable, so the two Instagram accounts keep their order from the config.
+const contacts: { label: string; brand: string; url: string; mail?: boolean }[] = [
+  { label: 'Mail', brand: 'Mail', url: '#credits', mail: true },
+  ...site.links
+    .filter((l) => l.label !== 'Instagram (photography)') // lives in the photos section
+    .map((l) => ({ label: l.label, brand: ('brand' in l ? l.brand : l.label) as string, url: l.url }))
+    .sort((a, b) => rank(a.brand) - rank(b.brand)),
+];
 ---
 
 <section id="credits" class="credits" data-scene="credits" aria-labelledby="credits-title">
@@ -36,36 +50,52 @@ const spelled = `${user} [at] ${domain}`;
     </h2>
   </div>
 
-  <a
-    class="mailband"
-    href="#credits"
-    data-mail
-    data-mail-user={user}
-    data-mail-domain={domain}
-    aria-label={`Email ${site.name}: ${spelled}`}
-  >
-    <span class="mailband__track" aria-hidden="true">
-      {
-        mail.map(() => (
-          <span class="mailband__item">
-            Say hello <i>✳</i> <span data-mail-text>{spelled}</span> <i>✳</i>
-          </span>
-        ))
-      }
-    </span>
-  </a>
-
   <div class="wrap contact">
-    <button type="button" class="pill pill--solid accent-cobalt" data-copy-mail>
-      <Icon name="copy" />
-      <span data-copy-label>Copy email</span>
-    </button>
     {
-      site.links.map((item) => (
-        <a class="pill" href={item.url} target="_blank" rel="me noopener noreferrer">
-          {item.label} <Icon name="arrow" />
+      contacts.map((item, i) => {
+        const fill = brandFills[item.brand];
+        const gid = `grad-${i}`;
+        const gradient = typeof fill === 'object' ? fill : undefined;
+        return (
+        <a
+          class:list={['pill', brands[item.brand] && 'pill--logo']}
+          href={item.url}
+          target={item.mail ? undefined : '_blank'}
+          rel={item.mail ? undefined : 'me noopener noreferrer'}
+          aria-label={item.mail ? `Email ${site.name}` : item.label}
+          title={item.mail ? 'Say hello' : item.label}
+          data-mail={item.mail ? '' : undefined}
+          data-mail-user={item.mail ? user : undefined}
+          data-mail-domain={item.mail ? domain : undefined}
+        >
+          {brands[item.brand] ? (
+            <svg class="pill__logo" viewBox="0 0 24 24" width="2.5em" height="2.5em" aria-hidden="true" focusable="false">
+              {gradient && (
+                <defs>
+                  <linearGradient
+                    id={gid}
+                    gradientUnits="userSpaceOnUse"
+                    x1={gradient.angle === 'across' ? 0 : 2}
+                    y1={gradient.angle === 'across' ? 0 : 24}
+                    x2={gradient.angle === 'across' ? 24 : 22}
+                    y2={gradient.angle === 'across' ? 0 : 0}
+                  >
+                    {gradient.stops.map(([offset, color]) => (
+                      <stop offset={`${offset}%`} stop-color={color} />
+                    ))}
+                  </linearGradient>
+                </defs>
+              )}
+              <path d={brands[item.brand]}fill={gradient ? `url(#${gid})` : (fill as string)} />
+            </svg>
+          ) : (
+            <>
+              {item.label} <Icon name="arrow" />
+            </>
+          )}
         </a>
-      ))
+        );
+      })
     }
   </div>
 
@@ -127,53 +157,31 @@ const spelled = `${user} [at] ${domain}`;
     color: var(--muted);
   }
 
-  /* ---- giant email marquee ---- */
-
-  .mailband {
-    display: block;
-    margin-top: clamp(3rem, 9vw, 5rem);
-    overflow: hidden;
-    padding-block: 1.1rem 0.9rem;
-    border-block: 1px solid var(--line);
-    background: var(--cobalt);
-    color: var(--ink);
-    text-decoration: none;
-  }
-
-  .mailband__track {
-    display: flex;
-    width: max-content;
-    animation: marquee 30s linear infinite;
-  }
-
-  .mailband:hover .mailband__track {
-    animation-play-state: paused;
-  }
-
-  .mailband__item {
-    display: flex;
-    align-items: center;
-    gap: 0.3em;
-    padding-right: 0.3em;
-    font-family: var(--f-display);
-    font-size: clamp(3rem, 14vw, 8.5rem);
-    font-stretch: 62%;
-    font-weight: 850;
-    line-height: 0.9;
-    white-space: nowrap;
-  }
-
-  .mailband__item i {
-    font-size: 0.5em;
-    font-style: normal;
-  }
-
   .contact {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.6rem;
-    margin-top: 1.75rem;
+    gap: 1.25rem;
+    margin-top: clamp(2.5rem, 8vw, 4rem);
+  }
+
+  /* Logos keep their own colours, on a paper-white disc so the dark ones (GitHub) still show. */
+  .pill--logo {
+    width: 72px;
+    height: 72px;
+    padding: 0;
+    border-color: transparent;
+    background: var(--paper);
+    font-size: 1rem;
+  }
+
+  .pill--logo:hover {
+    border-color: var(--cobalt);
+    transform: translateY(-2px);
+  }
+
+  .pill__logo {
+    flex: none;
   }
 
   /* ---- rolling credits ---- */
@@ -254,12 +262,6 @@ const spelled = `${user} [at] ${domain}`;
 
     .rolling dd {
       text-align: left;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .mailband__track {
-      animation: none;
     }
   }
 </style>

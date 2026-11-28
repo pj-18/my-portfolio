@@ -517,7 +517,7 @@ const laurels = laurel(false) + laurel(true);
           <div class="programmes">
             <div class="wrap">
               <h3 class="sub reveal">
-                Programmes <span>{diary.lists.length} lists</span>
+                Marquee Lists <span>{diary.lists.length} lists</span>
               </h3>
             </div>
             <ol class="programmes__list">
@@ -525,7 +525,7 @@ const laurels = laurel(false) + laurel(true);
                 <li class="programme reveal" style={`--delay:${(i % 3) * 0.08}s`}>
                   <a href={list.url} target="_blank" rel="noopener noreferrer">
                     <p class="programme__no">
-                      Programme {pad(i + 1)} · {list.total} {list.total === 1 ? 'film' : 'films'}
+                      List {pad(i + 1)} ·{list.total} {list.total === 1 ? 'film' : 'films'}
                       {list.ranked ? ' · ranked' : ''}
                     </p>
                     <h4 class="programme__title">{list.title}</h4>
